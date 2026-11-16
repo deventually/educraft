@@ -2,6 +2,12 @@
 
 Onder **Beheer** stel je in wat docenten op deze installatie kunnen gebruiken. Alleen beheerders zien dit onderwerp. Voor beheerders is [tweestapsverificatie](/help/account) verplicht.
 
+Beheer opent in het menu als een lijstje in vier groepen: **Mensen**, **Organisatie**, **AI** en **Controle**. Links op elke beheerpagina staan dezelfde groepen.
+
+## Overzicht en inrichten
+
+Hier begin je. Bovenaan staan zes stappen om de instelling in te richten, van boven naar beneden: het woord voor de laag onder de instelling kiezen (bijvoorbeeld faculteit), de faculteiten aanmaken, collega's uitnodigen, teams maken en collega's erin zetten, de opleidingen aanmaken, en elke opleiding onder een faculteit zetten. Bij elke stap zie je of hij klaar is, en een link naar de plek waar je hem doet. De stappen over faculteiten zijn optioneel. Daaronder staan alle beheerpagina's, met per pagina waar hij voor is.
+
 ## Gebruikers
 
 Zoek iemand en open de pagina van die persoon. Daar wijzig je de rol, zet je een account op non-actief, of zet je tweestapsverificatie uit als iemand telefoon en herstelcodes kwijt is.
@@ -11,6 +17,10 @@ Nieuwe collega's nodig je uit met een **uitnodigingslink**. Plak je een lijst me
 ## Teams
 
 Maak teams van collega's en wijs teamleiders aan. Per team kun je onderdelen, tools en modellen aanzetten die voor de rest *Op aanvraag* staan. Zie ook [Teams en delen](/help/teams).
+
+## Faculteiten en opleidingen
+
+Kies hoe je instelling de laag tussen instelling en opleiding noemt, maak die onderdelen aan (bijvoorbeeld faculteiten), en zet elke opleiding op zijn plek. Een opleiding maak je aan bij **Opleidingen**, in het menu **Onderwijs**. Zie ook [Opleidingen](/help/programmes).
 
 ## Mededelingen
 
@@ -28,7 +38,7 @@ Wat uit staat, verdwijnt echt: een docent kan zo'n tool ook niet via een link op
 
 Zet het reviewteam aan of uit, en elk lid apart. Het reviewteam geeft docenten advies bij hun cursus; het verandert nooit iets aan een cursus.
 
-## Onderwijscontext
+## Onderwijscontext instelling
 
 Kies welke onderwijssectoren (vo, mbo, hbo, wo) en domeinen docenten in hun onderwijscontext kunnen kiezen.
 

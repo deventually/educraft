@@ -12,7 +12,7 @@ Een opleiding hoort bij een of meer **teams**, bijvoorbeeld het opleidingsteam e
 
 ## Een opleiding aanmaken
 
-Ben je teamleider, ga dan naar **Opleidingen** (via de pagina **Cursussen**) en vul in:
+Ben je teamleider, ga dan naar **Opleidingen** in het menu **Onderwijs** en vul in:
 
 - **Team**: het eerste team van de opleiding. Een beheerder kan er later teams bij koppelen.
 

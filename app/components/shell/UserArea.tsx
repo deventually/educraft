@@ -2,7 +2,8 @@ import { useCallback, useRef, useState } from "react";
 import { Form, NavLink } from "react-router";
 import { LogOut } from "lucide-react";
 import { cn } from "~/lib/utils";
-import { type NavItem, navLinkClass } from "./nav";
+import type { MenuLink } from "~/lib/nav/menu";
+import { navLinkClass } from "./nav";
 import { useDisclosure } from "./useDisclosure";
 
 /**
@@ -18,7 +19,7 @@ export function UserArea({
   accountLabel,
 }: {
   name: string;
-  links: NavItem[];
+  links: MenuLink[];
   logoutLabel: string;
   loggedInAs: string;
   accountLabel: string;

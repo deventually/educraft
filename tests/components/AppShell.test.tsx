@@ -78,6 +78,7 @@ describe("AppShell top navigation", () => {
     renderShellWithUser({ name: "T", role: "teacher", features: { courses: false } });
     await screen.findAllByRole("link", { name: "Eerder gemaakt" });
     expect(screen.queryByRole("link", { name: "Cursussen" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Onderwijs" })).toBeNull();
   });
 
   it("collapses behind a toggle on small screens", () => {
@@ -206,62 +207,127 @@ describe("AppShell top navigation", () => {
   });
 });
 
-describe("AppShell menu of four (P27.3)", () => {
-  const ITEMS = ["Start", "Cursussen", "BDB/BKE", "Tools"];
-  const HREFS = ["/start", "/courses", "/portfolio", "/tools"];
+/** The top-level items of a header nav, in order: a link's or a submenu button's text. */
+const topItems = (nav: HTMLElement) =>
+  Array.from(nav.querySelectorAll(":scope > ul > li > :is(a, button)")).map((el) => el.textContent);
 
-  it("shows exactly four menu items in order for a teacher", async () => {
+describe("AppShell main menu (plan eenvoudiger beheer en navigatie)", () => {
+  it("shows Start, Onderwijs, BDB/BKE and Tools for a teacher", async () => {
     renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
     await screen.findByText("Tools home");
     const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
-    const links = within(primary).getAllByRole("link");
-    expect(links.map((l) => l.textContent)).toEqual(ITEMS);
-    expect(links.map((l) => l.getAttribute("href"))).toEqual(HREFS);
+    expect(topItems(primary)).toEqual(["Start", "Onderwijs", "BDB/BKE", "Tools"]);
+    expect(within(primary).getByRole("link", { name: "Start" })).toHaveAttribute("href", "/start");
+    expect(within(primary).getByRole("link", { name: "BDB/BKE" })).toHaveAttribute(
+      "href",
+      "/portfolio",
+    );
   });
 
-  it("shows three items when the BDB/BKE workplace is off", async () => {
+  it("leaves BDB/BKE out when the workplace is off", async () => {
     renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: false });
     await screen.findByText("Tools home");
     const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
+    expect(topItems(primary)).toEqual(["Start", "Onderwijs", "Tools"]);
+  });
+
+  it("opens Onderwijs on a click, with courses and programmes", async () => {
+    const user = userEvent.setup();
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
+    await screen.findByText("Tools home");
+    const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
+    const button = within(primary).getByRole("button", { name: "Onderwijs" });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    await user.click(button);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    const panel = document.getElementById(button.getAttribute("aria-controls") ?? "");
+    expect(panel).not.toBeNull();
+    const links = within(panel!).getAllByRole("link");
+    expect(links.map((l) => l.getAttribute("href"))).toEqual(["/courses", "/programmes"]);
+    // The line under a link describes it; the link's name stays short.
+    expect(within(panel!).getByRole("link", { name: "Opleidingen" })).toHaveAccessibleDescription(
+      "Per opleiding de cursussen en leerlijnen",
+    );
+  });
+
+  it("opens Tools on all tools, utilities, assessment models and earlier work", async () => {
+    const user = userEvent.setup();
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
+    await screen.findByText("Tools home");
+    const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
+    await user.click(within(primary).getByRole("button", { name: "Tools" }));
     expect(
       within(primary)
         .getAllByRole("link")
-        .map((l) => l.textContent),
-    ).toEqual(["Start", "Cursussen", "Tools"]);
+        .map((l) => l.getAttribute("href")),
+    ).toEqual(["/start", "/portfolio", "/tools", "/utilities", "/assessment-models", "/projects"]);
   });
 
-  it("shows the same four items first in the mobile menu, then the account links", async () => {
+  it("keeps one submenu open at a time", async () => {
+    const user = userEvent.setup();
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
+    await screen.findByText("Tools home");
+    const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
+    const onderwijs = within(primary).getByRole("button", { name: "Onderwijs" });
+    const tools = within(primary).getByRole("button", { name: "Tools" });
+    await user.click(onderwijs);
+    await user.click(tools);
+    expect(onderwijs).toHaveAttribute("aria-expanded", "false");
+    expect(tools).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("closes a submenu on Escape and returns focus to its button", async () => {
+    const user = userEvent.setup();
+    renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
+    await screen.findByText("Tools home");
+    const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
+    const button = within(primary).getByRole("button", { name: "Onderwijs" });
+    await user.click(button);
+    await user.keyboard("{ArrowDown}");
+    expect(within(primary).getByRole("link", { name: "Cursussen" })).toHaveFocus();
+    await user.keyboard("{Escape}");
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(button).toHaveFocus();
+  });
+
+  it("shows the same items in the mobile menu, a submenu as a heading over its links", async () => {
     renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
     await screen.findByText("Tools home");
     fireEvent.click(screen.getByRole("button", { name: "Menu openen" }));
     const mobile = screen.getByRole("navigation", { name: "Mobiele navigatie" });
-    const [menu, account] = within(mobile).getAllByRole("list");
-    const links = within(menu!).getAllByRole("link");
-    expect(links.map((l) => l.textContent)).toEqual(ITEMS);
-    expect(links.map((l) => l.getAttribute("href"))).toEqual(HREFS);
+    expect(within(mobile).getByText("Onderwijs")).toBeInTheDocument();
     expect(
-      within(account!)
+      within(mobile)
         .getAllByRole("link")
         .map((l) => l.getAttribute("href")),
-    ).toEqual(["/account", "/context-profiles", "/assessment-models", "/usage"]);
+    ).toEqual([
+      "/start",
+      "/courses",
+      "/programmes",
+      "/portfolio",
+      "/tools",
+      "/utilities",
+      "/assessment-models",
+      "/projects",
+      "/account",
+      "/context-profiles",
+      "/usage",
+    ]);
   });
 
-  it("moves 'Onderwijscontext' to the account menu", async () => {
+  it("keeps the personal pages in the account menu: account, own context, own AI use", async () => {
     renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
     await screen.findByText("Tools home");
-    const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
-    expect(within(primary).queryByRole("link", { name: "Onderwijscontext" })).toBeNull();
     const menu = screen.getByRole("navigation", { name: "Account" });
-    expect(within(menu).getByRole("link", { name: "Onderwijscontext" })).toHaveAttribute(
-      "href",
-      "/context-profiles",
-    );
-    expect(within(menu).getByRole("link", { name: "Account" })).toHaveAttribute("href", "/account");
-    expect(within(menu).getByRole("link", { name: "Beoordelingsmodellen" })).toHaveAttribute(
-      "href",
-      "/assessment-models",
-    );
-    expect(within(menu).getByRole("link", { name: "Gebruik" })).toHaveAttribute("href", "/usage");
+    expect(
+      within(menu)
+        .getAllByRole("link")
+        .map((l) => [l.textContent, l.getAttribute("href")]),
+    ).toEqual([
+      ["Account", "/account"],
+      ["Mijn onderwijscontext", "/context-profiles"],
+      ["Mijn AI-gebruik", "/usage"],
+    ]);
   });
 
   it("makes Help a question mark at the top right, and keeps it in the footer", async () => {
@@ -306,11 +372,15 @@ describe("AppShell menu of four (P27.3)", () => {
     renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true }, "en");
     await screen.findByText("Tools home");
     const primary = screen.getByRole("navigation", { name: "Main navigation" });
-    expect(
-      within(primary)
-        .getAllByRole("link")
-        .map((l) => l.textContent),
-    ).toEqual(["Start", "Courses", "BDB/BKE", "Tools"]);
+    expect(topItems(primary)).toEqual(["Start", "Education", "BDB/BKE", "Tools"]);
+  });
+
+  it("has no a11y violations with a submenu open", async () => {
+    const user = userEvent.setup();
+    const { container } = renderShellWithUser({ name: "Teacher T", role: "teacher" });
+    await screen.findByText("Tools home");
+    await user.click(screen.getByRole("button", { name: "Onderwijs" }));
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("has no a11y violations with the mobile menu open", async () => {
@@ -363,31 +433,46 @@ describe("AppShell user area", () => {
 });
 
 describe("AppShell admin surface & role switch", () => {
-  it("shows the admin nav link only for the effective admin role", async () => {
-    renderShellWithUser({ name: "Admin A", role: "admin", portfolio: true });
-    await screen.findByText("Tools home");
-    expect(screen.getAllByRole("link", { name: "Beheer" }).length).toBeGreaterThan(0);
-  });
-
   it("adds Beheer first for an admin", async () => {
     renderShellWithUser({ name: "Admin A", role: "admin", portfolio: true });
     await screen.findByText("Tools home");
     const primary = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
-    const links = within(primary).getAllByRole("link");
-    expect(links.map((l) => l.textContent)).toEqual([
-      "Beheer",
-      "Start",
-      "Cursussen",
-      "BDB/BKE",
-      "Tools",
-    ]);
-    expect(links[0]).toHaveAttribute("href", "/admin");
+    expect(topItems(primary)).toEqual(["Beheer", "Start", "Onderwijs", "BDB/BKE", "Tools"]);
   });
 
-  it("hides the admin nav link for a teacher", async () => {
+  it("opens Beheer on the overview and its four groups", async () => {
+    const user = userEvent.setup();
+    renderShellWithUser({ name: "Admin A", role: "admin", portfolio: true });
+    await screen.findByText("Tools home");
+    const button = screen.getByRole("button", { name: "Beheer" });
+    await user.click(button);
+    const panel = document.getElementById(button.getAttribute("aria-controls") ?? "")!;
+    expect(within(panel).getByRole("link", { name: "Overzicht en inrichten" })).toHaveAttribute(
+      "href",
+      "/admin",
+    );
+    for (const group of ["Mensen", "Organisatie", "AI", "Controle"])
+      expect(within(panel).getByRole("list", { name: group })).toBeInTheDocument();
+    expect(
+      within(within(panel).getByRole("list", { name: "Organisatie" }))
+        .getAllByRole("link")
+        .map((l) => l.getAttribute("href")),
+    ).toEqual(["/admin/organisation", "/admin/context"]);
+  });
+
+  it("hides Beheer for a teacher", async () => {
     renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
     await screen.findByText("Tools home");
+    expect(screen.queryByRole("button", { name: "Beheer" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Beheer" })).toBeNull();
+  });
+
+  it("has no a11y violations with Beheer open", async () => {
+    const user = userEvent.setup();
+    const { container } = renderShellWithUser({ name: "Admin A", role: "admin" });
+    await screen.findByText("Tools home");
+    await user.click(screen.getByRole("button", { name: "Beheer" }));
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
   it("offers an admin no view-as switch", async () => {

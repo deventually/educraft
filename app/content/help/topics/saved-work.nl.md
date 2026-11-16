@@ -1,6 +1,6 @@
 # Eerder gemaakt: terugvinden en exporteren
 
-Alles wat je met de tools maakt, wordt vanzelf bewaard onder **Eerder gemaakt**. Je komt er via de link op **Start** en **Tools**, en onderaan elke pagina.
+Alles wat je met de tools maakt, wordt vanzelf bewaard onder **Eerder gemaakt**. Je vindt het in het menu **Tools**, op **Start** en onderaan elke pagina.
 
 ## Terugvinden
 

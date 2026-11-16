@@ -12,7 +12,7 @@ A programme belongs to one or more **teams**, such as the programme team and the
 
 ## Create a programme
 
-If you are a team lead, go to **Programmes** (from the **Courses** page) and fill in:
+If you are a team lead, go to **Programmes** in the **Education** menu and fill in:
 
 - **Team**: the programme's first team. An admin can link more teams later.
 

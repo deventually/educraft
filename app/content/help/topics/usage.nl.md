@@ -1,6 +1,6 @@
 # Wat we meten
 
-Op **Gebruik**, in het menu rechtsboven, zie je hoe vaak de tools AI voor je aanroepen. Kies bovenaan een maand; je ziet de maand en de acht weken ervoor.
+Op **Mijn AI-gebruik**, in het menu onder je naam rechtsboven, zie je hoe vaak de tools AI voor je aanroepen. Kies bovenaan een maand; je ziet de maand en de acht weken ervoor.
 
 ## Wat we tellen
 
@@ -35,7 +35,7 @@ Er is geen grens aan het aantal vragen per dag. Wel stopt de AI als iemand op é
 
 Beheer kan een limiet per maand zetten, in euro's: voor een team of voor één docent. Een limiet voor jou zelf gaat voor die van je team. De eigenaar kan daarnaast een budget voor de hele instelling zetten.
 
-- Je ziet geen bedragen, wel hoeveel procent van je ruimte je deze maand gebruikte, op **Gebruik**.
+- Je ziet geen bedragen, wel hoeveel procent van je ruimte je deze maand gebruikte, op **Mijn AI-gebruik**.
 - Vanaf 80% zie je boven elke tool een melding, en krijg je één keer een melding in beeld, waar je ook bent.
 - Bij 100% stopt de AI voor je tot de 1e van de volgende maand; ook dat zie je één keer in beeld. Je beheerder kan de limiet verhogen.
 

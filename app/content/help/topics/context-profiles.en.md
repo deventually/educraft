@@ -4,7 +4,7 @@ A **context profile** describes your teaching situation once, so every tool take
 
 ## One short page
 
-Go to **Teaching context** and click **Set up teaching context** (or **New context profile** if you already have one). You fill in one short page — the same page you later use to **edit** a profile.
+Go to **My teaching context** (in the menu under your name at the top right) and click **Set up teaching context** (or **New context profile** if you already have one). You fill in one short page — the same page you later use to **edit** a profile.
 
 - **Open up front** are the **name** (e.g. "Software Engineering — year 2"), the **type of education**, the **programme**, the **course** and the **study year** (in secondary education: the **phase**). The type of education already proposes the level.
 - Under **More details (optional)** you find the level, the domain/subject with any national framework, professional field, technology/methods, educational concept, term for learners and custom fields. For an existing profile it shows how many are filled in. Folded-away fields are always saved as usual.
@@ -38,7 +38,7 @@ Mark one profile as **default**; it will be pre-selected on the tool pages.
 
 ## For admins: defaults
 
-If you're an **admin**, the **Teaching context** admin page is where you set the defaults for the whole instance: which **types of education** (sectors) and — under **Domains / profiles** — which subject areas teachers may choose. At least one type of education always stays; leave **Domains / profiles** empty and *all* domains are available.
+If you're an **admin**, the **Institution teaching context** admin page is where you set the defaults for the whole instance: which **types of education** (sectors) and — under **Domains / profiles** — which subject areas teachers may choose. At least one type of education always stays; leave **Domains / profiles** empty and *all* domains are available.
 
 Every teacher and admin follows these settings; there is no separate access per teacher.
 

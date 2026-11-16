@@ -89,21 +89,16 @@ describe("account menu: arrow keys", () => {
   it("moves round-robin with ArrowDown/ArrowUp and jumps with Home/End", async () => {
     const { user, menu } = await openAccountMenu();
     const links = Array.from(menu.querySelectorAll("a"));
-    expect(linkNames(menu)).toEqual([
-      "Account",
-      "Onderwijscontext",
-      "Beoordelingsmodellen",
-      "Gebruik",
-    ]);
+    expect(linkNames(menu)).toEqual(["Account", "Mijn onderwijscontext", "Mijn AI-gebruik"]);
     links[0]?.focus();
     await user.keyboard("{ArrowDown}");
     expect(links[1]).toHaveFocus();
     await user.keyboard("{End}");
-    expect(links[3]).toHaveFocus();
+    expect(links[2]).toHaveFocus();
     await user.keyboard("{ArrowDown}");
     expect(links[0]).toHaveFocus();
     await user.keyboard("{ArrowUp}");
-    expect(links[3]).toHaveFocus();
+    expect(links[2]).toHaveFocus();
     await user.keyboard("{Home}");
     expect(links[0]).toHaveFocus();
   });

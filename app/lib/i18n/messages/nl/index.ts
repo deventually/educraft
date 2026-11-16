@@ -2,6 +2,7 @@ import { about } from "./about";
 import { account } from "./account";
 import { admin } from "./admin";
 import { adminErrors } from "./adminErrors";
+import { adminSetup } from "./adminSetup";
 import { agents } from "./agents";
 import { auditLog } from "./auditLog";
 import { aiLeave } from "./aiLeave";
@@ -30,6 +31,7 @@ import { footer } from "./footer";
 import { help } from "./help";
 import { home } from "./home";
 import { language } from "./language";
+import { menu } from "./menu";
 import { meta } from "./meta";
 import { modelAdmin } from "./modelAdmin";
 import { nav } from "./nav";
@@ -86,6 +88,7 @@ export const nl = {
   account,
   admin,
   adminErrors,
+  adminSetup,
   agents,
   aiLeave,
   aiNotice,
@@ -115,6 +118,7 @@ export const nl = {
   help,
   home,
   language,
+  menu,
   meta,
   modelAdmin,
   nav,
