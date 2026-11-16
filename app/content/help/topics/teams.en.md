@@ -47,9 +47,9 @@ What colleagues share with your team is listed under **From my team**: on the Co
 
 If you are a team lead, you open your team from **Account**. There you can:
 
-- add a colleague by the email address they log in with;
+- add a colleague with **Add member**: type the email address they log in with;
 - create an **invite link** for a new colleague, who then becomes a teacher and a member of your team;
-- remove a colleague from the team, or make them team lead too;
+- remove a colleague from the team with **Remove** (it asks first), or make them team lead too;
 - stop being team lead yourself.
 
 Removing another team lead is done by an administrator.

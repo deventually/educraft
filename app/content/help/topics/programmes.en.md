@@ -8,13 +8,13 @@ A programme belongs to one or more **teams**, such as the programme team and the
 
 - A **team lead** of one of those teams or an **admin** creates the programme and changes its name, level and mode.
 - **Every member** of one of those teams can put their own courses in it, and courses they co-own, and sees their colleagues' courses in the programme.
-- An **admin** links a team to a programme, or takes it off, on the team's page (**Admin → Teams**). A programme always keeps at least one team.
+- A **team lead** of one of those teams or an **admin** adds teams or takes them off. On the programme's page, click **Add team** under **Teams**; in the window you search and tick one or more. **Remove** always asks first; the team itself stays. A programme always keeps at least one team. An admin can also do this on the team's page (**Admin → Teams**).
 
 ## Create a programme
 
 If you are a team lead, go to **Programmes** in the **Education** menu and fill in:
 
-- **Team**: the programme's first team. An admin can link more teams later.
+- **Team**: the programme's first team. You add other teams later on the programme's page.
 
 - **Name**, for example *Computer Science full-time* or *Master Software Engineering*.
 - **Type and level**, for example bachelor (hbo), associate degree (Ad), master (hbo) or wo master. You choose from the types your administrator has switched on.
@@ -22,7 +22,7 @@ If you are a team lead, go to **Programmes** in the **Education** menu and fill 
 
 ## Add courses
 
-On the programme's page, choose one of your own courses or a course you co-own under **Add a course**, with its year and period. The year runs from 1 to 8 and the period from 1 to 6. Both may stay empty; such a course comes last.
+On the programme's page, click **Add course**. In the window, tick one or more of your own courses, or courses you co-own, and choose the year and period. The year runs from 1 to 8 and the period from 1 to 6. Both may stay empty; such a course comes last.
 
 You can also do this from the course. The course page has **Belongs to programme**, where you choose the programme, the year and the period.
 
@@ -46,9 +46,9 @@ Like the coverage matrix, this is **advice**. Nothing changes in the courses, an
 
 ## Good to know
 
-- The owner or the team lead may take a course out of a programme. The course stays as it is, and stays shared with the team. You can stop sharing on the course page.
+- The owner or the team lead may take a course out of a programme (**Remove**, after a confirmation). The course stays as it is, and stays shared with the team. You can stop sharing on the course page.
 - If you stop sharing with the team, or leave the team, your course leaves that team's programmes, unless you are also in another team of the programme and share it with that one.
 - If a team is deleted, a programme that has another team stays. A programme of that team alone goes with it.
 - If you delete a course, it disappears from all programmes.
-- Only an **admin** deletes a programme. All courses stay as they are.
+- Only an **admin** deletes a programme, with **Delete programme** at the bottom of the programme's page. All courses stay as they are.
 - No AI is involved: a programme only records what you fill in yourself.

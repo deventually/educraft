@@ -8,13 +8,13 @@ Een opleiding hoort bij een of meer **teams**, bijvoorbeeld het opleidingsteam e
 
 - Een **teamleider** van een van die teams of een **beheerder** maakt de opleiding aan en past naam, niveau en vorm aan.
 - **Elk lid** van een van die teams kan zijn eigen cursussen erin zetten, en ook cursussen waarvan hij mede-eigenaar is, en ziet de cursussen van collega's in de opleiding.
-- Een **beheerder** koppelt een team aan een opleiding, of haalt het eraf, op de pagina van het team (**Beheer → Teams**). Een opleiding houdt altijd minstens één team.
+- Een **teamleider** van een van die teams of een **beheerder** voegt teams toe of haalt ze eraf. Op de pagina van de opleiding klik je op **Team toevoegen** bij **Teams**; in het venster zoek je en vink je er een of meer aan. **Weghalen** vraagt altijd eerst of je het zeker weet; het team zelf blijft bestaan. Een opleiding houdt altijd minstens één team. Een beheerder kan dit ook op de pagina van het team doen (**Beheer → Teams**).
 
 ## Een opleiding aanmaken
 
 Ben je teamleider, ga dan naar **Opleidingen** in het menu **Onderwijs** en vul in:
 
-- **Team**: het eerste team van de opleiding. Een beheerder kan er later teams bij koppelen.
+- **Team**: het eerste team van de opleiding. Andere teams voeg je later toe op de pagina van de opleiding.
 
 - **Naam**, bijvoorbeeld *HBO-ICT voltijd* of *Master Informatica*.
 - **Onderwijstype en niveau**, bijvoorbeeld hbo-bachelor, associate degree (Ad), hbo-master of wo-master. Je kiest uit de onderwijstypen die je beheerder heeft aangezet.
@@ -22,7 +22,7 @@ Ben je teamleider, ga dan naar **Opleidingen** in het menu **Onderwijs** en vul 
 
 ## Cursussen toevoegen
 
-Op de pagina van de opleiding kies je bij **Cursus toevoegen** een van je eigen cursussen of een cursus waarvan je mede-eigenaar bent, met het jaar en de periode. Het jaar loopt van 1 tot en met 8 en de periode van 1 tot en met 6. Allebei mogen leeg blijven; zo'n cursus staat dan onderaan.
+Op de pagina van de opleiding klik je op **Cursus toevoegen**. In het venster vink je een of meer van je eigen cursussen aan, of cursussen waarvan je mede-eigenaar bent, en kies je het jaar en de periode. Het jaar loopt van 1 tot en met 8 en de periode van 1 tot en met 6. Allebei mogen leeg blijven; zo'n cursus staat dan onderaan.
 
 Je kunt het ook vanaf de cursus doen. Op de cursuspagina staat **Hoort bij opleiding**. Daar kies je de opleiding, het jaar en de periode.
 
@@ -46,9 +46,9 @@ Net als de dekkingsmatrix is dit een **advies**. Er verandert niets aan de cursu
 
 ## Goed om te weten
 
-- Een cursus uit de opleiding halen mag de eigenaar of de teamleider. De cursus blijft gewoon bestaan, en blijft gedeeld met het team. Op de cursuspagina kun je stoppen met delen.
+- Een cursus uit de opleiding halen (**Weghalen**, na een bevestiging) mag de eigenaar of de teamleider. De cursus blijft gewoon bestaan, en blijft gedeeld met het team. Op de cursuspagina kun je stoppen met delen.
 - Stop je met delen met het team, of verlaat je het team, dan gaat je cursus uit de opleidingen van dat team, tenzij je ook in een ander team van die opleiding zit en hem daarmee deelt.
 - Wordt een team opgeheven, dan blijft een opleiding met nog een ander team gewoon bestaan. Een opleiding van alleen dat team verdwijnt mee.
 - Verwijder je een cursus, dan verdwijnt hij uit alle opleidingen.
-- Alleen een **beheerder** verwijdert een opleiding. Alle cursussen blijven dan bestaan.
+- Alleen een **beheerder** verwijdert een opleiding, met **Opleiding verwijderen** onderaan de pagina van de opleiding. Alle cursussen blijven dan bestaan.
 - Er komt geen AI aan te pas: een opleiding legt alleen vast wat je zelf invult.
