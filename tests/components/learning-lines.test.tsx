@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ComponentType } from "react";
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import LearningLinePage from "~/routes/programmes.$id.lines.$lineId";
@@ -79,19 +80,35 @@ describe("Learning line page", () => {
     expect(screen.getAllByText("creëren").length).toBeGreaterThan(0);
     expect(screen.getByText("Je test code.")).toBeVisible();
     // A team member reads; only an admin changes the order.
-    expect(screen.queryByRole("heading", { name: "Volgorde" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Cursussen, op volgorde" })).toBeNull();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
-  it("gives the lead buttons to move, remove and add courses", async () => {
+  it("gives the lead the courses in order, with Cursus toevoegen and Weghalen (plan step 6)", async () => {
+    const user = userEvent.setup();
     const { container } = renderRoute(LearningLinePage, data(true));
+    const list = screen.getByRole("region", { name: "Cursussen, op volgorde" });
+    // An ordered list: the place in the line is the order of the rows.
+    const rows = within(list).getAllByRole("listitem");
+    expect(list.querySelector("ol")).not.toBeNull();
+    expect(within(rows[0]!).getByText("Programmeren 1")).toBeVisible();
     expect(screen.getByRole("button", { name: "Omlaag (Programmeren 1)" })).toBeVisible();
     expect(screen.queryByRole("button", { name: "Omhoog (Programmeren 1)" })).toBeNull();
     expect(screen.getByRole("button", { name: "Omhoog (Programmeren 2)" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "Uit de leerlijn (Programmeren 2)" })).toBeVisible();
-    expect(screen.getByLabelText("Cursus toevoegen aan de leerlijn")).toHaveDisplayValue(
-      "Databases",
-    );
+    // Weghalen asks first, and says the course itself stays.
+    await user.click(within(list).getByRole("button", { name: "Weghalen: Programmeren 2" }));
+    const ask = screen.getByRole("dialog", {
+      name: "Programmeren 2 weghalen uit de leerlijn Programmeren?",
+    });
+    expect(within(ask).getByText(/De cursus blijft bestaan/)).toBeVisible();
+    await user.click(within(ask).getByRole("button", { name: "Annuleren" }));
+    // Cursus toevoegen: search and ticks, several at once.
+    await user.click(within(list).getByRole("button", { name: "Cursus toevoegen" }));
+    const add = screen.getByRole("dialog", { name: "Cursussen toevoegen aan Programmeren" });
+    expect(within(add).getByRole("checkbox", { name: "Databases" })).not.toBeChecked();
+    await user.click(within(add).getByRole("button", { name: "Annuleren" }));
+    // The name sits under Gegevens, deleting at the bottom.
+    expect(screen.getByRole("region", { name: "Gegevens" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Leerlijn verwijderen" })).toBeVisible();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });

@@ -181,6 +181,26 @@ describe("learning line routes", () => {
     expect(there.alsoFor).toEqual([{ id: pid, name: "HBO-ICT" }]);
   });
 
+  it("adds several courses at once, after the ones already in it (plan step 6)", async () => {
+    const c3 = (
+      await courses.createCourse(me.id, { name: "Prog 3", data: outcome("Je test.", "apply") })
+    ).id;
+    await programmes.placeCourse(me, pid, c3, { year: 3 });
+    const line = await lines.createLine(me, pid, "Drie", [c1]);
+    const params = { id: pid, lineId: line!.id };
+    const r = await linePage.action({
+      request: post("/x", [
+        ["intent", "add"],
+        ["courseId", c3],
+        ["courseId", c2],
+        ["courseId", c1],
+      ]),
+      params,
+    } as never);
+    expect(r).toMatchObject({ ok: true });
+    expect((await lines.getLine(me, line!.id))?.courseIds).toEqual([c1, c3, c2]);
+  });
+
   it("moves, removes and adds a course, renames, and deletes the line", async () => {
     const line = await lines.createLine(me, pid, "Lijn", [c1, c2]);
     const params = { id: pid, lineId: line!.id };

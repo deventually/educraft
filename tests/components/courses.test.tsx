@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ComponentType } from "react";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import CourseList from "~/routes/courses._index";
@@ -39,16 +40,24 @@ function pageData(data: CourseData = alignedCourse()) {
 }
 
 describe("Course list (/courses)", () => {
-  it("shows a create form and a guided empty state", async () => {
+  it("creates through Nieuwe cursus, and the empty state opens the same dialog (plan step 6)", async () => {
+    const user = userEvent.setup();
     const { container } = renderRoute(CourseList, { courses: [], profiles: [] });
     expect(screen.getByRole("heading", { level: 1, name: "Cursussen" })).toBeVisible();
-    expect(screen.getByLabelText("Naam")).toBeRequired();
-    expect(screen.getByLabelText("Onderwijscontext")).toHaveDisplayValue("Geen");
+    // No form that is always open: one button, the dialog holds the fields.
+    expect(screen.queryByLabelText("Naam")).toBeNull();
     expect(screen.getByRole("heading", { level: 2, name: "Nog geen cursus" })).toBeVisible();
     expect(screen.getByRole("link", { name: "Opleidingen" })).toHaveAttribute(
       "href",
       "/programmes",
     );
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    await user.click(screen.getAllByRole("button", { name: "Nieuwe cursus" })[0]!);
+    const dialog = screen.getByRole("dialog", { name: "Nieuwe cursus" });
+    expect(within(dialog).getByLabelText("Naam")).toBeRequired();
+    expect(within(dialog).getByLabelText("Naam")).toHaveFocus();
+    expect(within(dialog).getByLabelText("Onderwijscontext")).toHaveDisplayValue("Geen");
+    expect(within(dialog).getByRole("button", { name: "Cursus aanmaken" })).toBeVisible();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 

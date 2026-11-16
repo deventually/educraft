@@ -13,8 +13,8 @@ test("a team lead ticks a colleague to add and takes them out again", async ({ b
   const a = await admin.newPage();
   await a.goto("/teams");
   await a.getByRole("button", { name: "Nieuw team" }).click();
-  await a.getByLabel("Naam van het nieuwe team").fill(team);
-  await a.getByRole("button", { name: "Team aanmaken" }).click();
+  await a.getByRole("dialog").getByLabel("Naam van het nieuwe team").fill(team);
+  await a.getByRole("dialog").getByRole("button", { name: "Team aanmaken" }).click();
   await expect(a.getByRole("heading", { level: 1, name: team })).toBeVisible();
   const teamUrl = new URL(a.url()).pathname;
   await a.getByRole("button", { name: "Leden toevoegen" }).click();

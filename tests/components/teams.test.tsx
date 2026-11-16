@@ -81,7 +81,7 @@ describe("/teams for an admin: every team (plan step 5)", () => {
     expect(within(search).getByLabelText(/zoek op team of persoon/i)).toHaveValue("zorg");
   });
 
-  it("creates a team behind one button", async () => {
+  it("creates a team in the Nieuw team dialog, like every Nieuwe … (plan step 6)", async () => {
     const user = userEvent.setup();
     let body: FormData | undefined;
     page(async ({ request }) => {
@@ -89,12 +89,11 @@ describe("/teams for an admin: every team (plan step 5)", () => {
       return { saved: true };
     });
     expect(screen.queryByLabelText(/naam van het nieuwe team/i)).toBeNull();
-    const add = screen.getByRole("button", { name: /nieuw team/i });
-    expect(add).toHaveAttribute("aria-expanded", "false");
-    await user.click(add);
-    expect(add).toHaveAttribute("aria-expanded", "true");
-    await user.type(screen.getByLabelText(/naam van het nieuwe team/i), "Zorg");
-    await user.click(screen.getByRole("button", { name: /team aanmaken/i }));
+    await user.click(screen.getByRole("button", { name: /nieuw team/i }));
+    const dialog = screen.getByRole("dialog", { name: "Nieuw team" });
+    expect(within(dialog).getByLabelText(/naam van het nieuwe team/i)).toHaveFocus();
+    await user.keyboard("Zorg");
+    await user.click(within(dialog).getByRole("button", { name: /team aanmaken/i }));
     await waitFor(() => expect(body?.get("intent")).toBe("create"));
     expect(body?.get("name")).toBe("Zorg");
   });

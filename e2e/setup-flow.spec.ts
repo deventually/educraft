@@ -17,8 +17,10 @@ test("an admin sets up a faculty, a programme in it and a team, and links them",
   const team = `Team E2E ${stamp}`;
 
   await page.goto("/admin/organisation");
-  await page.locator("#division-new").fill(faculty);
-  await page.locator("#division-new").press("Enter");
+  // Plan step 6: "Nieuwe …" opens a dialog with only the name.
+  await page.getByRole("button", { name: /^Nieuwe? (faculteit|onderdeel)$/ }).click();
+  await page.getByRole("dialog").getByLabel("Naam").fill(faculty);
+  await page.getByRole("dialog").getByLabel("Naam").press("Enter");
   const block = page.getByRole("region", { name: faculty });
   await expect(block).toBeVisible();
 
@@ -36,7 +38,7 @@ test("an admin sets up a faculty, a programme in it and a team, and links them",
   await nav.getByRole("button", { name: "Onderwijs" }).click();
   await nav.getByRole("link", { name: "Teams", exact: true }).click();
   await page.getByRole("button", { name: "Nieuw team" }).click();
-  await page.getByLabel("Naam van het nieuwe team").fill(team);
+  await page.getByRole("dialog").getByLabel("Naam van het nieuwe team").fill(team);
   // Creating a team opens its page.
   await page.getByRole("button", { name: "Team aanmaken" }).click();
   await expect(page.getByRole("heading", { level: 1, name: team })).toBeVisible();

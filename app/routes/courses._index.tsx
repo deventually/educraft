@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Form, Link, redirect, useActionData } from "react-router";
+import { Link, redirect, useActionData } from "react-router";
 import { GraduationCap, Trash2 } from "lucide-react";
 import type { Route } from "./+types/courses._index";
 import { requireCourseUser } from "~/server/courses.server";
@@ -12,10 +12,11 @@ import { checkAlignment } from "~/lib/courses/alignment";
 import { courseProgress } from "~/lib/courses/progress";
 import type { CourseData } from "~/lib/courses/types";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
-import { Button, Card, Input, Label, Select } from "~/components/ui";
+import { Input, Label, Select } from "~/components/ui";
 import { EmptyState } from "~/components/EmptyState";
 import { ConfirmDialog } from "~/components/ConfirmDialog";
 import { useFormToast } from "~/components/Toast";
+import { NewDialog } from "~/components/connections/NewDialog";
 import { useT } from "~/lib/i18n/useT";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -113,10 +114,14 @@ export default function CourseList({ loaderData }: Route.ComponentProps) {
         </Link>
       </p>
 
-      <Card className="mt-6 p-5">
-        <h2 className="text-lg font-medium text-slate-900">{c.createTitle}</h2>
-        <Form method="post" className="mt-4 grid gap-4 sm:grid-cols-2">
-          <input type="hidden" name="intent" value="create" />
+      <div className="mt-6 flex justify-end">
+        <NewDialog
+          triggerLabel={c.createTitle}
+          triggerId={`${id}-new`}
+          title={c.createTitle}
+          intent="create"
+          submitLabel={c.create}
+        >
           <div>
             <Label htmlFor={`${id}-name`}>{c.name}</Label>
             <Input
@@ -126,6 +131,7 @@ export default function CourseList({ loaderData }: Route.ComponentProps) {
               maxLength={COURSE_LIMITS.title}
               placeholder={c.namePlaceholder}
               className="mt-1"
+              data-autofocus
             />
           </div>
           <div>
@@ -139,11 +145,8 @@ export default function CourseList({ loaderData }: Route.ComponentProps) {
               ))}
             </Select>
           </div>
-          <div className="sm:col-span-2">
-            <Button type="submit">{c.create}</Button>
-          </div>
-        </Form>
-      </Card>
+        </NewDialog>
+      </div>
 
       {courses.length === 0 ? (
         <EmptyState
@@ -152,7 +155,7 @@ export default function CourseList({ loaderData }: Route.ComponentProps) {
           body={c.emptyBody}
           action={{
             label: c.createTitle,
-            onClick: () => document.getElementById(`${id}-name`)?.focus(),
+            onClick: () => document.getElementById(`${id}-new`)?.click(),
           }}
         />
       ) : (

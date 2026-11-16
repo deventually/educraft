@@ -104,27 +104,24 @@ describe("/admin/organisation (Beheer → Organisatie)", () => {
     });
   });
 
-  it("moves a programme to a division and back to none, and lists it with its team", async () => {
+  it("lists a programme with its team and division; it is moved on the programme itself", async () => {
     const d = await org.createDivision(admin, "Faculteit Zorg");
     const team = await teams.createTeam("Team VPK");
     const p = await programmes.createProgramme(admin, team.id, {
       name: "Verpleegkunde",
       sector: "hbo",
     });
-    expect(
-      await call(page.action, {
-        request: post({ intent: "move", programmeId: p!.id, divisionId: d!.id }),
-      }),
-    ).toEqual({ ok: "move" });
+    await org.setProgrammeDivision(admin, p!.id, d!.id);
     const data = await call(page.loader, { request: get() });
     const row = data.programmes.find((x) => x.id === p!.id)!;
     expect(row).toMatchObject({ name: "Verpleegkunde", teamName: "Team VPK", divisionId: d!.id });
+    // Plan step 6: the faculty is chosen in the programme's Gegevens, not here.
     expect(
       await call(page.action, {
         request: post({ intent: "move", programmeId: p!.id, divisionId: "" }),
       }),
-    ).toEqual({ ok: "move" });
-    expect((await programmes.getProgramme(admin, p!.id))?.divisionId).toBeNull();
+    ).toEqual({ error: "invalid" });
+    expect((await programmes.getProgramme(admin, p!.id))?.divisionId).toBe(d!.id);
   });
 
   it("lists the teams under each division", async () => {

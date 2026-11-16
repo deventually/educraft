@@ -1,13 +1,12 @@
-import { useState } from "react";
 import { Form, Link, redirect, useActionData } from "react-router";
 import { z } from "zod";
-import { Plus } from "lucide-react";
 import type { Route } from "./+types/teams._index";
 import { requireRole, requireUser } from "~/server/auth.server";
 import { createTeam, listTeams } from "~/server/repositories/teams.server";
 import { listMyTeams } from "~/server/repositories/teamView.server";
 import { useT } from "~/lib/i18n/useT";
 import { teamError } from "~/components/teams/teamError";
+import { NewDialog } from "~/components/connections/NewDialog";
 import { useFormToast } from "~/components/Toast";
 import { Button, Input, Label } from "~/components/ui";
 import { HelpLink } from "~/components/HelpLink";
@@ -67,7 +66,6 @@ export default function Teams({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const tt = t.teams;
   const actionData = useActionData<typeof action>();
-  const [adding, setAdding] = useState(false);
   const { q, teams, canCreate } = loaderData;
 
   useFormToast(actionData, {
@@ -88,39 +86,27 @@ export default function Teams({ loaderData }: Route.ComponentProps) {
           <HelpLink topic="teams" />
         </div>
         {canCreate && (
-          <Button
-            type="button"
-            aria-expanded={adding}
-            aria-controls="new-team"
-            onClick={() => setAdding((v) => !v)}
+          <NewDialog
+            triggerLabel={tt.newTeam}
+            title={tt.newTeam}
+            intent="create"
+            submitLabel={tt.create}
           >
-            <Plus className="size-4" aria-hidden />
-            {tt.newTeam}
-          </Button>
+            <div>
+              <Label htmlFor="team-new">{tt.createLabel}</Label>
+              <Input
+                id="team-new"
+                name="name"
+                type="text"
+                required
+                maxLength={100}
+                className="mt-1"
+                data-autofocus
+              />
+            </div>
+          </NewDialog>
         )}
       </header>
-
-      {adding && (
-        <Form
-          id="new-team"
-          method="post"
-          className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-        >
-          <input type="hidden" name="intent" value="create" />
-          <div className="min-w-48 flex-1 sm:max-w-sm">
-            <Label htmlFor="team-new">{tt.createLabel}</Label>
-            <Input
-              id="team-new"
-              name="name"
-              type="text"
-              required
-              maxLength={100}
-              className="mt-1"
-            />
-          </div>
-          <Button type="submit">{tt.create}</Button>
-        </Form>
-      )}
 
       {/* ── Search: a plain GET form, the loader filters ─────────────────────── */}
       {(canCreate || q || teams.length > 5) && (

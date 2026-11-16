@@ -1,10 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import { AddDialog } from "~/components/connections/AddDialog";
 import { ConnectionList } from "~/components/connections/ConnectionList";
+import { NewDialog } from "~/components/connections/NewDialog";
 
 // One way to add, remove and link everywhere (plan "eenvoudiger beheer en navigatie", step 3):
 // "… toevoegen" opens a dialog with search and ticks; "Weghalen" always asks first.
@@ -198,5 +199,55 @@ describe("ConnectionList", () => {
     stub(<ConnectionList title="Teams" empty="Nog geen teams." items={[]} />);
     expect(screen.getByText("Nog geen teams.")).toBeVisible();
     expect(screen.queryByRole("list")).toBeNull();
+  });
+});
+
+describe("NewDialog (plan step 6)", () => {
+  it("opens from Nieuwe …, with the name field focused, and posts what it holds", async () => {
+    const user = userEvent.setup();
+    let posted: FormData | undefined;
+    const { container } = stub(
+      <NewDialog
+        triggerLabel="Nieuwe cursus"
+        title="Nieuwe cursus"
+        intent="create"
+        submitLabel="Aanmaken"
+      >
+        <label htmlFor="n">Naam</label>
+        <input id="n" name="name" data-autofocus />
+      </NewDialog>,
+      (fd) => {
+        posted = fd;
+      },
+    );
+    expect(screen.queryByRole("dialog")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Nieuwe cursus" }));
+    const dialog = screen.getByRole("dialog", { name: "Nieuwe cursus" });
+    expect(within(dialog).getByLabelText("Naam")).toHaveFocus();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    await user.keyboard("Databases");
+    await user.click(within(dialog).getByRole("button", { name: "Aanmaken" }));
+    await vi.waitFor(() => expect(posted?.get("name")).toBe("Databases"));
+    expect(posted?.get("intent")).toBe("create");
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("closes with Annuleren and gives focus back to its button", async () => {
+    const user = userEvent.setup();
+    stub(
+      <NewDialog
+        triggerLabel="Nieuw team"
+        title="Nieuw team"
+        intent="create"
+        submitLabel="Team aanmaken"
+      >
+        <input aria-label="Naam" name="name" data-autofocus />
+      </NewDialog>,
+    );
+    const trigger = screen.getByRole("button", { name: "Nieuw team" });
+    await user.click(trigger);
+    await user.click(screen.getByRole("button", { name: "Annuleren" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(trigger).toHaveFocus();
   });
 });
