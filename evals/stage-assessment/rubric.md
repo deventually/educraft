@@ -53,10 +53,13 @@ Tool-specific expectations:
   report in the input as evidence caps taskFidelity at 2.
 - **Summary for OnStage (@v6).** Every output has the heading "Samenvatting voor OnStage" /
   "Summary for OnStage" in the layout of OnStage's assessment form: first one `### Algemene
-  feedback` / `### General feedback` (at most 150 words; with two reports it combines both,
-  with a verdict per report), then per assessed report a `###` heading (with two reports first a short
-  `#### Algemene feedback` about that report only) and a `####` remark per criterion that belongs to that report (indication first, at most 80 words); addressed
-  to the student, without quotes, locations or new findings. A missing summary, a missing
+  feedback` / `### General feedback` (about 120 words; with two reports it combines both,
+  with a verdict per report), then per assessed report (also with one) a `###` heading with
+  the report's name (with two reports first a short `#### Algemene feedback` about that report
+  only) and a `####` remark per criterion that belongs to that report (indication first, two to
+  four sentences); addressed to the student, without quotes, locations or new findings. Word
+  counts are a guideline in the prompt: only a text clearly far too long for pasting (about
+  1.5 times the guideline or more) counts against formatAdherence. A missing summary, a missing
   report in it, or a summary that adds findings not in the assessment caps formatAdherence
   at 2.
 - When the work is not an internship or graduation document, it does **not** assume

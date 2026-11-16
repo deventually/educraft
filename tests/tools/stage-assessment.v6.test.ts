@@ -53,6 +53,13 @@ describe("tool: stage-assessment, both reports together in the summary for OnSta
     expect(en).not.toContain("### General (both reports)");
   });
 
+  it("always names the report in a heading, also with one report, and keeps word counts a guideline", () => {
+    expect(build("nl")).toMatch(/ook bij één verslag/i);
+    expect(build("en")).toMatch(/also with one report/i);
+    expect(build("nl")).toMatch(/richtlijn/i);
+    expect(build("en")).toMatch(/guideline/i);
+  });
+
   it("leaves no placeholder in either language", () => {
     for (const lang of ["nl", "en"] as const) expect(build(lang)).not.toMatch(/\{\{/);
   });
