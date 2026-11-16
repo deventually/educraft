@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, onTestFinished, vi } from "vitest";
 import { flashKeyOf } from "../helpers/flash";
 import { listModels } from "~/lib/ai/models";
 
@@ -980,7 +980,11 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     expect(ok instanceof Response).toBe(true);
   });
 
-  it("refuses a taken email, a short or common password and an unknown role", async () => {
+  it("refuses a taken email, a short or common password (in production) and an unknown role", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    onTestFinished(() => {
+      vi.unstubAllEnvs();
+    });
     await actAsOwner();
     await mkUser("Taken", "teacher", "taken-p187@example.com");
     const before = (await users.listUsers()).length;
@@ -1090,7 +1094,11 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     expect(await users.getPasswordReset(other.token)).toBeNull();
   });
 
-  it("setPassword refuses a short, common or mismatching password and changes nothing", async () => {
+  it("setPassword refuses a short, common (in production) or mismatching password and changes nothing", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    onTestFinished(() => {
+      vi.unstubAllEnvs();
+    });
     await actAsOwner();
     const pw = await password();
     const target = await users.createUser({
@@ -1127,6 +1135,64 @@ describe("admin.users action — owner accounts (P18.7)", () => {
     const row = await users.getUserById(target.id);
     expect(await pw.verifyPassword("old-password-xx", row!.passwordHash)).toBe(true);
     expect(row!.sessionVersion).toBe(v0);
+  });
+
+  it("outside production the owner may give an easy password, on create and on set", async () => {
+    await actAsOwner();
+    const pw = await password();
+    const res = await create({
+      email: "easy@example.com",
+      passwordMode: "password",
+      password: "welkom",
+      confirm: "welkom",
+    });
+    expect(res.error).toBeUndefined();
+    expect(res.accountCreated).toBe(true);
+    const created = await users.getUserByEmail("easy@example.com");
+    expect(await pw.verifyPassword("welkom", created!.passwordHash)).toBe(true);
+
+    const set = await run({
+      intent: "setPassword",
+      userId: created!.id,
+      password: "a",
+      confirm: "a",
+    });
+    expect(set.passwordSet).toBe(true);
+    const row = await users.getUserById(created!.id);
+    expect(await pw.verifyPassword("a", row!.passwordHash)).toBe(true);
+    // A mismatch and an empty password are still refused.
+    expect(
+      (await run({ intent: "setPassword", userId: created!.id, password: "a", confirm: "b" }))
+        .error,
+    ).toBe("passwordMismatch");
+    expect(
+      (await run({ intent: "setPassword", userId: created!.id, password: "", confirm: "" })).error,
+    ).toBe("passwordTooShort");
+  });
+
+  it("both loaders tell the page whether the full password rule applies", async () => {
+    await actAsOwner();
+    const target = await mkUser("StrictFlag", "teacher");
+    const list = () =>
+      invoke(usersRoute.loader, new Request("http://localhost/admin/users")) as Promise<{
+        strictPasswords: boolean;
+      }>;
+    const person = () =>
+      personRoute.loader({
+        request: new Request(`http://localhost/admin/users/${target.id}`),
+        params: { id: target.id },
+        context: {},
+      } as unknown as Parameters<typeof personRoute.loader>[0]) as Promise<{
+        strictPasswords: boolean;
+      }>;
+    expect((await list()).strictPasswords).toBe(false);
+    expect((await person()).strictPasswords).toBe(false);
+    vi.stubEnv("NODE_ENV", "production");
+    onTestFinished(() => {
+      vi.unstubAllEnvs();
+    });
+    expect((await list()).strictPasswords).toBe(true);
+    expect((await person()).strictPasswords).toBe(true);
   });
 
   it("the owner deactivates and reactivates a user, never themself", async () => {

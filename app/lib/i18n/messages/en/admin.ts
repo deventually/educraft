@@ -60,6 +60,7 @@ export const admin: Messages["admin"] = {
   },
   invites: {
     accountCreated: "Account created.",
+    anyPasswordHint: "Outside production any password will do, even an easy one.",
     copy: "Copy",
     createConfirm: "Repeat initial password",
     createEmail: "Email address",
@@ -71,6 +72,7 @@ export const admin: Messages["admin"] = {
     createModePassword: "I choose an initial password",
     createName: "Name",
     createPassword: "Initial password (at least 10 characters)",
+    createPasswordAny: "Initial password (outside production any password will do)",
     createRole: "Role",
     createSubmit: "Create account",
     deactivate: "Deactivate",

@@ -230,6 +230,12 @@ repository, `app/server/repositories/shares.server.ts`.
   NCSC's "100k most used passwords" (via SecLists), plus Dutch and school favourites. It
   is checked locally: no external service, no password leaves the server. Logging in is
   never checked against it, so an existing weak password keeps working until it changes.
+- **An admin's password outside production (BESLUIT-2026-11-16-5):** the two admin forms
+  ("create an account" with an initial password, and "set password" on the person page)
+  use `adminPasswordProblem`: the full rule above in production (`NODE_ENV=production`,
+  as the Docker image sets), any non-empty password elsewhere, so a developer can hand out
+  an easy one. The forms drop the 10-character hint there and say so. A password someone
+  chooses themselves (invite, reset, `/account`) keeps the full rule everywhere.
 - `SESSION_SECRET` (min 32 chars) signs the cookie. A dev default keeps local/test
   boots frictionless; **production refuses to boot** with the dev default.
 

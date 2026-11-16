@@ -17,12 +17,15 @@ export function PersonAccess({
   person,
   displayName,
   viewerIsOwner,
+  strictPasswords,
   resetLink,
   lostCourses = 0,
 }: {
   person: { id: string; status: "active" | "disabled"; twoFactor: boolean };
   displayName: string;
   viewerIsOwner: boolean;
+  /** Whether the full password rule applies to "Set password" (production only). */
+  strictPasswords: boolean;
   resetLink?: string;
   /** Courses without a co-owner that go with the account (BESLUIT-2026-11-10-5). */
   lostCourses?: number;
@@ -55,7 +58,7 @@ export function PersonAccess({
             </Form>
             {viewerIsOwner && (
               <>
-                <SetPasswordDialog userId={person.id} name={displayName} />
+                <SetPasswordDialog userId={person.id} name={displayName} strict={strictPasswords} />
                 <Form method="post">
                   <input
                     type="hidden"

@@ -681,3 +681,12 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   beheerder) kan het team aan een opleiding koppelen. Een team alleen zichzelf, een beheerder alle
   teams", "Een beheerder kan ook een team koppelen aan een of meerdere opleidingen" en keuzekaart:
   "Alle opleidingen van de instelling").
+- **BESLUIT-2026-11-16-5:** **Buiten productie mag een beheerder elk wachtwoord geven.** Bij
+  "account aanmaken" met een beginwachtwoord en bij "wachtwoord instellen" op de pagina van een
+  persoon geldt de wachtwoordregel (minstens 10 tekens, geen veelgebruikt wachtwoord) alleen op
+  productie (`NODE_ENV=production`). Daarbuiten mag elk wachtwoord dat niet leeg is, ook een
+  makkelijk te raden. Een wachtwoord dat iemand zelf kiest (uitnodiging, resetlink, accountpagina)
+  houdt overal de volle regel. Dat de gebruiker daarna verplicht een nieuw wachtwoord kiest, komt
+  later. Bastiaan, 2026-11-16 ("Een beheerder mag een makkelijk te raden wachtwoord kiezen voor een
+  nieuwe gebruiker als hij dat wil. [...] Misschien kunnen we inbouwen dat dit alleen op productie
+  gebeurt?").
