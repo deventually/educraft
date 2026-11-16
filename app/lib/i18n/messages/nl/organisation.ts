@@ -4,7 +4,11 @@ export const organisation = {
   belongsTo: "{name} hoort bij",
   create: "Toevoegen",
   delete: "{name} verwijderen",
+  deleteBody: "Er staan geen opleidingen of teams meer onder. Alleen de naam verdwijnt.",
+  deleteFirst:
+    "Om {name} te verwijderen, zet je eerst de opleidingen en teams eronder op Geen of onder iets anders.",
   deleteShort: "Verwijderen",
+  deleteTitle: "{name} verwijderen?",
   emptyDivision: "Nog geen opleidingen.",
   errorInvalid: "Dat lukte niet. Kijk het nog eens na.",
   errorName: "Geef een naam van hooguit 200 tekens.",

@@ -78,12 +78,25 @@ describe("/admin/organisation", () => {
     );
   });
 
-  it("offers delete only on an empty division", async () => {
+  it("says on a division that is not empty what to move before it can go", async () => {
     page();
     const zorg = await screen.findByRole("region", { name: "Faculteit Gezondheid" });
     expect(within(zorg).queryByRole("button", { name: /verwijderen/i })).toBeNull();
-    const techniek = screen.getByRole("region", { name: "Faculteit Techniek" });
-    expect(within(techniek).getByRole("button", { name: /verwijderen/i })).toBeInTheDocument();
+    expect(
+      within(zorg).getByText(
+        "Om Faculteit Gezondheid te verwijderen, zet je eerst de opleidingen en teams eronder op Geen of onder iets anders.",
+      ),
+    ).toBeVisible();
+  });
+
+  it("asks before deleting an empty division, and says what stays", async () => {
+    const user = userEvent.setup();
+    page();
+    const techniek = await screen.findByRole("region", { name: "Faculteit Techniek" });
+    await user.click(within(techniek).getByRole("button", { name: "Verwijderen: Faculteit Techniek" }));
+    const dialog = screen.getByRole("dialog", { name: "Faculteit Techniek verwijderen?" });
+    expect(within(dialog).getByText(/Er staan geen opleidingen of teams meer onder/)).toBeVisible();
+    expect(within(dialog).getByRole("button", { name: "Verwijderen" })).toBeVisible();
   });
 
   it("moves a programme with a choice of division per programme", async () => {

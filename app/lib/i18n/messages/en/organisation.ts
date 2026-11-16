@@ -4,7 +4,11 @@ export const organisation = {
   belongsTo: "{name} belongs to",
   create: "Add",
   delete: "Delete {name}",
+  deleteBody: "There are no programmes or teams under it any more. Only the name goes.",
+  deleteFirst:
+    "To delete {name}, first set the programmes and teams under it to None or under something else.",
   deleteShort: "Delete",
+  deleteTitle: "Delete {name}?",
   emptyDivision: "No programmes yet.",
   errorInvalid: "That did not work. Please check it again.",
   errorName: "Give a name of at most 200 characters.",
