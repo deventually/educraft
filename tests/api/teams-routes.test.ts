@@ -540,7 +540,7 @@ describe("/admin/teams/:id: the team's programmes (BESLUIT-2026-11-16-1)", () =>
       sector: "hbo",
     }))!;
     const before = await call(adminTeam.loader, { request: get(), params: { id: here.id } });
-    expect(before.programmes).toEqual([{ id: own.id, name: "Minor Web" }]);
+    expect(before.programmes).toEqual([{ id: own.id, name: "Minor Web", onlyTeam: true }]);
     expect(before.otherProgrammes).toContainEqual({
       id: other.id,
       name: "Informatica VT",
@@ -588,5 +588,51 @@ describe("/admin/teams/:id: the team's programmes (BESLUIT-2026-11-16-1)", () =>
       }),
     ).toEqual({ error: "lastTeam" });
     expect((await programmes.getProgramme(actor, p.id))?.teamIds).toEqual([a.id]);
+  });
+
+  it("links several programmes at once, and deletes a programme the team holds alone", async () => {
+    const programmes = await import("~/server/repositories/programmes.server");
+    const actor = { id: admin.id, role: "admin" };
+    const here = await teams.createTeam("Team Hier");
+    const there = await teams.createTeam("Team Daar");
+    const one = (await programmes.createProgramme(actor, there.id, {
+      name: "Een",
+      sector: "hbo",
+    }))!;
+    const two = (await programmes.createProgramme(actor, there.id, {
+      name: "Twee",
+      sector: "hbo",
+    }))!;
+    const body = new URLSearchParams([
+      ["intent", "linkProgramme"],
+      ["programmeId", one.id],
+      ["programmeId", two.id],
+    ]);
+    const res = await call(adminTeam.action, {
+      request: signedRequest(`http://localhost/admin/teams/${here.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString(),
+      }),
+      params: { id: here.id },
+    });
+    expect(res).toEqual({ saved: true });
+    const loaded = await call(adminTeam.loader, { request: get(), params: { id: here.id } });
+    expect(loaded.programmes.map((p) => [p.name, p.onlyTeam])).toEqual([
+      ["Een", false],
+      ["Twee", false],
+    ]);
+
+    const alone = (await programmes.createProgramme(actor, here.id, {
+      name: "Alleen",
+      sector: "hbo",
+    }))!;
+    expect(
+      await call(adminTeam.action, {
+        request: post({ intent: "deleteProgramme", programmeId: alone.id }),
+        params: { id: here.id },
+      }),
+    ).toEqual({ saved: true });
+    expect(await programmes.getProgramme(actor, alone.id)).toBeNull();
   });
 });

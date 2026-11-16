@@ -1,89 +1,83 @@
-import { Form, Link } from "react-router";
-import { Unlink } from "lucide-react";
+import { Link } from "react-router";
+import { ConfirmDialog } from "~/components/ConfirmDialog";
+import { AddDialog } from "~/components/connections/AddDialog";
+import { ConnectionList } from "~/components/connections/ConnectionList";
 import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
-import { Button, HelpText, Label, Select } from "~/components/ui";
 
 const link =
-  "rounded font-medium text-violet-700 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500";
+  "rounded text-sm font-medium text-violet-700 underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500";
 
 /**
- * The programmes of a team (admin team page, BESLUIT-2026-11-16-1): its own, each to unlink, a
- * way to start a new one for it, and linking it to a programme of other teams. A programme can
- * have several teams (the programme team, module teams) and always keeps at least one.
+ * The programmes of a team (admin team page, BESLUIT-2026-11-16-1), in the fixed pattern
+ * (plan step 3): "Opleiding toevoegen" adds programmes of other teams, Weghalen asks first.
+ * Where the team is a programme's only team there is no Weghalen (a programme keeps one
+ * team) but a line that says so, and Opleiding verwijderen, which also asks first.
  */
 export function TeamProgrammes({
-  teamId,
+  team,
   programmes,
   others,
 }: {
-  teamId: string;
-  programmes: { id: string; name: string }[];
+  team: { id: string; name: string };
+  programmes: { id: string; name: string; onlyTeam: boolean }[];
   others: { id: string; name: string; teamName: string }[];
 }) {
-  const tt = useT().teams;
+  const t = useT();
+  const tt = t.teams;
   return (
-    <section
-      className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-      aria-labelledby="team-programmes"
-    >
-      <h3 id="team-programmes" className="text-sm font-semibold text-slate-800">
-        {tt.programmesHeading}
-      </h3>
-      {programmes.length === 0 ? (
-        <p className="text-sm text-slate-500">{tt.programmesNone}</p>
-      ) : (
-        <ul className="divide-y divide-slate-100 text-sm">
-          {programmes.map((p) => (
-            <li key={p.id} className="flex items-center justify-between gap-3 py-1.5">
-              <Link to={`/programmes/${p.id}`} className={link}>
-                {p.name}
-              </Link>
-              <Form method="post">
-                <input type="hidden" name="intent" value="unlinkProgramme" />
-                <input type="hidden" name="programmeId" value={p.id} />
-                <Button
-                  type="submit"
-                  variant="ghost"
-                  aria-label={fmt(tt.programmesUnlink, { name: p.name })}
-                  title={fmt(tt.programmesUnlink, { name: p.name })}
-                >
-                  <Unlink className="size-3.5" aria-hidden />
-                </Button>
-              </Form>
-            </li>
-          ))}
-        </ul>
-      )}
-      <p className="text-sm">
-        <Link to={`/programmes?team=${encodeURIComponent(teamId)}`} className={link}>
-          {tt.programmesNew}
-        </Link>
-      </p>
-      {others.length > 0 && (
-        <Form method="post" className="flex flex-wrap items-end gap-3">
-          <input type="hidden" name="intent" value="linkProgramme" />
-          <div className="min-w-48 flex-1 sm:max-w-sm">
-            <Label htmlFor="team-link-programme">{tt.programmesLink}</Label>
-            <Select
-              id="team-link-programme"
-              name="programmeId"
-              aria-describedby="team-link-programme-hint"
-              className="mt-1"
-            >
-              {others.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({p.teamName})
-                </option>
-              ))}
-            </Select>
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <ConnectionList
+        title={tt.programmesHeading}
+        headingLevel={3}
+        intro={tt.programmesLinkHint}
+        empty={tt.programmesNone}
+        add={
+          <div className="flex flex-wrap items-center gap-3">
+            <Link to={`/programmes?team=${encodeURIComponent(team.id)}`} className={link}>
+              {tt.programmesNew}
+            </Link>
+            {others.length > 0 && (
+              <AddDialog
+                triggerLabel={tt.programmesAdd}
+                title={fmt(tt.programmesAddTitle, { team: team.name })}
+                description={tt.programmesLinkHint}
+                intent="linkProgramme"
+                pick={{
+                  name: "programmeId",
+                  options: others.map((p) => ({ id: p.id, label: p.name, hint: p.teamName })),
+                  empty: tt.programmesAddNone,
+                }}
+              />
+            )}
           </div>
-          <Button type="submit" variant="secondary">
-            {tt.programmesLinkButton}
-          </Button>
-          <HelpText id="team-link-programme-hint">{tt.programmesLinkHint}</HelpText>
-        </Form>
-      )}
-    </section>
+        }
+        items={programmes.map((p) => ({
+          id: p.id,
+          name: p.name,
+          href: `/programmes/${p.id}`,
+          meta: p.onlyTeam ? tt.programmesOnlyTeam : undefined,
+          actions: p.onlyTeam && (
+            <ConfirmDialog
+              triggerLabel={tt.programmeDelete}
+              triggerContext={p.name}
+              triggerVariant="ghost"
+              title={tt.programmeDeleteTitle}
+              description={fmt(tt.programmeDeleteBody, { name: p.name })}
+              confirmLabel={t.programmes.delete}
+              cancelLabel={t.confirm.cancel}
+              fields={{ intent: "deleteProgramme", programmeId: p.id }}
+            />
+          ),
+          remove: p.onlyTeam
+            ? undefined
+            : {
+                fields: { intent: "unlinkProgramme", programmeId: p.id },
+                title: fmt(tt.programmeRemoveTitle, { team: team.name, programme: p.name }),
+                description: tt.programmeRemoveBody,
+              },
+        }))}
+      />
+    </div>
   );
 }

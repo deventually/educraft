@@ -1,13 +1,13 @@
 /** Teams of colleagues and their leads (P28.2). */
 export const teams = {
-  add: "Toevoegen",
   addEmailLabel: "E-mailadres van je collega",
-  addHeading: "Collega toevoegen",
   addHint:
     "Typ precies het e-mailadres waarmee je collega inlogt. Je kunt niet bladeren door alle accounts.",
+  addMember: "Lid toevoegen",
   addMembersHeading: "Leden toevoegen",
   addMembersHint: "Vink collega's aan en voeg ze in één keer toe.",
-  addSelected: "Aangevinkte toevoegen",
+  addMembersTitle: "Leden toevoegen aan {team}",
+  addMemberTitle: "Lid toevoegen aan {team}",
   addTeam: "In team",
   adminIntro:
     "Maak teams van collega's en wijs teamleiders aan. Een teamleider voegt zelf collega's toe. Lid zijn deelt niets: alles blijft privé tot iemand zelf iets deelt.",
@@ -31,7 +31,6 @@ export const teams = {
   divisionNoneYet: "Er is nog niets om uit te kiezen. Maak eerst een {kind} aan bij",
   divisionNoneYetLink: "Organisatie",
   filterTeam: "Team",
-  findCandidate: "Zoek een collega",
   heading: "Teams",
   inviteHeading: "Uitnodigen",
   inviteIntro:
@@ -46,6 +45,9 @@ export const teams = {
   makeLead: "Teamleider maken",
   manageTeams: "Teams beheren",
   memberOf: "Lid van {name}",
+  memberRemoveBody:
+    "Het account blijft bestaan. Wat met het team gedeeld is, ziet deze persoon niet meer.",
+  memberRemoveTitle: "{name} weghalen uit {team}?",
   members: "Leden",
   myTeams: "Mijn teams",
   myTeamsIntro: "Je bent lid van deze teams. Lid zijn deelt niets van je werk.",
@@ -62,18 +64,24 @@ export const teams = {
   notMember: "Deze persoon zit niet in het team.",
   placeProgramme: "Opleiding {names}",
   placeProgrammes: "Opleidingen {names}",
+  programmeDelete: "Opleiding verwijderen",
+  programmeDeleteBody: "{name} verdwijnt, met haar leerlijnen. De cursussen blijven bestaan.",
+  programmeDeleteTitle: "Opleiding verwijderen?",
+  programmeRemoveBody:
+    "De opleiding blijft bestaan. De leden van dit team zien haar niet meer, tenzij ze ook in een ander team ervan zitten.",
+  programmeRemoveTitle: "{team} weghalen uit {programme}?",
+  programmesAdd: "Opleiding toevoegen",
+  programmesAddNone: "Er zijn geen opleidingen van andere teams meer.",
+  programmesAddTitle: "Opleidingen toevoegen aan {team}",
   programmesHeading: "Opleidingen",
   programmesLastTeam:
     "Dit is het enige team van de opleiding. Koppel eerst een ander team, of verwijder de opleiding.",
-  programmesLink: "Opleiding koppelen aan dit team",
-  programmesLinkButton: "Koppelen",
   programmesLinkHint:
     "Een opleiding kan meer teams hebben, zoals het opleidingsteam en de moduleteams. De leden van dit team zien haar dan ook, de teamleider beheert haar mee.",
   programmesNew: "Nieuwe opleiding voor dit team",
   programmesNone: "Dit team heeft nog geen opleiding.",
-  programmesUnlink: "{name} loskoppelen van dit team",
-  remove: "Uit het team halen",
-  removeLabel: "{name} uit het team halen",
+  programmesOnlyTeam:
+    "Het enige team van deze opleiding. Moet ze hier weg, voeg dan eerst een ander team toe aan de opleiding, of verwijder haar.",
   search: "Zoek op team of persoon",
   searchRegion: "Teams zoeken",
   stepDown: "Stoppen als teamleider",

@@ -1,14 +1,14 @@
 import type { Messages } from "../nl";
 
 export const teams: Messages["teams"] = {
-  add: "Add",
   addEmailLabel: "Your colleague's email address",
-  addHeading: "Add a colleague",
   addHint:
     "Type exactly the email address your colleague signs in with. You cannot browse all accounts.",
+  addMember: "Add member",
   addMembersHeading: "Add members",
   addMembersHint: "Tick colleagues and add them in one go.",
-  addSelected: "Add ticked",
+  addMembersTitle: "Add members to {team}",
+  addMemberTitle: "Add a member to {team}",
   addTeam: "In team",
   adminIntro:
     "Make teams of colleagues and appoint team leads. A team lead adds colleagues themselves. Being a member shares nothing: everything stays private until someone shares it.",
@@ -31,7 +31,6 @@ export const teams: Messages["teams"] = {
   divisionNoneYet: "There is nothing to choose yet. First create a {kind} under",
   divisionNoneYetLink: "Organisation",
   filterTeam: "Team",
-  findCandidate: "Find a colleague",
   heading: "Teams",
   inviteHeading: "Invite",
   inviteIntro:
@@ -46,6 +45,8 @@ export const teams: Messages["teams"] = {
   makeLead: "Make team lead",
   manageTeams: "Manage teams",
   memberOf: "Member of {name}",
+  memberRemoveBody: "The account stays. This person no longer sees what is shared with the team.",
+  memberRemoveTitle: "Remove {name} from {team}?",
   members: "Members",
   myTeams: "My teams",
   myTeamsIntro: "You are a member of these teams. Being a member shares none of your work.",
@@ -62,18 +63,24 @@ export const teams: Messages["teams"] = {
   notMember: "This person is not in the team.",
   placeProgramme: "Programme {names}",
   placeProgrammes: "Programmes {names}",
+  programmeDelete: "Delete programme",
+  programmeDeleteBody: "{name} goes, with its learning lines. The courses stay.",
+  programmeDeleteTitle: "Delete programme?",
+  programmeRemoveBody:
+    "The programme stays. This team's members no longer see it, unless they are also in another of its teams.",
+  programmeRemoveTitle: "Remove {team} from {programme}?",
+  programmesAdd: "Add programme",
+  programmesAddNone: "There are no programmes of other teams left.",
+  programmesAddTitle: "Add programmes to {team}",
   programmesHeading: "Programmes",
   programmesLastTeam:
     "This is the programme's only team. Link another team first, or delete the programme.",
-  programmesLink: "Link a programme to this team",
-  programmesLinkButton: "Link",
   programmesLinkHint:
     "A programme can have several teams, such as the programme team and the module teams. This team's members then see it too, and its lead helps manage it.",
   programmesNew: "New programme for this team",
   programmesNone: "This team has no programme yet.",
-  programmesUnlink: "Unlink {name} from this team",
-  remove: "Remove from the team",
-  removeLabel: "Remove {name} from the team",
+  programmesOnlyTeam:
+    "The only team of this programme. To take it off, first add another team to the programme, or delete it.",
   search: "Search by team or person",
   searchRegion: "Search teams",
   stepDown: "Stop being team lead",
