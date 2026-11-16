@@ -65,6 +65,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     },
     kinds,
     available,
+    canPlace: programme.isMember,
     lines: await Promise.all(
       (await listLines(user, programme.id)).map(async (l) => {
         // A line of another programme says where it comes from, when the user reads that one.
@@ -134,7 +135,7 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
         : { variant: "error", message: d.error };
     },
   });
-  const { programme, kinds, available, lines = [] } = loaderData;
+  const { programme, kinds, available, canPlace, lines = [] } = loaderData;
   const placementText = usePlacementText();
 
   return (
@@ -238,7 +239,9 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
           <h2 id={`${id}-add`} className="text-lg font-medium text-slate-900">
             {p.addTitle}
           </h2>
-          {available.length === 0 ? (
+          {!canPlace ? (
+            <p className="mt-2 max-w-[65ch] text-slate-600">{p.addNotMember}</p>
+          ) : available.length === 0 ? (
             <p className="mt-2 text-slate-600">{p.addNone}</p>
           ) : (
             <Card className="mt-3 p-4">

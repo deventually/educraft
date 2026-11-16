@@ -148,6 +148,8 @@ function withTeams(a: Actor, p: Row, list: { id: string; name: string }[] = []) 
     teams: list,
     teamName: namesOf(list),
     canManage: canManage(a, p.id),
+    // In one of its teams: only they place a course in it (an admin may not be).
+    isMember: myTeams(a.id, p.id).length > 0,
   };
 }
 
