@@ -34,6 +34,15 @@ describe("dev server config", () => {
     expect(flags.filter((f) => f.startsWith("v8_"))).toEqual([]);
   });
 
+  it("pre-bundles every route's dependencies at start, so no page triggers a reload", () => {
+    // Without it Vite finds a dependency (mammoth, unpdf, …) on the first visit to a page,
+    // re-bundles and reloads; an open tab then gets "504 Outdated Optimize Dep" and its
+    // buttons stop working until a hard reload.
+    expect((config as { future?: Record<string, unknown> }).future?.unstable_optimizeDeps).toBe(
+      true,
+    );
+  });
+
   it("@react-router/dev no longer passes Vite's deprecated envFile option", () => {
     const dist = resolve(root, "node_modules/@react-router/dev/dist");
     const files = readdirSync(dist, { recursive: true, encoding: "utf8" }).filter((f) =>
