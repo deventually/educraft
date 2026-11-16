@@ -1,12 +1,14 @@
 import { type ReactNode, useState } from "react";
 import { Form } from "react-router";
 import { wordCount } from "~/lib/portfolio/progress";
-import { markersIn } from "~/lib/portfolio/openSpots";
+import { fillMarker, markersIn } from "~/lib/portfolio/openSpots";
 import { LIMITS } from "~/lib/portfolio/schema";
 import { Button, Label, Textarea } from "~/components/ui";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { AiCallField } from "~/components/AiLeaveGuard";
+import { AiPatternCheck } from "./AiPatternCheck";
+import { OpenSpotFill } from "./OpenSpotFill";
 
 /**
  * The chapter for one outcome, with a live word count. `children` sit in the
@@ -57,6 +59,8 @@ export function ChapterEditor({
           {open === 1 ? t.outcome.openSpotsOne : fmt(t.outcome.openSpots, { n: open })}
         </p>
       )}
+      <OpenSpotFill text={text} onFill={(i, answer) => setText((t) => fillMarker(t, i, answer))} />
+      <AiPatternCheck text={text} />
       <div>
         <Button type="submit" name="intent" value="writeChapter">
           {t.outcome.saveChapter}

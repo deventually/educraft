@@ -42,6 +42,22 @@ export function markersIn(text: string): string[] {
     .map((p) => p.text);
 }
 
+/** What a marker asks the teacher for: the text after the colon, or the marker itself. */
+export function markerQuestion(marker: string): string {
+  const m = /^\[[^:\]]*:\s*([^\]]*?)\s*\]$/u.exec(marker);
+  return m?.[1] || marker;
+}
+
+/** The text with its `index`-th marker (from 0) replaced by the answer; a blank answer changes nothing. */
+export function fillMarker(text: string, index: number, answer: string): string {
+  const filled = answer.trim();
+  if (!filled) return text;
+  let n = -1;
+  return splitOnMarkers(text)
+    .map((p) => (p.marker && ++n === index ? filled : p.text))
+    .join("");
+}
+
 export type OpenSpot =
   | { kind: "marker" | "empty"; where: "chapter"; outcomeId: string; text: string }
   | { kind: "marker" | "empty"; where: "evidence"; evidenceId: string; text: string }

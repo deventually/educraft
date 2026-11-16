@@ -53,6 +53,7 @@ import { portfolioReadiness } from "./portfolioReadiness";
 import { portfolioRehearsal } from "./portfolioRehearsal";
 import { portfolioRoute } from "./portfolioRoute";
 import { portfolioStart } from "./portfolioStart";
+import { portfolioVoice } from "./portfolioVoice";
 import { privacy } from "./privacy";
 import { programmes } from "./programmes";
 import { projects } from "./projects";
@@ -142,6 +143,7 @@ export const nl = {
   portfolioRehearsal,
   portfolioRoute,
   portfolioStart,
+  portfolioVoice,
   privacy,
   programmes,
   projects,

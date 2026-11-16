@@ -11,6 +11,7 @@ import { Button, Card } from "~/components/ui";
 import { useFormToast } from "~/components/Toast";
 import { EvidenceFields, EvidenceRow } from "~/components/portfolio/EvidenceRow";
 import { ChapterEditor } from "~/components/portfolio/ChapterEditor";
+import { EvidenceNeeds } from "~/components/portfolio/EvidenceNeeds";
 import { ChapterOutline } from "~/components/portfolio/ChapterOutline";
 import { CoachPanel } from "~/components/portfolio/CoachPanel";
 import { ProofreadPanel } from "~/components/portfolio/ProofreadPanel";
@@ -342,6 +343,12 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
               </Form>
             </div>
           )}
+          <EvidenceNeeds
+            criteria={outcome.criteria}
+            evidence={evidence}
+            required={required}
+            href={outcomeHref(id, outcome.id, "evidence", "add-evidence-title")}
+          />
           <ChapterOutline outcome={outcome} showOutline={guided.length === 0} />
           <ToolHints hints={chapterTools} step="chapter" className="mt-3" />
           <CourseFacts view={courseFacts} />

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as edit from "~/lib/portfolio/edit";
-import { markersIn, openSpots } from "~/lib/portfolio/openSpots";
+import { fillMarker, markerQuestion, markersIn, openSpots } from "~/lib/portfolio/openSpots";
 import { EV, LU, sampleDossier } from "./fixtures";
 
 const LU2 = "00000000-0000-4000-8000-000000000002";
@@ -76,5 +76,30 @@ describe("openSpots", () => {
     expect(openSpots(marked)).toEqual([
       { kind: "marker", where: "evidence", evidenceId: EV, text: "[invullen]" },
     ]);
+  });
+});
+
+describe("fillMarker", () => {
+  const text = "Ik had [aanvullen: hoeveel studenten] studenten. Daarna [aanvullen: wat ik deed].";
+
+  it("puts the answer in place of the n-th marker, trimmed", () => {
+    expect(fillMarker(text, 1, "  liet ik ze in tweetallen werken ")).toBe(
+      "Ik had [aanvullen: hoeveel studenten] studenten. Daarna liet ik ze in tweetallen werken.",
+    );
+    expect(fillMarker(text, 0, "24")).toBe("Ik had 24 studenten. Daarna [aanvullen: wat ik deed].");
+  });
+
+  it("leaves the text as it is for a blank answer or a marker that is not there", () => {
+    expect(fillMarker(text, 0, "  ")).toBe(text);
+    expect(fillMarker(text, 2, "iets")).toBe(text);
+  });
+});
+
+describe("markerQuestion", () => {
+  it("is what the marker asks for, or the marker itself", () => {
+    expect(markerQuestion("[aanvullen: hoeveel studenten]")).toBe("hoeveel studenten");
+    expect(markerQuestion("[to add: the group size]")).toBe("the group size");
+    expect(markerQuestion("[invullen]")).toBe("[invullen]");
+    expect(markerQuestion("TODO")).toBe("TODO");
   });
 });
