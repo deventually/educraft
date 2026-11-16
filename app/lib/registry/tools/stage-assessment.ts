@@ -1,5 +1,5 @@
 import type { Tool } from "../types";
-import { STAGE_ASSESSMENT_PROMPT_V4 } from "~/lib/prompts/stage-assessment@v4.prompt";
+import { STAGE_ASSESSMENT_PROMPT_V5 } from "~/lib/prompts/stage-assessment@v5.prompt";
 import { originalAttribution } from "~/lib/prompts/attribution";
 import { DEFAULT_MODEL } from "~/lib/ai/models";
 
@@ -122,6 +122,14 @@ export const stageAssessment: Tool = {
       options: [
         { value: "stageverslag", label: { nl: "Stageverslag", en: "Internship report" } },
         { value: "onderzoeksverslag", label: { nl: "Onderzoeksverslag", en: "Research report" } },
+        {
+          // Two reports together: feedback per report plus general feedback (prompt @v5).
+          value: "stageverslag+onderzoeksverslag",
+          label: {
+            nl: "Stageverslag + onderzoeksverslag (samen)",
+            en: "Internship report + research report (together)",
+          },
+        },
         { value: "stageplan", label: { nl: "Stageplan", en: "Internship plan" } },
         {
           value: "portfolio",
@@ -138,8 +146,8 @@ export const stageAssessment: Tool = {
         { value: "overig", label: { nl: "Overig", en: "Other" } },
       ],
       help: {
-        nl: "Het type bepaalt welke criteria uit het kader gelden. Kies 'Onderzoeksportfolio (geheel)' om zowel het onderzoeksverslag (Analyseren) als het beroepsproduct/de realisatie (Realiseren) samen te beoordelen — upload of plak dan beide documenten. De overige typen beoordelen één onderdeel.",
-        en: "The type decides which criteria in the framework apply. Choose 'Research portfolio (whole)' to assess both the research report (Analyseren) and the work product/realisation (Realiseren) together — then upload or paste both documents. The other types assess a single component.",
+        nl: "Het type bepaalt welke criteria uit het kader gelden. Kies 'Stageverslag + onderzoeksverslag (samen)' om beide verslagen in één keer te laten beoordelen, met de feedback en een samenvatting per verslag; upload dan beide bestanden. Kies 'Onderzoeksportfolio (geheel)' om zowel het onderzoeksverslag (Analyseren) als het beroepsproduct/de realisatie (Realiseren) samen te beoordelen — upload of plak dan beide documenten. De overige typen beoordelen één onderdeel.",
+        en: "The type decides which criteria in the framework apply. Choose 'Internship report + research report (together)' to have both reports assessed at once, with the feedback and a summary per report; then upload both files. Choose 'Research portfolio (whole)' to assess both the research report (Analyseren) and the work product/realisation (Realiseren) together — then upload or paste both documents. The other types assess a single component.",
       },
       group: CONTEXT,
     },
@@ -285,14 +293,16 @@ export const stageAssessment: Tool = {
     {
       id: "assessment",
       name: { nl: "Concept-beoordeling", en: "Draft assessment" },
-      systemPromptId: STAGE_ASSESSMENT_PROMPT_V4.id,
+      systemPromptId: STAGE_ASSESSMENT_PROMPT_V5.id,
       output: {
         kind: "structured-sections",
         exportAs: "table",
         hint: {
-          nl: "Samenvattend oordeel, per succescriterium (indicatie + citaten + verbeterpunten), concept-feedback, volledigheid bedrijfsevaluatie, aandachtspunten",
-          en: "Summary verdict, per success criterion (indication + quotes + improvements), draft feedback, evaluation completeness, caveats",
+          nl: "Samenvattend oordeel, per succescriterium (indicatie + citaten + verbeterpunten), concept-feedback, samenvatting voor OnStage per verslag, volledigheid bedrijfsevaluatie, aandachtspunten",
+          en: "Summary verdict, per success criterion (indication + quotes + improvements), draft feedback, summary for OnStage per report, evaluation completeness, caveats",
         },
+        // Each report's summary gets its own Copy button under the result.
+        copyBlocks: { nl: "Samenvatting voor OnStage", en: "Summary for OnStage" },
       },
     },
   ],

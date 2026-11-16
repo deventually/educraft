@@ -86,6 +86,7 @@ const toolStage = z.object({
         .optional(),
       computed: z.enum(COMPUTATION_IDS).optional(),
       guard: z.enum(GUARD_IDS).optional(),
+      copyBlocks: localizedText.optional(),
     })
     .refine((o) => o.exportAs !== "slides" || o.slides, {
       message: "a slides result names its slide headings (output.slides)",

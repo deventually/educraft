@@ -118,8 +118,9 @@ describe("tool: stage-assessment @v2 (any student work)", () => {
   });
 
   it("keeps the numbering continuous when the company evaluation is left out", () => {
-    // Eval 2026-11-04c: dropping heading 4 left a jump from 3 to 5.
-    expect(build("nl")).toMatch(/nummer het volgende kopje dan door als 4/);
-    expect(build("en")).toMatch(/number the next heading 4/);
+    // Eval 2026-11-04c: dropping the evaluation heading left a jump in the numbers. Since @v5
+    // the summary for OnStage is heading 4, so the evaluation is 5.
+    expect(build("nl")).toMatch(/nummer het volgende kopje dan door als 5/);
+    expect(build("en")).toMatch(/number the next heading 5/);
   });
 });

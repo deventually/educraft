@@ -158,10 +158,7 @@ export interface OutputFormat {
   hint?: LocalizedText;
   /** Expected headings; drives copy/export structure. */
   sections?: string[];
-  /**
-   * What this result *is* for an export (P30): the export module picks the file
-   * formats for it (`app/lib/export/formats.ts`). Absent = "document".
-   */
+  /** What this result *is* for an export (P30, `app/lib/export/formats.ts`). Absent = "document". */
   exportAs?: ExportKind;
   /**
    * For a `slides` result (P30.4): which of its headings the deck is made from, as the prompt
@@ -178,6 +175,8 @@ export interface OutputFormat {
    * that is not in the input. Ids live in `app/lib/template/guards.ts`.
    */
   guard?: GuardId;
+  /** A result heading (per language) whose sub-headings each get a Copy button, e.g. for OnStage. */
+  copyBlocks?: LocalizedText;
 }
 
 /** The headings of a lesson plan that become slides (P30.4), each as the prompt writes it. */
