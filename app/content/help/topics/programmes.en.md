@@ -6,15 +6,15 @@ A **programme** is a bundle of the courses of one or more teams. Each course sho
 
 A programme belongs to one or more **teams**, such as the programme team and the module teams that make its courses. You can be in several teams; you then see the programmes of all of them. Each programme shows its teams.
 
-- A **team lead** of one of those teams or an **admin** creates the programme and changes its name, level and mode.
+- Usually the **admin** creates the programmes, under their faculty. A **team lead** of one of its teams or an admin changes its name, level and mode.
 - **Every member** of one of those teams can put their own courses in it, and courses they co-own, and sees their colleagues' courses in the programme.
-- A **team lead** of one of those teams or an **admin** adds teams or takes them off. On the programme's page, click **Add team** under **Teams**; in the window you search and tick one or more. **Remove** always asks first; the team itself stays. A programme always keeps at least one team. An admin can also do this on the team's page (**Admin → Teams**).
+- An **admin** links any team to one or more programmes, a **team lead** only their own team. On the programme's page, click **Add team** under **Teams**; on a team's page, click **Add programme**. In the window you search and tick one or more. **Remove** always asks first; the team and the programme both stay. Only an admin sees a programme without a team.
 
 ## Create a programme
 
-If you are a team lead, go to **Programmes** in the **Education** menu and fill in:
+If you are an admin, go to **Admin → Faculties and programmes** and click **New programme** in the faculty. If your institution has no faculties, or you are a team lead, click **New programme** under **Programmes** in the **Education** menu. Fill in:
 
-- **Team**: the programme's first team. You add other teams later on the programme's page.
+- **Team**: a team you lead. An admin may choose **No team yet** and link the teams later.
 
 - **Name**, for example *Computer Science full-time* or *Master Software Engineering*.
 - **Type and level**, for example bachelor (hbo), associate degree (Ad), master (hbo) or wo master. You choose from the types your administrator has switched on.
@@ -48,7 +48,7 @@ Like the coverage matrix, this is **advice**. Nothing changes in the courses, an
 
 - The owner or the team lead may take a course out of a programme (**Remove**, after a confirmation). The course stays as it is, and stays shared with the team. You can stop sharing on the course page.
 - If you stop sharing with the team, or leave the team, your course leaves that team's programmes, unless you are also in another team of the programme and share it with that one.
-- If a team is deleted, a programme that has another team stays. A programme of that team alone goes with it.
+- If a team is deleted, its programmes stay. A programme left without a team is seen only by the admin, until a team joins again.
 - If you delete a course, it disappears from all programmes.
 - Only an **admin** deletes a programme, with **Delete programme** at the bottom of the programme's page. All courses stay as they are.
 - No AI is involved: a programme only records what you fill in yourself.

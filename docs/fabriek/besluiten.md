@@ -664,12 +664,20 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   2026-11-16 (thread "Plan voor eenvoudiger beheer en navigatie": keuzes 1 tot en met 6, "Ook
   ontkoppelen moet bevestigd worden met een confirm" en "Is het ook een idee om het beheer met
   een dashboardpagina te starten?").
-- **BESLUIT-2026-11-16-4:** **Een teamleider van de opleiding koppelt teams; alleen een beheerder
-  verwijdert een opleiding.** Een teamleider van een van de teams van een opleiding koppelt een
-  ander team aan die opleiding en haalt een team eraf, net als een beheerder; een opleiding houdt
-  altijd minstens één team. Een teamleider van een team dat (nog) niet bij de opleiding hoort, heeft
-  er geen zeggenschap over. Een opleiding verwijderen kan alleen een beheerder; de teamleider beheert
-  haar wel (naam, niveau, vorm, leerlijnen). De server dwingt dit af in `programmeTeams.server.ts`
-  en `deleteProgramme`. Dit vervangt "een beheerder koppelt een team" uit BESLUIT-2026-11-16-1.
-  Bastiaan, 2026-11-16 (thread "Plan voor eenvoudiger beheer en navigatie", keuzes 2 en 3:
-  "Beheerder en teamleider van de opleiding" en "Alleen de beheerder").
+- **BESLUIT-2026-11-16-4:** **De beheerder maakt de opleidingen, een teamleider koppelt zijn eigen
+  team; alleen een beheerder verwijdert een opleiding.** Een beheerder maakt een opleiding aan,
+  ook zonder team en meteen onder een faculteit (*Nieuwe opleiding* bij elke faculteit). Een
+  opleiding zonder team ziet alleen een beheerder. Een beheerder koppelt elk team aan een of meer
+  opleidingen en haalt het eraf; een teamleider doet dat alleen voor zijn eigen team, en kiest
+  daarvoor uit alle opleidingen van de instelling. Het laatste team mag eraf: de opleiding blijft
+  dan bestaan, voor de beheerder, net als wanneer haar laatste team wordt opgeheven. Een
+  teamleider van een van de teams beheert de opleiding nog steeds (naam, niveau, vorm,
+  leerlijnen) en kan er een aanmaken voor een team dat hij leidt, maar verwijderen kan alleen een
+  beheerder. Dit vervangt in BESLUIT-2026-11-16-1 "een beheerder koppelt", "een opleiding houdt
+  altijd minstens één team" en "een opleiding van alleen dat team verdwijnt mee", en in
+  BESLUIT-2026-11-16-3 "een teamleider van de opleiding koppelt zelf teams". Bastiaan, 2026-11-16
+  (thread "Plan voor eenvoudiger beheer en navigatie": "Alleen de beheerder", "Ik wil eerst de
+  opleidingen aanmaken als beheerder. Deze opleiding valt onder een faculteit. Een team (of
+  beheerder) kan het team aan een opleiding koppelen. Een team alleen zichzelf, een beheerder alle
+  teams", "Een beheerder kan ook een team koppelen aan een of meerdere opleidingen" en keuzekaart:
+  "Alle opleidingen van de instelling").

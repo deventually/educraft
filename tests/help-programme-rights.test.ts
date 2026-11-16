@@ -22,11 +22,24 @@ describe("help on programme rights", () => {
   });
 });
 
+describe("help on who makes and links programmes (BESLUIT-2026-11-16-4)", () => {
+  it("says the admin makes programmes, also in a faculty, and a lead links only their own team", () => {
+    expect(topic("nl")).toContain("**Nieuwe opleiding**");
+    expect(topic("en")).toContain("**New programme**");
+    expect(topic("nl")).toContain("alleen zijn eigen team");
+    expect(topic("en")).toContain("only their own team");
+    for (const gone of ["minstens één team", "verdwijnt mee"]) expect(topic("nl")).not.toContain(gone);
+    for (const gone of ["at least one team", "goes with it"]) expect(topic("en")).not.toContain(gone);
+  });
+});
+
 describe("help on the lead's team page", () => {
   const teams = (lang: "nl" | "en") =>
     readFileSync(`app/content/help/topics/teams.${lang}.md`, "utf8");
   it("names the Lid toevoegen button", () => {
     expect(teams("nl")).toContain("**Lid toevoegen**");
     expect(teams("en")).toContain("**Add member**");
+    expect(teams("nl")).toContain("**Opleiding toevoegen**");
+    expect(teams("en")).toContain("**Add programme**");
   });
 });

@@ -50,6 +50,7 @@ If you are a team lead, you open your team from **Account**. There you can:
 - add a colleague with **Add member**: type the email address they log in with;
 - create an **invite link** for a new colleague, who then becomes a teacher and a member of your team;
 - remove a colleague from the team with **Remove** (it asks first), or make them team lead too;
+- link your team to programmes with **Add programme**, or take it off with **Remove**;
 - stop being team lead yourself.
 
 Removing another team lead is done by an administrator.
