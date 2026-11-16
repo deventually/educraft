@@ -96,7 +96,9 @@ lead** is a stand per team (`team_members.is_lead`), not a role: `users.role` st
   team page; `app/server/teamPage.server.ts` decides the role. The old `/admin/teams` addresses
   redirect there.
 - An admin (with two-step verification, `requireRole("admin")`) works on every team: rename,
-  delete, place it under a faculty, add several accounts at once by ticking them, remove, lead
+  delete, choose where it belongs (*Waar hoort dit team bij?*: its programmes, a faculty or the
+  whole institution; a team in programmes keeps that until they are taken off, intent `belongs`),
+  add several accounts at once by ticking them, remove, lead
   on/off, the team's choices; and per person on the person page (section Teams).
 - A plain member only reads their own team: names, who leads and its programmes
   (`getTeamForMember`, no e-mail addresses, no choices); the action is a 404 for them.

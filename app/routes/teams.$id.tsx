@@ -4,7 +4,7 @@ import type { Route } from "./+types/teams.$id";
 import { loadTeamPage, teamPageAction } from "~/server/teamPage.server";
 import { TeamProgrammes } from "~/components/teams/TeamProgrammes";
 import { TeamMembers } from "~/components/teams/TeamMembers";
-import { TeamDivisionForm } from "~/components/teams/TeamDivisionForm";
+import { TeamBelongsForm } from "~/components/teams/TeamBelongsForm";
 import { useT } from "~/lib/i18n/useT";
 import { useFormToast } from "~/components/Toast";
 import { Button, Input, Label } from "~/components/ui";
@@ -99,7 +99,8 @@ export default function TeamPage({ loaderData }: Route.ComponentProps) {
                 className="mt-1"
               />
             </AutoSaveForm>
-            <TeamDivisionForm
+            <TeamBelongsForm
+              belongs={loaderData.belongs}
               divisions={loaderData.divisions}
               divisionId={loaderData.divisionId}
               divisionWord={loaderData.divisionWord}

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import type { ComponentType } from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { useState, type ComponentType } from "react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
@@ -131,6 +131,7 @@ describe("/teams/:id for an admin", () => {
     offer,
     divisions: [{ id: "d-1", name: "Faculteit Gezondheid" }],
     divisionId: null as string | null,
+    belongs: "institution",
     divisionWord: "Faculteit",
     programmes: [{ id: "p-1", name: "Verpleegkunde voltijd" }],
     programmeChoices: [
@@ -185,9 +186,11 @@ describe("/teams/:id for an admin", () => {
     expect(within(section).queryByRole("button", { name: "Opleiding toevoegen" })).toBeNull();
   });
 
-  it("points to Organisatie when there are no divisions to choose", () => {
+  it("points to Organisatie when there are no faculties to choose", () => {
     page(undefined, { ...data, divisions: [] });
-    expect(screen.getByRole("link", { name: /organisatie/i })).toHaveAttribute(
+    const choice = screen.getByRole("group", { name: "Waar hoort dit team bij?" });
+    expect(within(choice).getByRole("radio", { name: /een faculteit/i })).toBeDisabled();
+    expect(within(choice).getByRole("link", { name: /organisatie/i })).toHaveAttribute(
       "href",
       "/admin/organisation",
     );
@@ -201,14 +204,48 @@ describe("/teams/:id for an admin", () => {
     return { bodies, action };
   };
 
-  it("lets the admin put the team under a division, with autosave", async () => {
+  it("asks where the team belongs as one choice, and saves a faculty at once", async () => {
+    const user = userEvent.setup();
     const { bodies, action } = recorder();
     page(action);
-    const select = screen.getByLabelText("Hoort bij faculteit");
-    expect(select).toHaveValue("");
-    await userEvent.selectOptions(select, "d-1");
-    await waitFor(() => expect(bodies.at(-1)?.get("intent")).toBe("division"));
+    const choice = screen.getByRole("group", { name: "Waar hoort dit team bij?" });
+    expect(within(choice).getByRole("radio", { name: /hele instelling/i })).toBeChecked();
+    expect(within(choice).queryByLabelText("Faculteit")).toBeNull();
+    await user.click(within(choice).getByRole("radio", { name: /een faculteit/i }));
+    await waitFor(() => expect(bodies.at(-1)?.get("intent")).toBe("belongs"));
+    expect(bodies.at(-1)?.get("belongs")).toBe("division");
     expect(bodies.at(-1)?.get("divisionId")).toBe("d-1");
+    expect(within(choice).getByLabelText("Faculteit")).toHaveValue("d-1");
+  });
+
+  it("says a team in programmes belongs to them, until they are taken off", () => {
+    page(undefined, { ...data, belongs: "programmes" });
+    const choice = screen.getByRole("group", { name: "Waar hoort dit team bij?" });
+    expect(within(choice).getByRole("radio", { name: /opleidingen/i })).toBeChecked();
+    expect(within(choice).getByRole("radio", { name: /een faculteit/i })).toBeDisabled();
+    expect(within(choice).getByRole("radio", { name: /hele instelling/i })).toBeDisabled();
+    expect(within(choice).getByText(/haal eerst de opleidingen weg/i)).toBeInTheDocument();
+  });
+
+  it("follows the saved choice when the page reloads its data, e.g. after linking a programme", async () => {
+    // The page keeps its form when its data comes back; the radios must follow the new value.
+    let setData: (d: typeof data) => void = () => {};
+    const Page = TeamPage as unknown as ComponentType<{ loaderData: typeof data }>;
+    function Live() {
+      const [d, set] = useState(data);
+      setData = set;
+      return (
+        <ToastProvider>
+          <Page loaderData={d} />
+        </ToastProvider>
+      );
+    }
+    const Stub = createRoutesStub([{ path: "/teams/:id", Component: Live }]);
+    render(<Stub initialEntries={["/teams/team-1"]} />);
+    act(() => setData({ ...data, belongs: "programmes" }));
+    const choice = await screen.findByRole("group", { name: "Waar hoort dit team bij?" });
+    expect(within(choice).getByRole("radio", { name: /opleidingen/i })).toBeChecked();
+    expect(within(choice).getByRole("radio", { name: /hele instelling/i })).toBeDisabled();
   });
 
   it("shows the team under Teams in the breadcrumb, and the delete button", () => {

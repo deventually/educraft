@@ -8,6 +8,8 @@ export function teamError(t: Messages, code: string): string {
     isLead: t.teams.isLeadError,
     notMember: t.teams.notMember,
     noneSelected: t.teams.noneSelected,
+    chooseDivision: t.teams.chooseDivision,
+    hasProgrammes: t.teams.hasProgrammes,
     atLeastOne: t.admin.models.atLeastOne,
     invalid: t.error.invalidRequest,
   };

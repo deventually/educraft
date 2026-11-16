@@ -583,25 +583,68 @@ describe("a team's choices for parts, tools and models (P28.3)", () => {
   });
 });
 
-describe("/teams/:id: where the team belongs", () => {
-  it("puts the team under a division, and offers the divisions", async () => {
+describe("/teams/:id: where the team belongs, as one choice (plan step 5)", () => {
+  const belongs = (teamId: string, fields: Record<string, string>) =>
+    call(teamPage.action, {
+      request: post({ intent: "belongs", ...fields }),
+      params: { id: teamId },
+    });
+
+  it("puts the team under a faculty or the whole institution, and says what it is now", async () => {
     const org = await import("~/server/repositories/organisation.server");
     const d = await org.createDivision({ id: admin.id, role: "admin" }, "Faculteit Techniek");
     const team = await teams.createTeam("Team Techniek");
-    const res = await call(teamPage.action, {
-      request: post({ intent: "division", divisionId: d!.id }),
-      params: { id: team.id },
+    const load = () => call(teamPage.loader, { request: get(), params: { id: team.id } });
+    expect((await load()).belongs).toBe("institution");
+
+    expect(await belongs(team.id, { belongs: "division", divisionId: d!.id })).toEqual({
+      saved: true,
     });
-    expect(res).toEqual({ saved: true });
-    const data = await call(teamPage.loader, { request: get(), params: { id: team.id } });
+    const data = await load();
+    expect(data.belongs).toBe("division");
     expect(data.divisionId).toBe(d!.id);
     expect(data.divisions).toContainEqual({ id: d!.id, name: "Faculteit Techniek" });
-    expect(
-      await call(teamPage.action, {
-        request: post({ intent: "division", divisionId: "nope" }),
-        params: { id: team.id },
-      }),
-    ).toEqual({ error: "unknown" });
+
+    expect(await belongs(team.id, { belongs: "division", divisionId: "nope" })).toEqual({
+      error: "unknown",
+    });
+    expect(await belongs(team.id, { belongs: "division" })).toEqual({ error: "chooseDivision" });
+    expect(await belongs(team.id, { belongs: "elsewhere" })).toEqual({ error: "unknown" });
+
+    expect(await belongs(team.id, { belongs: "institution" })).toEqual({ saved: true });
+    expect((await load()).belongs).toBe("institution");
+    expect((await load()).divisionId).toBeNull();
+  });
+
+  it("a team with programmes belongs to them; first take the programmes off (Bastiaan, 16-11)", async () => {
+    const org = await import("~/server/repositories/organisation.server");
+    const programmes = await import("~/server/repositories/programmes.server");
+    const d = await org.createDivision({ id: admin.id, role: "admin" }, "Faculteit Zorg");
+    const team = await teams.createTeam("Team met opleiding");
+    await programmes.createProgramme({ id: admin.id, role: "admin" }, team.id, {
+      name: `Zorg ${++n}`,
+      sector: "hbo",
+    });
+    const data = await call(teamPage.loader, { request: get(), params: { id: team.id } });
+    expect(data.belongs).toBe("programmes");
+    const refused: Record<string, string>[] = [
+      { belongs: "division", divisionId: d!.id },
+      { belongs: "institution" },
+    ];
+    for (const fields of refused) {
+      expect(await belongs(team.id, fields)).toEqual({ error: "hasProgrammes" });
+    }
+    expect(await belongs(team.id, { belongs: "programmes" })).toEqual({ saved: true });
+    expect(await org.teamDivisionId(team.id)).toBeNull();
+  });
+
+  it("only an admin chooses it", async () => {
+    const team = await teams.createTeam("Alleen beheer kiest");
+    const lead = await mk("Kiezende Leider");
+    await teams.addMember(team.id, lead.id);
+    await teams.setLead(team.id, lead.id, true);
+    await as(lead);
+    expect(await belongs(team.id, { belongs: "institution" })).toEqual({ error: "unknown" });
   });
 });
 

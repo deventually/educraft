@@ -711,3 +711,10 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   2026-11-16 (plan "eenvoudiger beheer en navigatie", stap 5; keuze "Ja, alleen lezen" op de vraag
   of een teamlid de pagina van zijn team mag zien, en "Nee, alleen de beheerder" op de vraag of een
   docent een team mag aanmaken).
+- **BESLUIT-2026-11-16-8:** **"Waar hoort dit team bij?" is één keuze.** Op de teampagina kiest de
+  beheerder bij **Gegevens** of het team hoort bij **opleidingen**, bij **een faculteit** (met de
+  lijst van faculteiten) of bij **de hele instelling**. De keuze slaat meteen op. Een team dat aan
+  opleidingen is gekoppeld, hoort bij die opleidingen: de andere twee keuzes zijn dan uitgeschakeld
+  tot de opleidingen zijn weggehaald (bij *Opleidingen* op dezelfde pagina). Er wordt nooit iets
+  vanzelf ontkoppeld; de server weigert de wissel ook (`hasProgrammes`). Bastiaan, 2026-11-16
+  (plan "eenvoudiger beheer en navigatie", stap 5; keuze "Eerst opleidingen weghalen").

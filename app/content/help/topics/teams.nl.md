@@ -58,3 +58,5 @@ Een andere teamleider weghalen doet een beheerder.
 ## Voor beheerders
 
 Een beheerder ziet bij **Onderwijs › Teams** alle teams, zoekt op team of persoon en maakt een team met **Nieuw team**. Op dezelfde teampagina als de teamleider heeft de beheerder meer knoppen: de naam wijzigen, kiezen waar het team bij hoort, teamleiders aanvinken, elk lid weghalen en het team opheffen.
+
+Bij **Waar hoort dit team bij?** kiest de beheerder één van drie: *bij opleidingen* (het team hoort waar zijn opleidingen horen), *bij een faculteit* (voor een team zonder opleiding, zoals een vakgroep) of *bij de hele instelling* (zoals een examencommissie). Hangt het team aan opleidingen, dan hoort het daarbij. Wil je het bij een faculteit of de hele instelling laten horen, haal dan eerst de opleidingen weg bij **Opleidingen**; zo verdwijnt er nooit iets ongemerkt.

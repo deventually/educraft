@@ -49,6 +49,10 @@ test("an admin sets up a faculty, a programme in it and a team, and links them",
   await expectNoAxeViolations(page);
   await add.getByRole("button", { name: "Toevoegen (1)" }).click();
   await expect(programmes.getByRole("link", { name: programme })).toBeVisible();
+  // A team in a programme belongs to it; the other choices wait until it is taken off.
+  const belongs = page.getByRole("group", { name: "Waar hoort dit team bij?" });
+  await expect(belongs.getByRole("radio", { name: "Bij opleidingen" })).toBeChecked();
+  await expect(belongs.getByRole("radio", { name: "Bij de hele instelling" })).toBeDisabled();
 
   await page.goto(programmeUrl);
   // Plan step 4: the faculty on top, and the teams under the Gegevens tab.
