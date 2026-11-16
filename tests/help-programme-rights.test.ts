@@ -107,3 +107,14 @@ describe("help on Onderwijs › Teams (plan step 5, BESLUIT-2026-11-16-7)", () =
     expect(teams("en")).toMatch(/read only/i);
   });
 });
+
+describe("help on Waar hoort dit team bij? (plan step 5)", () => {
+  const teams = (lang: "nl" | "en") =>
+    readFileSync(`app/content/help/topics/teams.${lang}.md`, "utf8");
+  it("names the one choice and says programmes come off first", () => {
+    expect(teams("nl")).toContain("**Waar hoort dit team bij?**");
+    expect(teams("en")).toContain("**Where does this team belong?**");
+    expect(teams("nl")).toMatch(/eerst de opleidingen weg/);
+    expect(teams("en")).toMatch(/first remove the programmes/i);
+  });
+});

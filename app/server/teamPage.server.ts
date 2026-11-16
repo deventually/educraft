@@ -92,6 +92,11 @@ export async function loadTeamPage(request: Request, teamId: string) {
     programmeChoices: manages ? await programmeChoices(user, team.id) : [],
     divisions: divisions.map(({ id, name }) => ({ id, name })),
     divisionId,
+    // Where the team belongs, as one choice: its programmes, a faculty, or the institution.
+    belongs: (programmes.length > 0 ? "programmes" : divisionId ? "division" : "institution") as
+      | "programmes"
+      | "division"
+      | "institution",
     divisionWord: loc(divisionWord(kind), getLocale(request)),
     // The team's PowerPoint template (P30.7b): the lead's to set.
     slideTemplate: role === "lead" ? await getTeamTemplate(user.id, team.id) : null,
@@ -201,15 +206,33 @@ async function adminOnly(
     await setLead(teamId, userId, fd.get("lead") === "1");
     return { saved: true };
   }
-  if (intent === "division") {
-    const divisionId = String(fd.get("divisionId") ?? "") || null;
-    return (await setTeamDivision(admin, teamId, divisionId))
-      ? { saved: true }
-      : { error: "unknown" };
-  }
+  if (intent === "belongs") return chooseBelongs(admin, teamId, fd);
   if (intent === "delete") {
     await deleteTeam(teamId);
     return redirectWithFlash("/teams", "teamDeleted");
   }
   return { error: "unknown" };
+}
+
+/**
+ * "Waar hoort dit team bij?" (plan step 5): its programmes, a faculty or the whole institution.
+ * A team in programmes belongs to them; a faculty or the institution comes only after its
+ * programmes are taken off (Bastiaan, 2026-11-16), so a click never unlinks anything.
+ */
+async function chooseBelongs(
+  admin: { id: string; role: string },
+  teamId: string,
+  fd: FormData,
+): Promise<Result> {
+  const belongs = String(fd.get("belongs") ?? "");
+  if (!["programmes", "division", "institution"].includes(belongs)) return { error: "unknown" };
+  const divisionId = belongs === "division" ? String(fd.get("divisionId") ?? "") || null : null;
+  if (belongs === "division" && !divisionId) return { error: "chooseDivision" };
+  if (belongs !== "programmes") {
+    const inProgrammes = (await listProgrammes(admin, MAX)).some((p) => p.teamIds.includes(teamId));
+    if (inProgrammes) return { error: "hasProgrammes" };
+  }
+  return (await setTeamDivision(admin, teamId, divisionId))
+    ? { saved: true }
+    : { error: "unknown" };
 }

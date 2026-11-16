@@ -8,6 +8,17 @@ export const teams = {
     "Maak teams van collega's en wijs teamleiders aan. Een teamleider voegt zelf collega's toe. Lid zijn deelt niets: alles blijft privé tot iemand zelf iets deelt.",
   adminTeamIntro:
     "Je beheert dit team als beheerder: de naam, waar het bij hoort, de leden en teamleiders, en de keuzes voor onderdelen, tools en modellen.",
+  belongsDivision: "Bij een {kind}",
+  belongsDivisionHint: "Voor een team zonder opleiding binnen één {kind}, zoals een vakgroep.",
+  belongsInstitution: "Bij de hele instelling",
+  belongsInstitutionHint: "Voor een team dat overal werkt, zoals een examencommissie.",
+  belongsLegend: "Waar hoort dit team bij?",
+  belongsLocked:
+    "Dit team hangt aan opleidingen en hoort daar dus bij. Wil je het bij een {kind} of de hele instelling laten horen? Haal eerst de opleidingen weg bij Opleidingen.",
+  belongsProgrammes: "Bij opleidingen",
+  belongsProgrammesHint:
+    "Het team hoort waar zijn opleidingen horen. Je koppelt ze hieronder bij Opleidingen.",
+  chooseDivision: "Kies eerst er één uit de lijst.",
   colEmail: "E-mail",
   colLead: "Teamleider",
   colLeads: "Teamleiders",
@@ -21,13 +32,10 @@ export const teams = {
   deleteConfirm: "Opheffen",
   deleteTitle: "Team {name} opheffen?",
   detailsHeading: "Gegevens",
-  divisionHint:
-    "Een team van een opleiding hoort waar de opleiding hoort. Kies dit voor een team zonder opleiding, zoals een examencommissie.",
-  divisionLabel: "Hoort bij {kind}",
-  divisionNone: "Geen (hele instelling)",
   divisionNoneYet: "Er is nog niets om uit te kiezen. Maak eerst een {kind} aan bij",
   divisionNoneYetLink: "Organisatie",
   filterTeam: "Team",
+  hasProgrammes: "Dit team hangt aan opleidingen. Haal die eerst weg.",
   heading: "Teams",
   inviteHeading: "Uitnodigen",
   inviteIntro:

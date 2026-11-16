@@ -9,6 +9,17 @@ export const teams: Messages["teams"] = {
     "Make teams of colleagues and appoint team leads. A team lead adds colleagues themselves. Being a member shares nothing: everything stays private until someone shares it.",
   adminTeamIntro:
     "You manage this team as an admin: its name, where it belongs, its members and leads, and the choices for parts, tools and models.",
+  belongsDivision: "To a {kind}",
+  belongsDivisionHint: "For a team without a programme within one {kind}, such as a department.",
+  belongsInstitution: "To the whole institution",
+  belongsInstitutionHint: "For a team that works everywhere, such as an exam board.",
+  belongsLegend: "Where does this team belong?",
+  belongsLocked:
+    "This team is linked to programmes, so it belongs to them. Want it to belong to a {kind} or the whole institution? First remove the programmes under Programmes.",
+  belongsProgrammes: "To programmes",
+  belongsProgrammesHint:
+    "The team belongs where its programmes belong. You link them below under Programmes.",
+  chooseDivision: "First choose one from the list.",
   colEmail: "Email",
   colLead: "Team lead",
   colLeads: "Team leads",
@@ -21,13 +32,10 @@ export const teams: Messages["teams"] = {
   deleteConfirm: "Delete",
   deleteTitle: "Delete team {name}?",
   detailsHeading: "Details",
-  divisionHint:
-    "A programme's team belongs where its programme does. Choose this for a team without a programme, such as an exam board.",
-  divisionLabel: "Belongs to {kind}",
-  divisionNone: "None (whole institution)",
   divisionNoneYet: "There is nothing to choose yet. First create a {kind} under",
   divisionNoneYetLink: "Organisation",
   filterTeam: "Team",
+  hasProgrammes: "This team is linked to programmes. Remove those first.",
   heading: "Teams",
   inviteHeading: "Invite",
   inviteIntro:

@@ -58,3 +58,5 @@ Removing another team lead is done by an administrator.
 ## For administrators
 
 An administrator sees every team under **Education › Teams**, searches by team or person and creates a team with **New team**. On the same team page as the lead, the administrator has more buttons: rename the team, choose where it belongs, tick the team leads, remove any member and delete the team.
+
+Under **Where does this team belong?** the administrator picks one of three: *to programmes* (the team belongs where its programmes belong), *to a faculty* (for a team without a programme, such as a department) or *to the whole institution* (such as an exam board). A team linked to programmes belongs to them. To have it belong to a faculty or the whole institution, first remove the programmes under **Programmes**; that way nothing disappears unnoticed.
