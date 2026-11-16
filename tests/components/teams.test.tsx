@@ -321,9 +321,13 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     offer,
     programmes: [{ id: "p-1", name: "Verpleegkunde voltijd" }],
     programmeChoices: [{ id: "p-2", name: "Pabo", divisionName: "Faculteit Onderwijs" }],
+    candidates: [
+      { id: "u-a", name: "Anna Aal", email: "anna@school.nl" },
+      { id: "u-b", name: "Bram Beuk", email: "bram@school.nl" },
+    ],
   };
-  const page = (action?: (args: { request: Request }) => unknown) =>
-    renderWith(LeadTeam, "/teams/:id", data, action);
+  const page = (action?: (args: { request: Request }) => unknown, d: unknown = data) =>
+    renderWith(LeadTeam, "/teams/:id", d, action);
 
   it("shows the members with name, e-mail and lead badge", () => {
     page();
@@ -343,21 +347,30 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     expect(within(lea).queryByRole("button")).toBeNull();
   });
 
-  it("adds a colleague by exact e-mail in the Lid toevoegen dialog", async () => {
+  it("lets the lead choose colleagues to add, with search and ticks (Bastiaan, 16-11)", async () => {
     const user = userEvent.setup();
     let body: FormData | undefined;
     page(async ({ request }) => {
       body = await request.formData();
       return { saved: true };
     });
-    await user.click(screen.getByRole("button", { name: "Lid toevoegen" }));
-    const dialog = screen.getByRole("dialog", { name: "Lid toevoegen aan Verpleegkunde" });
-    expect(within(dialog).getByText(/precies het e-mailadres/i)).toBeInTheDocument();
-    expect(within(dialog).getByLabelText(/e-mailadres van je collega/i)).toHaveFocus();
-    await user.keyboard("c@school.nl");
-    await user.click(within(dialog).getByRole("button", { name: "Toevoegen" }));
-    await waitFor(() => expect(body?.get("intent")).toBe("addMember"));
-    expect(body?.get("email")).toBe("c@school.nl");
+    await user.click(screen.getByRole("button", { name: "Leden toevoegen" }));
+    const dialog = screen.getByRole("dialog", { name: "Leden toevoegen aan Verpleegkunde" });
+    await user.keyboard("bram");
+    expect(
+      within(dialog).getByRole("checkbox", { name: /anna aal/i, hidden: true }),
+    ).not.toBeVisible();
+    await user.click(within(dialog).getByRole("checkbox", { name: /bram beuk/i }));
+    await user.click(within(dialog).getByRole("button", { name: "Toevoegen (1)" }));
+    await waitFor(() => expect(body?.get("intent")).toBe("addMembers"));
+    expect(body?.getAll("userIds")).toEqual(["u-b"]);
+  });
+
+  it("says so when every colleague is already in the team", async () => {
+    const user = userEvent.setup();
+    page(undefined, { ...data, candidates: [] });
+    await user.click(screen.getByRole("button", { name: "Leden toevoegen" }));
+    expect(screen.getByText(/iedereen zit al in dit team/i)).toBeInTheDocument();
   });
 
   it("asks before taking a member out", async () => {
@@ -376,11 +389,11 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
   it("shows a refusal as an error toast", async () => {
     const user = userEvent.setup();
     page(() => ({ error: "noSuchUser" }));
-    await user.click(screen.getByRole("button", { name: "Lid toevoegen" }));
-    await user.keyboard("x@school.nl");
-    await user.click(screen.getByRole("button", { name: "Toevoegen" }));
+    await user.click(screen.getByRole("button", { name: "Leden toevoegen" }));
+    await user.click(screen.getByRole("checkbox", { name: /anna aal/i }));
+    await user.click(screen.getByRole("button", { name: "Toevoegen (1)" }));
     await waitFor(() =>
-      expect(screen.getByRole("alert")).toHaveTextContent(/geen account met dit e-mailadres/i),
+      expect(screen.getByRole("alert")).toHaveTextContent(/kun je niet toevoegen/i),
     );
   });
 
@@ -468,6 +481,7 @@ describe("/teams/:id help", () => {
       selfId: "u-lead",
       team: { id: "team-1", name: "Verpleegkunde", members, settings: noChoices },
       offer,
+      candidates: [],
     });
     expect(screen.getByRole("link", { name: "Hoe werkt dit?" })).toHaveAttribute(
       "href",

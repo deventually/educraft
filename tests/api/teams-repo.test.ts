@@ -113,16 +113,36 @@ describe("teams — a lead's functions are scoped to their own team (P28.2)", ()
     expect(await teams.getTeamForLead(a.lead.id, "no-such-team")).toBeNull();
   });
 
-  it("a lead adds a member by exact e-mail address", async () => {
-    const { team, lead } = await teamWithLead("Mail");
+  it("a lead chooses colleagues to add from everyone not yet in the team (Bastiaan, 16-11)", async () => {
+    const { team, lead, member } = await teamWithLead("Kiezen");
     const p = await person("New Colleague");
-    expect(await teams.leadAddMember(lead.id, team.id, p.email!)).toEqual({ ok: true });
-    expect(await memberIds(team.id)).toContain(p.id);
-    expect(await teams.leadAddMember(lead.id, team.id, "nobody@school.nl")).toEqual({
-      error: "noSuchUser",
+    const q = await person("Second Colleague");
+    const gone = await person("Gone Colleague");
+    await users.setUserDisabled(gone.id, true);
+    const boss = await person("Some Admin", "admin");
+    const candidates = (await teams.leadCandidates(lead.id, team.id)) ?? [];
+    const ids = candidates.map((c) => c.id);
+    expect(ids).toEqual(expect.arrayContaining([p.id, q.id]));
+    expect(ids).not.toContain(member.id);
+    expect(ids).not.toContain(lead.id);
+    expect(ids).not.toContain(gone.id);
+    // Admins stay out of the lead's list, and cannot be added by id (Bastiaan, 16-11).
+    expect(ids).not.toContain(boss.id);
+    expect(candidates.find((c) => c.id === p.id)).toEqual({
+      id: p.id,
+      name: "New Colleague",
+      email: p.email,
     });
-    // No browsing: part of an address finds nobody.
-    expect(await teams.leadAddMember(lead.id, team.id, p.email!.slice(0, 5))).toEqual({
+    expect(
+      await teams.leadAddMembers(lead.id, team.id, [p.id, q.id, gone.id, boss.id, "nobody"]),
+    ).toEqual({
+      ok: true,
+      added: 2,
+    });
+    expect(await memberIds(team.id)).toEqual(expect.arrayContaining([p.id, q.id]));
+    expect(await memberIds(team.id)).not.toContain(gone.id);
+    expect(await memberIds(team.id)).not.toContain(boss.id);
+    expect(await teams.leadAddMembers(lead.id, team.id, ["nobody"])).toEqual({
       error: "noSuchUser",
     });
   });
@@ -174,9 +194,10 @@ describe("teams — a lead's functions are scoped to their own team (P28.2)", ()
       [a.lead.id, b.team.id],
       [a.member.id, a.team.id],
     ] as const) {
-      expect(await teams.leadAddMember(actor, team, stranger.email!)).toEqual({
+      expect(await teams.leadAddMembers(actor, team, [stranger.id])).toEqual({
         error: "notLead",
       });
+      expect(await teams.leadCandidates(actor, team)).toBeNull();
       expect(await teams.leadRemoveMember(actor, team, b.member.id)).toEqual({
         error: "notLead",
       });

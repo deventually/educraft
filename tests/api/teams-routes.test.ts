@@ -373,23 +373,48 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
         who.name,
       ).toBe(404);
       expect(
-        await status(act(team.id, { intent: "addMember", email: other.member.email! })),
+        await status(
+          call(leadPage.action, {
+            request: post({ intent: "addMembers", userIds: [other.member.id] }),
+            params: { id: team.id },
+          }),
+        ),
         who.name,
       ).toBe(404);
     }
     expect(await memberIds(team.id)).not.toContain(other.member.id);
   });
 
-  it("adds by exact e-mail, makes a member lead, and removes a plain member", async () => {
+  it("offers active colleagues outside the team and adds the chosen ones (Bastiaan, 16-11)", async () => {
     const { team, lead, member } = await setup();
     const colleague = await mk("Colleague");
+    const second = await mk("Second");
     await as(lead);
-    expect(await act(team.id, { intent: "addMember", email: colleague.email! })).toEqual({
-      saved: true,
+    const data = await call(leadPage.loader, { request: get(), params: { id: team.id } });
+    const ids = data.candidates.map((c) => c.id);
+    expect(ids).toEqual(expect.arrayContaining([colleague.id, second.id]));
+    expect(ids).not.toContain(member.id);
+    expect(data.candidates.find((c) => c.id === colleague.id)).toEqual({
+      id: colleague.id,
+      name: colleague.name,
+      email: colleague.email,
     });
-    expect(await act(team.id, { intent: "addMember", email: "nobody@school.nl" })).toEqual({
-      error: "noSuchUser",
-    });
+    const add = (userIds: string[]) =>
+      call(leadPage.action, {
+        request: post({ intent: "addMembers", userIds }),
+        params: { id: team.id },
+      });
+    expect(await add([])).toEqual({ error: "noneSelected" });
+    expect(await add(["ghost"])).toEqual({ error: "noSuchUser" });
+    expect(await add([colleague.id, second.id, "ghost"])).toEqual({ saved: true });
+    expect(await memberIds(team.id)).toEqual(expect.arrayContaining([colleague.id, second.id]));
+  });
+
+  it("makes a member lead, and removes a plain member", async () => {
+    const { team, lead, member } = await setup();
+    const colleague = await mk("Colleague");
+    await teams.addMember(team.id, colleague.id);
+    await as(lead);
     expect(await act(team.id, { intent: "makeLead", userId: member.id })).toEqual({
       saved: true,
     });

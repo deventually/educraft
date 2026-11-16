@@ -59,9 +59,11 @@ describe("help: only the admin manages a programme (BESLUIT-2026-11-16-4)", () =
 describe("help on the lead's team page", () => {
   const teams = (lang: "nl" | "en") =>
     readFileSync(`app/content/help/topics/teams.${lang}.md`, "utf8");
-  it("names the Lid toevoegen button", () => {
-    expect(teams("nl")).toContain("**Lid toevoegen**");
-    expect(teams("en")).toContain("**Add member**");
+  it("names the Leden toevoegen button: the lead ticks colleagues (BESLUIT-2026-11-16-6)", () => {
+    expect(teams("nl")).toContain("**Leden toevoegen**");
+    expect(teams("en")).toContain("**Add members**");
+    expect(teams("nl")).not.toContain("typ het e-mailadres");
+    expect(teams("en")).not.toContain("type the email address");
     expect(teams("nl")).toContain("**Opleiding toevoegen**");
     expect(teams("en")).toContain("**Add programme**");
   });

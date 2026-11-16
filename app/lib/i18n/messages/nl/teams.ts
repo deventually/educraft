@@ -1,13 +1,8 @@
 /** Teams of colleagues and their leads (P28.2). */
 export const teams = {
-  addEmailLabel: "E-mailadres van je collega",
-  addHint:
-    "Typ precies het e-mailadres waarmee je collega inlogt. Je kunt niet bladeren door alle accounts.",
-  addMember: "Lid toevoegen",
   addMembersHeading: "Leden toevoegen",
   addMembersHint: "Vink collega's aan en voeg ze in één keer toe.",
   addMembersTitle: "Leden toevoegen aan {team}",
-  addMemberTitle: "Lid toevoegen aan {team}",
   addTeam: "In team",
   adminIntro:
     "Maak teams van collega's en wijs teamleiders aan. Een teamleider voegt zelf collega's toe. Lid zijn deelt niets: alles blijft privé tot iemand zelf iets deelt.",
@@ -58,7 +53,8 @@ export const teams = {
   noMatch: "Geen teams gevonden.",
   noMembers: "Nog geen leden.",
   noneSelected: "Vink eerst iemand aan.",
-  noSuchUser: "Er is geen account met dit e-mailadres.",
+  noSuchUser:
+    "Die collega kun je niet toevoegen: het account bestaat niet meer of zit al in het team.",
   noTeam: "Geen team",
   noTeams: "Nog geen teams.",
   notMember: "Deze persoon zit niet in het team.",
