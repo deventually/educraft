@@ -12,11 +12,19 @@ export interface ModelChoice {
 }
 
 /**
- * The teacher's own model for a document type: the first that lists it. A starter is never
- * picked by itself, so nobody gets another programme's rubric without choosing it.
+ * The teacher's own model for a document type: the first that lists it. Two documents together
+ * (`a+b`) fall back to the first own model that lists every part. A starter is never picked by
+ * itself, so nobody gets another programme's rubric without choosing it.
  */
 export function ownModelFor(models: ModelChoice[], documentType: string): ModelChoice | undefined {
-  return models.find((m) => !m.starter && m.documentTypes.includes(documentType));
+  const own = models.filter((m) => !m.starter);
+  const parts = documentType.split("+");
+  return (
+    own.find((m) => m.documentTypes.includes(documentType)) ??
+    (parts.length > 1
+      ? own.find((m) => parts.every((p) => m.documentTypes.includes(p)))
+      : undefined)
+  );
 }
 
 /** The values a model gives the fields that take one; no model empties them. */

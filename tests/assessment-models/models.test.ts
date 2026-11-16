@@ -96,6 +96,18 @@ describe("ownModelFor", () => {
     expect(ownModelFor(models, "essay")?.id).toBe("mine-essay");
     expect(ownModelFor(models, "stageplan")).toBeUndefined();
   });
+
+  it("for two documents together (a+b), falls back to the own model that covers both", () => {
+    const models = [
+      model("start", ["stageverslag", "onderzoeksverslag"], true),
+      model("mine-stage", ["stageverslag"]),
+      model("mine-both", ["stageverslag", "onderzoeksverslag"]),
+    ];
+    expect(ownModelFor(models, "stageverslag+onderzoeksverslag")?.id).toBe("mine-both");
+    const listed = [...models, model("mine-combined", ["stageverslag+onderzoeksverslag"])];
+    expect(ownModelFor(listed, "stageverslag+onderzoeksverslag")?.id).toBe("mine-combined");
+    expect(ownModelFor([models[1]!], "stageverslag+onderzoeksverslag")).toBeUndefined();
+  });
 });
 
 describe("applyAssessmentModel", () => {

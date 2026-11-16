@@ -32,8 +32,7 @@ const build = (lang: "nl" | "en", values: Record<string, unknown> = base) =>
   });
 
 describe("tool: stage-assessment with the feedback line (P38.4)", () => {
-  it("runs on stage-assessment@v4 and keeps @v1 to @v3 registered", () => {
-    expect(tool().stages[0]!.systemPromptId).toBe("stage-assessment@v4");
+  it("keeps @v1 to @v4 registered (the tool runs on a later version, which keeps this)", () => {
     for (const v of ["@v1", "@v2", "@v3", "@v4"])
       expect(PROMPTS[`stage-assessment${v}`]).toBeDefined();
   });

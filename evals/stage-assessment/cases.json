@@ -310,6 +310,52 @@
         "feedbackHistory": "### Drafts, round 1\n- C1: Describe what you did differently over time, not only what you liked about the internship.\n- C2: Give at least two concrete examples from the workplace to support your claims.",
         "document": "INTERNSHIP REPORT\n\nIntroduction\nThis report describes my ten weeks at a small design agency.\n\nReflection\nAt the start I avoided asking questions because I did not want to look inexperienced. Halfway through I noticed this slowed me down, so I began a short daily check-in with my supervisor. I now ask earlier and I finish tasks faster.\n\nEvidence\nFor example, in week six I redesigned the agency's newsletter template after a check-in, and the client approved it in one round.\n\nConclusion\nI learned that asking for help early is part of working professionally."
       }
+    },
+    {
+      "id": "two-reports-together-eqf6",
+      "description": "Instructor grader on an internship report and a research report submitted together (documentType stageverslag+onderzoeksverslag, merged with a heading per file). Checks that verdict, criteria and student feedback are given per report under clearly labelled headings, that evidence from one report is never used for the other (the research report's log analysis must not count for the internship report, and the internship report's switch to Jest must not count for the research report), that SC3 is assessed for each report separately, that a separate 'Algemene feedback (beide verslagen)' covers what applies to both without repeating, and that '## Samenvatting voor OnStage' follows the OnStage layout: under '### Stageverslag' and '### Onderzoeksverslag' each a '#### Algemene feedback' (at most 100 words) and a '#### SC…' remark per criterion that belongs to that report (indication first, at most 80 words), then '### Algemeen (beide verslagen)', all without quotes or locations. Known error: the research report's conclusion ('Pushmeldingen zijn de beste oplossing') is not supported by its own data (no user research, only a comparison of what competitors use).",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO-ICT — stage, jaar 3",
+        "programme": "HBO-ICT",
+        "domain": "ICT",
+        "eqf": 6
+      },
+      "values": {
+        "documentType": "stageverslag+onderzoeksverslag",
+        "track": "Software",
+        "studyYear": "3",
+        "durationWeeks": "20",
+        "submissionNotes": "",
+        "assessmentFramework": "LEERUITKOMST ANALYSEREN (niveau 2), alle drie minimaal Voldoende.\nSC1 Methodisch onderzoek: afgebakende probleemstelling, hoofd- en deelvragen, navolgbare methoden, APA 7. Beoordeeld in het onderzoeksverslag.\nSC2 Onderbouwing van methoden en technieken en bijsturen. Beoordeeld in het stageverslag.\nSC3 Belanghebbenden, omgevingsfactoren en specificaties. Beoordeeld in beide verslagen.",
+        "assessmentScale": "Schaal per criterium: Onvoldoende / Voldoende / Goed. Slaagregel per verslag: één Onvoldoende = dat verslag onvoldoende.",
+        "companyEvaluation": "",
+        "feedbackHistory": "",
+        "document": "=== stageverslag.pdf ===\nSTAGEVERSLAG\n\n1. Organisatie\n[STUDENT] liep stage bij [BEDRIJF] (een middelgroot logistiek softwarebedrijf), in het team dat de planningsapp bouwt.\n\n2. Werkwijze\nWe werken in sprints van twee weken. Ik heb gekozen voor React Native omdat het team daar al ervaring mee heeft. Na sprint 3 ben ik overgestapt van handmatig testen naar Jest, omdat er te veel regressies waren.\n\n3. Belanghebbenden\nIk heb wekelijks overleg met de product owner. Met de chauffeurs, de eindgebruikers, heb ik niet gesproken.\n\n4. Reflectie\nDe planning liep uit door ziekte in het team.\n\n=== onderzoeksverslag.pdf ===\nONDERZOEKSVERSLAG\n\n1. Probleemstelling\nChauffeurs missen wijzigingen in hun rit. Hoofdvraag: hoe kan de app chauffeurs tijdig informeren over ritwijzigingen?\nDeelvragen: (1) welke wijzigingen komen voor? (2) welke meldingsvormen zijn er?\n\n2. Methode\nIk heb de logbestanden van maart geanalyseerd (1.240 wijzigingen) en drie concurrerende apps vergeleken.\n\n3. Resultaten\n62% van de wijzigingen betreft een nieuw tijdslot. Pushmeldingen worden in alle drie de apps gebruikt.\n\n4. Conclusie\nPushmeldingen zijn de beste oplossing.\n\nLiteratuur\nApple (z.d.). Notifications. developer.apple.com"
+      }
+    },
+    {
+      "id": "one-report-of-two-eqf6",
+      "description": "Instructor grader assessing only the research report (documentType onderzoeksverslag) while the input also contains the internship report. Checks that all criteria, feedback and the summary are only about the research report, that nothing from the internship report is used as evidence, that the other report is mentioned once under the caveats, that there is no general feedback for both reports, and that '## Samenvatting voor OnStage' has only '### Onderzoeksverslag', with '#### Algemene feedback' and a '#### SC…' remark per criterion, paste-ready.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO-ICT — stage, jaar 3",
+        "programme": "HBO-ICT",
+        "domain": "ICT",
+        "eqf": 6
+      },
+      "values": {
+        "documentType": "onderzoeksverslag",
+        "track": "Software",
+        "studyYear": "3",
+        "durationWeeks": "20",
+        "submissionNotes": "",
+        "assessmentFramework": "LEERUITKOMST ANALYSEREN (niveau 2), alle drie minimaal Voldoende.\nSC1 Methodisch onderzoek: afgebakende probleemstelling, hoofd- en deelvragen, navolgbare methoden, APA 7. Beoordeeld in het onderzoeksverslag.\nSC2 Onderbouwing van methoden en technieken en bijsturen. Beoordeeld in het stageverslag.\nSC3 Belanghebbenden, omgevingsfactoren en specificaties. Beoordeeld in beide verslagen.",
+        "assessmentScale": "Schaal per criterium: Onvoldoende / Voldoende / Goed. Slaagregel per verslag: één Onvoldoende = dat verslag onvoldoende.",
+        "companyEvaluation": "",
+        "feedbackHistory": "",
+        "document": "=== stageverslag.pdf ===\nSTAGEVERSLAG\n\n1. Organisatie\n[STUDENT] liep stage bij [BEDRIJF] (een middelgroot logistiek softwarebedrijf), in het team dat de planningsapp bouwt.\n\n2. Werkwijze\nWe werken in sprints van twee weken. Ik heb gekozen voor React Native omdat het team daar al ervaring mee heeft. Na sprint 3 ben ik overgestapt van handmatig testen naar Jest, omdat er te veel regressies waren.\n\n3. Belanghebbenden\nIk heb wekelijks overleg met de product owner. Met de chauffeurs, de eindgebruikers, heb ik niet gesproken.\n\n4. Reflectie\nDe planning liep uit door ziekte in het team.\n\n=== onderzoeksverslag.pdf ===\nONDERZOEKSVERSLAG\n\n1. Probleemstelling\nChauffeurs missen wijzigingen in hun rit. Hoofdvraag: hoe kan de app chauffeurs tijdig informeren over ritwijzigingen?\nDeelvragen: (1) welke wijzigingen komen voor? (2) welke meldingsvormen zijn er?\n\n2. Methode\nIk heb de logbestanden van maart geanalyseerd (1.240 wijzigingen) en drie concurrerende apps vergeleken.\n\n3. Resultaten\n62% van de wijzigingen betreft een nieuw tijdslot. Pushmeldingen worden in alle drie de apps gebruikt.\n\n4. Conclusie\nPushmeldingen zijn de beste oplossing.\n\nLiteratuur\nApple (z.d.). Notifications. developer.apple.com"
+      }
     }
   ]
 }

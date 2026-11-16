@@ -31,7 +31,13 @@ export const STARTER_MODELS: StarterModel[] = [
   {
     id: "hbo-i-stage",
     name: { nl: "HBO-i stage (Informatica)", en: "HBO-i internship (Informatica)" },
-    documentTypes: ["stageverslag", "onderzoeksverslag", "stageplan", "portfolio"],
+    documentTypes: [
+      "stageverslag",
+      "onderzoeksverslag",
+      "stageverslag+onderzoeksverslag",
+      "stageplan",
+      "portfolio",
+    ],
     // A Dutch programme's own rubric: the same text in both languages.
     framework: { nl: hboiStage, en: hboiStage },
     scale: { nl: HBOI_SCALE, en: HBOI_SCALE },

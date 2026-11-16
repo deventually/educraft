@@ -15,6 +15,7 @@ import { calendar } from "./calendar";
 import { chat } from "./chat";
 import { confirm } from "./confirm";
 import { connections } from "./connections";
+import { copyBlocks } from "./copyBlocks";
 import { courseCopy } from "./courseCopy";
 import { courseDesign } from "./courseDesign";
 import { courseDocuments } from "./courseDocuments";
@@ -103,6 +104,7 @@ export const nl = {
   chat,
   confirm,
   connections,
+  copyBlocks,
   courseCopy,
   courseDesign,
   courseDocuments,

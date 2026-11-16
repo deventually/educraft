@@ -122,7 +122,7 @@ export type TrackKind = (typeof TRACK_KINDS)[number];
 
 /** The `documentType` values of *Studentwerk beoordelen* that belong to each kind. */
 const KIND_DOCUMENTS: Record<TrackKind, readonly string[]> = {
-  internship: ["stageplan", "stageverslag", "portfolio"],
+  internship: ["stageplan", "stageverslag", "stageverslag+onderzoeksverslag", "portfolio"],
   thesis: ["afstudeerscriptie", "onderzoeksverslag"],
 };
 
