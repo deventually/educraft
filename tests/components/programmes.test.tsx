@@ -147,6 +147,8 @@ describe("Programme list (/programmes)", () => {
     });
     expect(screen.getByRole("link", { name: "HBO-ICT" })).toBeVisible();
     expect(screen.queryByRole("region", { name: /zonder/i })).toBeNull();
+    // A programme without a team says so, instead of an empty "team".
+    expect(screen.getByText("hbo · nog geen team · 0 cursussen")).toBeVisible();
   });
 });
 

@@ -135,6 +135,7 @@ export const programmes = {
   sharesWith:
     "Your course is shared with your team in this programme. That way the colleagues of {team} see it in the programme.",
   summary: "{kind} · team {team} · {courses} courses",
+  summaryNoTeam: "{kind} · no team yet · {courses} courses",
   tabCourses: "Courses",
   tabDetails: "Details",
   tabLines: "Learning lines",

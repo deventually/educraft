@@ -67,7 +67,7 @@ function Rows({ rows }: { rows: Row[] }) {
               {programme.name}
             </Link>
             <p className="text-sm text-slate-600">
-              {fmt(p.summary, {
+              {fmt(programme.teamName ? p.summary : p.summaryNoTeam, {
                 kind: programme.kind,
                 team: programme.teamName,
                 courses: programme.courses,
