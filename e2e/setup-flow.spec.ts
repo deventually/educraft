@@ -48,6 +48,9 @@ test("an admin sets up a faculty, a programme in it and a team, and links them",
   await expect(programmes.getByRole("link", { name: programme })).toBeVisible();
 
   await page.goto(programmeUrl);
+  // Plan step 4: the faculty on top, and the teams under the Gegevens tab.
+  await expect(page.getByText(new RegExp(faculty))).toBeVisible();
+  await page.getByRole("tab", { name: "Gegevens" }).click();
   const teams = page.getByRole("region", { name: "Teams" });
   await expect(teams.getByText(team)).toBeVisible();
   await teams.getByRole("button", { name: `Weghalen: ${team}` }).click();
@@ -55,4 +58,12 @@ test("an admin sets up a faculty, a programme in it and a team, and links them",
   await expect(confirm.getByText(/Het team blijft bestaan/)).toBeVisible();
   await confirm.getByRole("button", { name: "Annuleren" }).click();
   await expect(teams.getByRole("button", { name: `Weghalen: ${team}` })).toBeFocused();
+});
+
+test("Leerlijnen opens from the Onderwijs menu", async ({ page }) => {
+  await page.goto("/start");
+  await page.getByRole("button", { name: "Onderwijs" }).click();
+  await page.getByRole("link", { name: /Leerlijnen/ }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Leerlijnen" })).toBeVisible();
+  await expectNoAxeViolations(page);
 });

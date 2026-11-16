@@ -13,7 +13,7 @@ export function Breadcrumb({ label, items }: { label: string; items: Crumb[] }) 
     <nav aria-label={label}>
       <ol className="flex flex-wrap items-center gap-1 text-sm text-slate-600">
         {items.map((item, i) => (
-          <li key={`${i}-${item.label}`} className="flex min-w-0 items-center gap-1">
+          <li key={item.to ?? `here-${item.label}`} className="flex min-w-0 items-center gap-1">
             {i > 0 && <ChevronRight className="size-4 shrink-0 text-slate-400" aria-hidden />}
             {item.to ? (
               <Link

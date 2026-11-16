@@ -32,8 +32,10 @@ export const menu: Messages["menu"] = {
   education: {
     courses: "Your courses and your team's",
     label: "Education",
+    learningLines: "Learning lines",
+    learningLinesDescription: "Series of courses across the years",
     programmes: "Programmes",
-    programmesDescription: "Per programme its courses and learning lines",
+    programmesDescription: "Per faculty, with courses, learning lines and teams",
   },
   tools: {
     all: "All tools",

@@ -66,3 +66,30 @@ describe("help on the lead's team page", () => {
     expect(teams("en")).toContain("**Add programme**");
   });
 });
+
+describe("help on finding programmes and learning lines (plan step 4)", () => {
+  it("names the tabs, the faculty grouping, the minor and the Leerlijnen overview", () => {
+    const nl = topic("nl");
+    const en = topic("en");
+    for (const word of [
+      "**Cursussen**",
+      "**Leerlijnen**",
+      "**Gegevens**",
+      "per faculteit",
+      "**minor**",
+    ])
+      expect(nl).toContain(word);
+    for (const word of [
+      "**Courses**",
+      "**Learning lines**",
+      "**Details**",
+      "per faculty",
+      "**minor**",
+    ])
+      expect(en).toContain(word);
+    expect(nl).toContain("**Onderwijs → Leerlijnen**");
+    expect(en).toContain("**Education → Learning lines**");
+    expect(nl).not.toContain("Een **minor** zet je bij de opleiding die hem aanbiedt");
+    expect(en).not.toContain("A **minor** goes in the programme that offers it");
+  });
+});

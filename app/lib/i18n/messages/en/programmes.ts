@@ -11,7 +11,6 @@ export const programmes = {
   addTeamNone: "There is no team left to add. You create a new team under Admin → Teams.",
   addTeamTitle: "Add teams to {programme}",
   addTitle: "Add a course",
-  back: "All programmes",
   course: "Course",
   courseAdded: "The course has been added.",
   courses: {
@@ -49,8 +48,15 @@ export const programmes = {
     add: "Add",
     addCourse: "Add a course to the learning line",
     addNone: "All of the programme's courses are in this learning line.",
+    allCourseOne: "1 course · {programmes}",
+    allCourses: "{courses} courses · {programmes}",
+    allEmptyBody:
+      "The admin makes a learning line in a programme, on the Learning lines tab. Then you see all learning lines of your programmes here.",
+    allEmptyTitle: "No learning lines yet",
+    allIntro:
+      "All learning lines of your programmes. A learning line is a series of courses in order, such as Programming or Research.",
+    allTitle: "Learning lines",
     alsoFor: "Also holds for: {programmes}",
-    back: "Back to {programme}",
     bloomDrops: "The Bloom level drops",
     coursesHint: "The order starts as year and period. You change it on the learning line's page.",
     coursesLegend: "Which courses belong to the learning line?",

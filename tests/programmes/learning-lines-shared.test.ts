@@ -126,6 +126,35 @@ describe("a learning line across programmes", () => {
   });
 });
 
+describe("every learning line I read (the Leerlijnen overview, plan step 4)", () => {
+  it("lists each line once, with the programmes it holds for that the reader reads", async () => {
+    const { admin, memberA, memberB, a, b, cA } = await world();
+    const line = (await lines.createLine(admin, a.id, "Onderzoek", [cA.id]))!;
+    await lines.setLineProgrammes(admin, line.id, [b.id]);
+
+    const forA = await lines.listAllLines(memberA);
+    expect(forA).toEqual([
+      {
+        id: line.id,
+        name: "Onderzoek",
+        programmeId: a.id,
+        courses: 1,
+        programmes: [{ id: a.id, name: a.name }],
+      },
+    ]);
+    // B's member reads only B, so the line shows under B alone.
+    expect((await lines.listAllLines(memberB)).map((l) => l.programmes)).toEqual([
+      [{ id: b.id, name: b.name }],
+    ]);
+    expect((await lines.listAllLines(admin)).filter((l) => l.id === line.id)).toHaveLength(1);
+  });
+
+  it("shows nothing to someone outside every team", async () => {
+    await world();
+    expect(await lines.listAllLines({ id: "nobody", role: "teacher" })).toEqual([]);
+  });
+});
+
 describe("where a course sits in its learning lines (the course page)", () => {
   it("gives the place, the total and the courses before and after", async () => {
     const { admin, memberA, a, cA } = await world();

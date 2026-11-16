@@ -31,8 +31,10 @@ export const menu = {
   education: {
     courses: "Jouw cursussen en die van je team",
     label: "Onderwijs",
+    learningLines: "Leerlijnen",
+    learningLinesDescription: "Reeksen cursussen over de jaren heen",
     programmes: "Opleidingen",
-    programmesDescription: "Per opleiding de cursussen en leerlijnen",
+    programmesDescription: "Per faculteit, met cursussen, leerlijnen en teams",
   },
   tools: {
     all: "Alle tools",

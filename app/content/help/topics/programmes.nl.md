@@ -6,6 +6,10 @@ Een **opleiding** is een bundel cursussen van een of meer teams. Per cursus staa
 
 Een opleiding hoort bij een of meer **teams**, bijvoorbeeld het opleidingsteam en de moduleteams die de cursussen maken. Je kunt in meer teams zitten; je ziet dan de opleidingen van al je teams. Bij elke opleiding staan haar teams erbij.
 
+## Waar vind je ze?
+
+Klik in het menu **Onderwijs** op **Opleidingen**. De lijst staat per faculteit, met de opleidingen zonder faculteit onderaan. Een opleiding heeft drie tabbladen: **Cursussen**, **Leerlijnen** en **Gegevens** (naam, niveau, vorm, faculteit en teams). Bovenaan staat de weg terug, zoals *Opleidingen › HBO-ICT voltijd*.
+
 - Alleen een **beheerder** maakt een opleiding aan en beheert haar: naam, niveau, vorm, leerlijnen en verwijderen.
 - **Elk lid** van een van die teams kan zijn eigen cursussen erin zetten, en ook cursussen waarvan hij mede-eigenaar is, en ziet de cursussen van collega's in de opleiding.
 - Een **beheerder** koppelt elk team aan een of meer opleidingen, een **teamleider** alleen zijn eigen team. Op de pagina van de opleiding klik je op **Team toevoegen** bij **Teams**; op de pagina van een team klik je op **Opleiding toevoegen**. In het venster zoek je en vink je er een of meer aan. **Weghalen** vraagt altijd eerst of je het zeker weet; het team en de opleiding blijven allebei bestaan. Een opleiding zonder team ziet alleen de beheerder.
@@ -17,7 +21,7 @@ Dat doet de beheerder. Ga naar **Beheer → Faculteiten en opleidingen** en klik
 - **Team**: het eerste team, of **Nog geen team**; de teams koppel je later.
 - **Naam**, bijvoorbeeld *HBO-ICT voltijd* of *Master Informatica*.
 - **Onderwijstype en niveau**, bijvoorbeeld hbo-bachelor, associate degree (Ad), hbo-master of wo-master. Je kiest uit de onderwijstypen die je beheerder heeft aangezet.
-- **Vorm**: voltijd, deeltijd of duaal. Dit mag leeg blijven.
+- **Vorm**: voltijd, deeltijd, duaal of **minor**. Dit mag leeg blijven.
 
 ## Cursussen toevoegen
 
@@ -31,7 +35,7 @@ Een cursus kan bij **meer opleidingen** horen, met in elke opleiding een eigen j
 
 ## Leerlijnen
 
-Een **leerlijn** is een reeks cursussen binnen een opleiding, op volgorde, bijvoorbeeld *Programmeren* of *Onderzoeken*. De beheerder maakt hem aan op de pagina van de opleiding: geef een naam en vink de cursussen aan. Op de pagina van de leerlijn zet je de cursussen op volgorde met **Omhoog** en **Omlaag**, en voeg je er een toe of haal je er een uit. Elk teamlid kan de leerlijn bekijken.
+Een **leerlijn** is een reeks cursussen binnen een opleiding, op volgorde, bijvoorbeeld *Programmeren* of *Onderzoeken*. De beheerder maakt hem aan op de pagina van de opleiding: geef een naam en vink de cursussen aan. Op de pagina van de leerlijn zet je de cursussen op volgorde met **Omhoog** en **Omlaag**, en voeg je er een toe of haal je er een uit. Elk teamlid kan de leerlijn bekijken. Alle leerlijnen van je opleidingen vind je bij **Onderwijs → Leerlijnen**.
 
 De leerlijn laat zien **wat terugkomt**: een leeruitkomst die in meer cursussen voorkomt, met per cursus het hoogste Bloom-niveau. Een leeruitkomst komt terug als hij in een latere cursus dezelfde tekst heeft (hoofdletters, spaties en een punt aan het eind tellen niet mee), of dezelfde **vakgebiedtag**, zoals dezelfde beroepstaak uit je onderwijscontext. Daalt het Bloom-niveau in een latere cursus, dan staat erbij: *Het Bloom-niveau daalt*. Daaronder staan de leeruitkomsten per cursus.
 
@@ -40,7 +44,7 @@ Net als de dekkingsmatrix is dit een **advies**. Er verandert niets aan de cursu
 ## Wat hoort waar?
 
 - Een **master** is een eigen opleiding.
-- Een **minor** zet je bij de opleiding die hem aanbiedt.
+- Een **minor** is een eigen opleiding met de vorm *minor*.
 - Een **deeltijd**- of **duale** variant maak je als eigen opleiding, met dezelfde cursussen erin.
 
 ## Goed om te weten

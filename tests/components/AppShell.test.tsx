@@ -231,7 +231,7 @@ describe("AppShell main menu (plan eenvoudiger beheer en navigatie)", () => {
     expect(topItems(primary)).toEqual(["Start", "Onderwijs", "Tools"]);
   });
 
-  it("opens Onderwijs on a click, with courses and programmes", async () => {
+  it("opens Onderwijs on a click, with courses, programmes and learning lines", async () => {
     const user = userEvent.setup();
     renderShellWithUser({ name: "Teacher T", role: "teacher", portfolio: true });
     await screen.findByText("Tools home");
@@ -243,10 +243,14 @@ describe("AppShell main menu (plan eenvoudiger beheer en navigatie)", () => {
     const panel = document.getElementById(button.getAttribute("aria-controls") ?? "");
     expect(panel).not.toBeNull();
     const links = within(panel!).getAllByRole("link");
-    expect(links.map((l) => l.getAttribute("href"))).toEqual(["/courses", "/programmes"]);
+    expect(links.map((l) => l.getAttribute("href"))).toEqual([
+      "/courses",
+      "/programmes",
+      "/learning-lines",
+    ]);
     // The line under a link describes it; the link's name stays short.
     expect(within(panel!).getByRole("link", { name: "Opleidingen" })).toHaveAccessibleDescription(
-      "Per opleiding de cursussen en leerlijnen",
+      "Per faculteit, met cursussen, leerlijnen en teams",
     );
   });
 
@@ -304,6 +308,7 @@ describe("AppShell main menu (plan eenvoudiger beheer en navigatie)", () => {
       "/start",
       "/courses",
       "/programmes",
+      "/learning-lines",
       "/portfolio",
       "/tools",
       "/utilities",

@@ -11,7 +11,6 @@ export const programmes = {
   addTeamNone: "Er is geen team meer om toe te voegen. Een nieuw team maak je bij Beheer → Teams.",
   addTeamTitle: "Teams toevoegen aan {programme}",
   addTitle: "Cursus toevoegen",
-  back: "Alle opleidingen",
   course: "Cursus",
   courseAdded: "De cursus is toegevoegd.",
   courses: {
@@ -51,8 +50,15 @@ export const programmes = {
     add: "Toevoegen",
     addCourse: "Cursus toevoegen aan de leerlijn",
     addNone: "Alle cursussen van de opleiding zitten in deze leerlijn.",
+    allCourseOne: "1 cursus · {programmes}",
+    allCourses: "{courses} cursussen · {programmes}",
+    allEmptyBody:
+      "Een leerlijn maakt de beheerder bij een opleiding, op het tabblad Leerlijnen. Hier zie je daarna alle leerlijnen van je opleidingen.",
+    allEmptyTitle: "Nog geen leerlijnen",
+    allIntro:
+      "Alle leerlijnen van je opleidingen. Een leerlijn is een reeks cursussen op volgorde, zoals Programmeren of Onderzoeken.",
+    allTitle: "Leerlijnen",
     alsoFor: "Geldt ook voor: {programmes}",
-    back: "Terug naar {programme}",
     bloomDrops: "Het Bloom-niveau daalt",
     coursesHint:
       "De volgorde is eerst die van jaar en periode. Op de pagina van de leerlijn pas je hem aan.",
