@@ -7,6 +7,7 @@ import { Button, Label, Textarea } from "~/components/ui";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { AiCallField } from "~/components/AiLeaveGuard";
+import { AiPatternCheck } from "./AiPatternCheck";
 
 /**
  * The chapter for one outcome, with a live word count. `children` sit in the
@@ -57,6 +58,7 @@ export function ChapterEditor({
           {open === 1 ? t.outcome.openSpotsOne : fmt(t.outcome.openSpots, { n: open })}
         </p>
       )}
+      <AiPatternCheck text={text} />
       <div>
         <Button type="submit" name="intent" value="writeChapter">
           {t.outcome.saveChapter}
