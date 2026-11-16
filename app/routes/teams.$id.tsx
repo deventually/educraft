@@ -3,7 +3,8 @@ import type { Route } from "./+types/teams.$id";
 import { requireUser } from "~/server/auth.server";
 import {
   getTeamForLead,
-  leadAddMember,
+  leadAddMembers,
+  leadCandidates,
   leadCreateInvite,
   leadMakeLead,
   leadRemoveMember,
@@ -36,8 +37,9 @@ import { getTeamTemplate } from "~/server/repositories/slideTemplates.server";
 const INVITE_DAYS = 14;
 
 /**
- * The team lead's page (P28.2, teacher side): the members (name, e-mail), add a colleague
- * by exact e-mail (in the Lid toevoegen dialog), remove a plain member after a confirm, make a member lead, step down, the team's
+ * The team lead's page (P28.2, teacher side): the members (name, e-mail), choose colleagues
+ * to add (Leden toevoegen, BESLUIT-2026-11-16-6), remove a plain member after a confirm,
+ * make a member lead, step down, the team's
  * choices for parts, tools and models within the instance (P28.3), and an invite link
  * that makes a new teacher a member. Anyone who is not lead of this team, an admin
  * included, gets a 404: the admin works on /admin/teams.
@@ -49,6 +51,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   return {
     selfId: user.id,
     team,
+    // Active colleagues not yet in the team, to tick in Leden toevoegen.
+    candidates: (await leadCandidates(user.id, team.id)) ?? [],
     offer: await getTeamSettingsOffer(),
     // The programmes the team works on, and the ones the lead can put it in
     // (BESLUIT-2026-11-16-4: a lead only their own team, in any programme).
@@ -72,8 +76,11 @@ export async function action({ request, params }: Route.ActionArgs) {
   const done = (r: { ok: true } | { error: string }) =>
     "ok" in r ? { saved: true as const } : { error: r.error };
 
-  if (intent === "addMember") {
-    return done(await leadAddMember(user.id, params.id, String(fd.get("email") ?? "")));
+  if (intent === "addMembers") {
+    const ids = fd.getAll("userIds").map(String);
+    if (ids.length === 0) return { error: "noneSelected" as const };
+    const res = await leadAddMembers(user.id, params.id, ids);
+    return "ok" in res ? { saved: true as const } : { error: res.error };
   }
   if (intent === "removeMember") return done(await leadRemoveMember(user.id, params.id, userId));
   const programmeId = String(fd.get("programmeId") ?? "");
@@ -119,7 +126,7 @@ const th = "px-4 py-2.5 font-semibold";
 export default function LeadTeam({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const tt = t.teams;
-  const { team, selfId, offer, slideTemplate } = loaderData;
+  const { team, selfId, offer, slideTemplate, candidates } = loaderData;
   const programmes = "programmes" in loaderData ? loaderData.programmes : [];
   const choices = "programmeChoices" in loaderData ? loaderData.programmeChoices : [];
   const actionData = useActionData<typeof action>();
@@ -147,24 +154,20 @@ export default function LeadTeam({ loaderData }: Route.ComponentProps) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className={h2}>{tt.members}</h2>
           <AddDialog
-            triggerLabel={tt.addMember}
-            title={fmt(tt.addMemberTitle, { team: team.name })}
-            description={tt.addHint}
-            intent="addMember"
-          >
-            <div>
-              <Label htmlFor="team-add-email">{tt.addEmailLabel}</Label>
-              <Input
-                id="team-add-email"
-                name="email"
-                type="email"
-                required
-                autoComplete="off"
-                className="mt-1"
-                data-autofocus
-              />
-            </div>
-          </AddDialog>
+            triggerLabel={tt.addMembersHeading}
+            title={fmt(tt.addMembersTitle, { team: team.name })}
+            description={tt.addMembersHint}
+            intent="addMembers"
+            pick={{
+              name: "userIds",
+              options: candidates.map((c) => ({
+                id: c.id,
+                label: c.name,
+                hint: c.email ?? undefined,
+              })),
+              empty: tt.noCandidates,
+            }}
+          />
         </div>
         <div className="relative mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
           <table className="w-full text-left text-sm">

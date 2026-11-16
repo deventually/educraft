@@ -1,14 +1,9 @@
 import type { Messages } from "../nl";
 
 export const teams: Messages["teams"] = {
-  addEmailLabel: "Your colleague's email address",
-  addHint:
-    "Type exactly the email address your colleague signs in with. You cannot browse all accounts.",
-  addMember: "Add member",
   addMembersHeading: "Add members",
   addMembersHint: "Tick colleagues and add them in one go.",
   addMembersTitle: "Add members to {team}",
-  addMemberTitle: "Add a member to {team}",
   addTeam: "In team",
   adminIntro:
     "Make teams of colleagues and appoint team leads. A team lead adds colleagues themselves. Being a member shares nothing: everything stays private until someone shares it.",
@@ -57,7 +52,8 @@ export const teams: Messages["teams"] = {
   noMatch: "No teams found.",
   noMembers: "No members yet.",
   noneSelected: "Tick someone first.",
-  noSuchUser: "There is no account with this email address.",
+  noSuchUser:
+    "That colleague can't be added: the account no longer exists or is already in the team.",
   noTeam: "No team",
   noTeams: "No teams yet.",
   notMember: "This person is not in the team.",

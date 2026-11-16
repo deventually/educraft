@@ -12,7 +12,7 @@
  * A lead never demotes or removes another lead; an admin does (`setLead`, `removeMember`).
  */
 import { randomUUID } from "node:crypto";
-import { and, asc, eq, inArray, notInArray, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, notInArray, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
   announcementDismissals,
@@ -28,7 +28,7 @@ import {
   users,
   type TeamRow,
 } from "../schema.server";
-import { createInvite, getUserByEmail } from "./users.server";
+import { createInvite } from "./users.server";
 import {
   type TeamSettings,
   TeamSettingsSchema,
@@ -296,17 +296,41 @@ export async function getTeamForLead(
   return getTeamWithMembers(teamId);
 }
 
-/** Add a colleague by their exact e-mail address (no browsing through accounts). */
-export async function leadAddMember(
+/** Active accounts not yet in the team: the lead's picker (BESLUIT-2026-11-16-6). */
+async function activeOutsiders(teamId: string, ids?: string[]) {
+  const inTeam = getDb()
+    .select({ userId: teamMembers.userId })
+    .from(teamMembers)
+    .where(eq(teamMembers.teamId, teamId));
+  return getDb()
+    .select({ id: users.id, name: users.name, email: users.email })
+    .from(users)
+    .where(
+      and(isNull(users.disabledAt), notInArray(users.id, inTeam), ids && inArray(users.id, ids)),
+    )
+    .orderBy(asc(users.name), asc(users.email))
+    .limit(500)
+    .all();
+}
+
+/** Colleagues the lead may add: everyone active and not yet in the team; `null` for a non-lead. */
+export async function leadCandidates(callerId: string, teamId: string) {
+  if (!(await getTeamForLead(callerId, teamId))) return null;
+  return activeOutsiders(teamId);
+}
+
+/** Add the chosen colleagues; unknown, disabled or present accounts are skipped. */
+export async function leadAddMembers(
   callerId: string,
   teamId: string,
-  email: string,
-): Promise<LeadResult> {
+  userIds: string[],
+): Promise<{ ok: true; added: number } | { error: "notLead" | "noSuchUser" }> {
   if (!(await getTeamForLead(callerId, teamId))) return { error: "notLead" };
-  const user = email.trim() ? await getUserByEmail(email.trim()) : null;
-  if (!user) return { error: "noSuchUser" };
-  await addMember(teamId, user.id);
-  return { ok: true };
+  const wanted = [...new Set(userIds)].slice(0, 500);
+  const found = wanted.length ? await activeOutsiders(teamId, wanted) : [];
+  if (!found.length) return { error: "noSuchUser" };
+  for (const u of found) await addMember(teamId, u.id);
+  return { ok: true, added: found.length };
 }
 
 /** Remove a plain member; another lead is the admin's to remove. */
