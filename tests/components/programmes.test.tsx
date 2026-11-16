@@ -31,39 +31,49 @@ const kinds = [
 describe("Programme list (/programmes)", () => {
   const teams = [{ id: "t1", name: "Informatica" }];
 
-  it("offers a team lead a create form with team, level and mode, and a guided empty state", async () => {
+  it("offers a team lead Nieuwe opleiding, with team, level and mode, and a guided empty state", async () => {
+    const user = userEvent.setup();
     const { container } = renderRoute(ProgrammeList, { programmes: [], kinds, teams });
-    expect(screen.getByLabelText("Team")).toHaveDisplayValue("Informatica");
     expect(screen.getByRole("heading", { level: 1, name: "Opleidingen" })).toBeVisible();
-    expect(screen.getByLabelText("Naam")).toBeRequired();
-    expect(screen.getByLabelText("Onderwijstype en niveau")).toHaveDisplayValue("hbo-bachelor");
-    expect(screen.getByLabelText("Vorm")).toHaveDisplayValue("Niet ingevuld");
     expect(screen.getByRole("heading", { level: 2, name: "Nog geen opleidingen" })).toBeVisible();
     expect(screen.getByRole("link", { name: "Hoe werken opleidingen?" })).toHaveAttribute(
       "href",
       "/help/programmes",
     );
     expect((await axe(container, axeOpts)).violations).toEqual([]);
+    await user.click(screen.getAllByRole("button", { name: "Nieuwe opleiding" })[0]!);
+    const dialog = screen.getByRole("dialog", { name: "Nieuwe opleiding" });
+    expect(within(dialog).getByLabelText("Team")).toHaveDisplayValue("Informatica");
+    expect(within(dialog).getByLabelText("Naam")).toBeRequired();
+    expect(within(dialog).getByLabelText("Onderwijstype en niveau")).toHaveDisplayValue(
+      "hbo-bachelor",
+    );
+    expect(within(dialog).getByLabelText("Vorm")).toHaveDisplayValue("Niet ingevuld");
+    // A lead does not choose the faculty: that is the admin's.
+    expect(within(dialog).queryByLabelText("Faculteit")).toBeNull();
+    expect(within(dialog).getByRole("button", { name: "Opleiding aanmaken" })).toBeVisible();
   });
 
-  it("preselects the team named in the link (from an admin's team page)", () => {
-    const loaderData = {
+  it("lets an admin start one without a team, under a faculty", async () => {
+    const user = userEvent.setup();
+    renderRoute(ProgrammeList, {
       programmes: [],
       kinds,
-      teams: [...teams, { id: "t2", name: "Pabo" }],
-    };
-    // biome-ignore lint/suspicious/noExplicitAny: route components take framework-typed props
-    const List = ProgrammeList as ComponentType<any>;
-    const Stub = createRoutesStub([
-      { path: "/programmes", Component: () => <List loaderData={loaderData} /> },
-    ]);
-    render(<Stub initialEntries={["/programmes?team=t2"]} />);
-    expect(screen.getByLabelText("Team")).toHaveDisplayValue("Pabo");
+      teams,
+      isAdmin: true,
+      divisionWord: "Faculteit",
+      divisions: [{ id: "d1", name: "Faculteit Techniek" }],
+    });
+    await user.click(screen.getAllByRole("button", { name: "Nieuwe opleiding" })[0]!);
+    const dialog = screen.getByRole("dialog", { name: "Nieuwe opleiding" });
+    expect(within(dialog).getByLabelText("Team")).toHaveDisplayValue("Nog geen team");
+    expect(within(dialog).getByLabelText("Faculteit")).toHaveDisplayValue("Geen");
+    await user.selectOptions(within(dialog).getByLabelText("Faculteit"), "d1");
   });
 
   it("tells a teacher who leads no team who creates a programme", () => {
     renderRoute(ProgrammeList, { programmes: [], kinds, teams: [] });
-    expect(screen.queryByRole("button", { name: "Opleiding aanmaken" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Nieuwe opleiding" })).toBeNull();
     expect(
       screen.getByText(/Alleen een teamleider of een beheerder maakt er een aan/),
     ).toBeVisible();
@@ -136,6 +146,7 @@ describe("Programme page (/programmes/:id)", () => {
     kinds,
     available: [{ id: "c3", name: "Databases" }],
     teamOptions: [] as { id: string; label: string; hint?: string }[],
+    myTeamIds: [] as string[],
     canPlace: true,
   };
 
@@ -186,7 +197,7 @@ describe("Programme page (/programmes/:id)", () => {
     expect(screen.getByRole("button", { name: "Weghalen: Afstuderen" })).toBeVisible();
   });
 
-  it("shows its teams; the lead adds teams and takes one off, never the last", async () => {
+  it("shows its teams; Weghalen on the teams you speak for, Team toevoegen with what you may add", async () => {
     const user = userEvent.setup();
     const lead = {
       ...data,
@@ -199,10 +210,12 @@ describe("Programme page (/programmes/:id)", () => {
         ],
       },
       teamOptions: [{ id: "t3", label: "Moduleteam Data", hint: "4 leden" }],
+      myTeamIds: ["t2"],
     };
-    const { container, unmount } = renderRoute(ProgrammePage, lead);
+    const { container } = renderRoute(ProgrammePage, lead);
     const teams = screen.getByRole("region", { name: "Teams" });
     expect(within(teams).getAllByRole("listitem")).toHaveLength(2);
+    expect(within(teams).queryByRole("button", { name: "Weghalen: Informatica" })).toBeNull();
     await user.click(within(teams).getByRole("button", { name: "Weghalen: Moduleteam Web" }));
     expect(
       screen.getByRole("dialog", { name: "Moduleteam Web weghalen uit HBO-ICT?" }),
@@ -212,14 +225,17 @@ describe("Programme page (/programmes/:id)", () => {
     const dialog = screen.getByRole("dialog", { name: "Teams toevoegen aan HBO-ICT" });
     expect(within(dialog).getByRole("checkbox", { name: /Moduleteam Data/ })).toBeVisible();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
-    unmount();
+  });
 
+  it("says so when the programme has no team yet", () => {
     renderRoute(ProgrammePage, {
-      ...lead,
-      programme: { ...lead.programme, teams: [{ id: "t1", name: "Informatica" }] },
+      ...data,
+      programme: { ...data.programme, teams: [], teamCount: 0, teamName: "" },
     });
-    const one = screen.getByRole("region", { name: "Teams" });
-    expect(within(one).queryByRole("button", { name: /Weghalen/ })).toBeNull();
+    expect(screen.getByText("hbo-bachelor · voltijd · nog geen team")).toBeVisible();
+    expect(
+      screen.getByText(/Nog geen team. Alleen een beheerder ziet deze opleiding/),
+    ).toBeVisible();
   });
 
   it("shows a member the teams, without buttons", () => {

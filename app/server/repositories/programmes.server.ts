@@ -23,6 +23,7 @@ import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
 import { getDb } from "../db.server";
 import {
   courses,
+  divisions,
   learningLineProgrammes,
   learningLines,
   programmeCourses,
@@ -210,25 +211,36 @@ export async function getProgramme(
 /** Null when the actor may not manage the team; throws on invalid input (nothing written). */
 export async function createProgramme(
   a: Actor,
-  teamId: string,
+  teamId: string | null,
   input: unknown,
+  divisionId: string | null = null,
 ): Promise<Programme | null> {
   const values = parseInput(input);
-  if (!(await manageableTeams(a)).some((t) => t.id === teamId)) return null;
+  // An admin may start one without a team, under a faculty (BESLUIT-2026-11-16-4); a lead
+  // makes one for a team they lead, and leaves the faculty to the admin.
+  if (teamId === null ? !isAdmin(a) : !(await manageableTeams(a)).some((t) => t.id === teamId))
+    return null;
+  const division = isAdmin(a) ? divisionId : null;
+  if (
+    division &&
+    !getDb().select({ id: divisions.id }).from(divisions).where(eq(divisions.id, division)).get()
+  )
+    return null;
   const now = new Date();
   const row: Row = {
     id: randomUUID(),
     createdBy: a.id,
     ...values,
-    divisionId: null,
+    divisionId: division,
     createdAt: now,
     updatedAt: now,
   };
   getDb().transaction((tx) => {
     tx.insert(programmes).values(row).run();
-    tx.insert(programmeTeams).values({ programmeId: row.id, teamId, createdAt: now }).run();
+    if (teamId)
+      tx.insert(programmeTeams).values({ programmeId: row.id, teamId, createdAt: now }).run();
   });
-  return rowToProgramme(row, [teamId]);
+  return rowToProgramme(row, teamId ? [teamId] : []);
 }
 
 function managedRow(a: Actor, id: string): Row | undefined {

@@ -141,7 +141,7 @@ describe("learning lines: the courses in order", () => {
     expect((await lines.getLine(lead, line!.id))?.courses.map((c) => c.id)).toEqual([p1.id]);
   });
 
-  it("goes with its programme and its team", async () => {
+  it("goes with its programme, and stays when its programme loses its team", async () => {
     const a = await world();
     const l1 = await lines.createLine(a.lead, a.programme.id, "Lijn", [a.p1.id]);
     await programmes.deleteProgramme({ id: "admin", role: "admin" }, a.programme.id);
@@ -150,6 +150,6 @@ describe("learning lines: the courses in order", () => {
     const b = await world();
     const l2 = await lines.createLine(b.lead, b.programme.id, "Lijn", [b.p1.id]);
     await teams.deleteTeam(b.team.id);
-    expect(await lines.getLine({ id: "x", role: "admin" }, l2!.id)).toBeNull();
+    expect(await lines.getLine({ id: "x", role: "admin" }, l2!.id)).not.toBeNull();
   });
 });

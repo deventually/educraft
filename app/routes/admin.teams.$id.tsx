@@ -18,9 +18,10 @@ import {
   setTeamDivision,
   teamDivisionId,
 } from "~/server/repositories/organisation.server";
-import { deleteProgramme, listProgrammes } from "~/server/repositories/programmes.server";
+import { listProgrammes } from "~/server/repositories/programmes.server";
 import {
   linkProgrammeTeam,
+  programmeChoices,
   unlinkProgrammeTeam,
 } from "~/server/repositories/programmeTeams.server";
 import { divisionWord } from "~/lib/organisation/kinds";
@@ -75,10 +76,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     // The team's programmes, and the others an admin may link it to (BESLUIT-2026-11-16-1).
     programmes: programmes
       .filter((p) => p.teamIds.includes(team.id))
-      .map(({ id, name, teamIds }) => ({ id, name, onlyTeam: teamIds.length === 1 })),
-    otherProgrammes: programmes
-      .filter((p) => !p.teamIds.includes(team.id))
-      .map(({ id, name, teamName }) => ({ id, name, teamName })),
+      .map(({ id, name }) => ({ id, name })),
+    otherProgrammes: await programmeChoices(admin, team.id),
   };
 }
 
@@ -127,16 +126,10 @@ export async function action({ request, params }: Route.ActionArgs) {
     for (const id of ids) if (await linkProgrammeTeam(admin, id, team.id)) linked++;
     return linked ? { saved: true as const } : { error: "unknown" as const };
   }
-  if (intent === "deleteProgramme") {
-    // Only where this is the programme's only team; elsewhere the team is taken off instead.
-    return (await deleteProgramme(admin, programmeId))
+  if (intent === "unlinkProgramme") {
+    return (await unlinkProgrammeTeam(admin, programmeId, team.id)) === "unlinked"
       ? { saved: true as const }
       : { error: "unknown" as const };
-  }
-  if (intent === "unlinkProgramme") {
-    const result = await unlinkProgrammeTeam(admin, programmeId, team.id);
-    if (result === "unlinked") return { saved: true as const };
-    return { error: result === "lastTeam" ? ("lastTeam" as const) : ("unknown" as const) };
   }
   if (intent === "settings") {
     const next = applyTeamSettingsForm(team.settings, fd, await getTeamSettingsOffer());
@@ -219,7 +212,9 @@ export default function AdminTeam({ loaderData }: Route.ComponentProps) {
         </div>
       </section>
 
-      <TeamProgrammes team={team} programmes={programmes} others={otherProgrammes} />
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <TeamProgrammes team={team} programmes={programmes} choices={otherProgrammes} />
+      </section>
 
       <section className={`${card} space-y-5`} aria-labelledby="team-members">
         <div className="flex flex-wrap items-center justify-between gap-3">

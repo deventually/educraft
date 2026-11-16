@@ -23,6 +23,7 @@ export function DivisionSection({
   heading,
   programmes,
   options,
+  newProgramme,
 }: {
   division?: {
     id: string;
@@ -33,6 +34,8 @@ export function DivisionSection({
   heading?: string;
   programmes: ProgrammeRow[];
   options: { id: string; name: string }[];
+  /** "Nieuwe opleiding" in this division, next to its heading. */
+  newProgramme?: React.ReactNode;
 }) {
   const t = useT();
   const o = t.organisation;
@@ -43,9 +46,12 @@ export function DivisionSection({
       aria-labelledby={headingId}
       className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
     >
-      <h3 id={headingId} className="font-display text-base font-medium text-slate-900">
-        {title}
-      </h3>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h3 id={headingId} className="font-display text-base font-medium text-slate-900">
+          {title}
+        </h3>
+        {newProgramme}
+      </div>
 
       {division && (
         <div className="mt-3 flex flex-wrap items-end gap-3">

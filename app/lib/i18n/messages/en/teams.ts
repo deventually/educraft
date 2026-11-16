@@ -63,9 +63,6 @@ export const teams: Messages["teams"] = {
   notMember: "This person is not in the team.",
   placeProgramme: "Programme {names}",
   placeProgrammes: "Programmes {names}",
-  programmeDelete: "Delete programme",
-  programmeDeleteBody: "{name} goes, with its learning lines. The courses stay.",
-  programmeDeleteTitle: "Delete programme?",
   programmeRemoveBody:
     "The programme stays. This team's members no longer see it, unless they are also in another of its teams.",
   programmeRemoveTitle: "Remove {team} from {programme}?",
@@ -73,14 +70,10 @@ export const teams: Messages["teams"] = {
   programmesAddNone: "There are no programmes of other teams left.",
   programmesAddTitle: "Add programmes to {team}",
   programmesHeading: "Programmes",
-  programmesLastTeam:
-    "This is the programme's only team. Link another team first, or delete the programme.",
   programmesLinkHint:
     "A programme can have several teams, such as the programme team and the module teams. This team's members then see it too, and its lead helps manage it.",
   programmesNew: "New programme for this team",
   programmesNone: "This team has no programme yet.",
-  programmesOnlyTeam:
-    "The only team of this programme. To take it off, first add another team to the programme, or delete it.",
   search: "Search by team or person",
   searchRegion: "Search teams",
   stepDown: "Stop being team lead",

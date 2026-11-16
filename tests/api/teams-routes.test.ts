@@ -338,6 +338,32 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     expect(data.selfId).toBe(lead.id);
   });
 
+  it("lets the lead put the team in programmes and take it out (BESLUIT-2026-11-16-4)", async () => {
+    const programmes = await import("~/server/repositories/programmes.server");
+    const { team, lead } = await setup();
+    const p = (await programmes.createProgramme(
+      { id: admin.id, role: "admin" },
+      null,
+      { name: `Zonder team ${n}`, sector: "hbo" },
+    ))!;
+    await as(lead);
+    const before = await call(leadPage.loader, { request: get(), params: { id: team.id } });
+    expect(before.programmes).toEqual([]);
+    expect(before.programmeChoices.map((c) => c.id)).toContain(p.id);
+    expect(await act(team.id, { intent: "linkProgramme", programmeId: p.id })).toEqual({
+      saved: true,
+    });
+    const after = await call(leadPage.loader, { request: get(), params: { id: team.id } });
+    expect(after.programmes).toEqual([{ id: p.id, name: p.name }]);
+    expect(after.programmeChoices.map((c) => c.id)).not.toContain(p.id);
+    expect(await act(team.id, { intent: "unlinkProgramme", programmeId: p.id })).toEqual({
+      saved: true,
+    });
+    expect(await act(team.id, { intent: "linkProgramme", programmeId: "nope" })).toEqual({
+      error: "unknown",
+    });
+  });
+
   it("is a 404 for a plain member, a lead of another team and an admin who is no lead", async () => {
     const { team, member } = await setup();
     const other = await setup();
@@ -540,11 +566,11 @@ describe("/admin/teams/:id: the team's programmes (BESLUIT-2026-11-16-1)", () =>
       sector: "hbo",
     }))!;
     const before = await call(adminTeam.loader, { request: get(), params: { id: here.id } });
-    expect(before.programmes).toEqual([{ id: own.id, name: "Minor Web", onlyTeam: true }]);
+    expect(before.programmes).toEqual([{ id: own.id, name: "Minor Web" }]);
     expect(before.otherProgrammes).toContainEqual({
       id: other.id,
       name: "Informatica VT",
-      teamName: "Opleidingsteam Informatica",
+      divisionName: null,
     });
     expect(before.otherProgrammes.map((p) => p.id)).not.toContain(own.id);
 
@@ -567,7 +593,7 @@ describe("/admin/teams/:id: the team's programmes (BESLUIT-2026-11-16-1)", () =>
     ).toEqual({ error: "unknown" });
   });
 
-  it("unlinks a programme from the team, but not from its last team", async () => {
+  it("unlinks a programme from the team, also from its last team", async () => {
     const programmes = await import("~/server/repositories/programmes.server");
     const links = await import("~/server/repositories/programmeTeams.server");
     const actor = { id: admin.id, role: "admin" };
@@ -586,11 +612,12 @@ describe("/admin/teams/:id: the team's programmes (BESLUIT-2026-11-16-1)", () =>
         request: post({ intent: "unlinkProgramme", programmeId: p.id }),
         params: { id: a.id },
       }),
-    ).toEqual({ error: "lastTeam" });
-    expect((await programmes.getProgramme(actor, p.id))?.teamIds).toEqual([a.id]);
+    ).toEqual({ saved: true });
+    // Its last team gone, the programme stays, for the admin (BESLUIT-2026-11-16-4).
+    expect((await programmes.getProgramme(actor, p.id))?.teamIds).toEqual([]);
   });
 
-  it("links several programmes at once, and deletes a programme the team holds alone", async () => {
+  it("links several programmes at once", async () => {
     const programmes = await import("~/server/repositories/programmes.server");
     const actor = { id: admin.id, role: "admin" };
     const here = await teams.createTeam("Team Hier");
@@ -618,21 +645,6 @@ describe("/admin/teams/:id: the team's programmes (BESLUIT-2026-11-16-1)", () =>
     });
     expect(res).toEqual({ saved: true });
     const loaded = await call(adminTeam.loader, { request: get(), params: { id: here.id } });
-    expect(loaded.programmes.map((p) => [p.name, p.onlyTeam])).toEqual([
-      ["Een", false],
-      ["Twee", false],
-    ]);
-
-    const alone = (await programmes.createProgramme(actor, here.id, {
-      name: "Alleen",
-      sector: "hbo",
-    }))!;
-    expect(
-      await call(adminTeam.action, {
-        request: post({ intent: "deleteProgramme", programmeId: alone.id }),
-        params: { id: here.id },
-      }),
-    ).toEqual({ saved: true });
-    expect(await programmes.getProgramme(actor, alone.id)).toBeNull();
+    expect(loaded.programmes.map((p) => p.name)).toEqual(["Een", "Twee"]);
   });
 });

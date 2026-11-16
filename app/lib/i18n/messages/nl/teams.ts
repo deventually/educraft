@@ -64,9 +64,6 @@ export const teams = {
   notMember: "Deze persoon zit niet in het team.",
   placeProgramme: "Opleiding {names}",
   placeProgrammes: "Opleidingen {names}",
-  programmeDelete: "Opleiding verwijderen",
-  programmeDeleteBody: "{name} verdwijnt, met haar leerlijnen. De cursussen blijven bestaan.",
-  programmeDeleteTitle: "Opleiding verwijderen?",
   programmeRemoveBody:
     "De opleiding blijft bestaan. De leden van dit team zien haar niet meer, tenzij ze ook in een ander team ervan zitten.",
   programmeRemoveTitle: "{team} weghalen uit {programme}?",
@@ -74,14 +71,10 @@ export const teams = {
   programmesAddNone: "Er zijn geen opleidingen van andere teams meer.",
   programmesAddTitle: "Opleidingen toevoegen aan {team}",
   programmesHeading: "Opleidingen",
-  programmesLastTeam:
-    "Dit is het enige team van de opleiding. Koppel eerst een ander team, of verwijder de opleiding.",
   programmesLinkHint:
     "Een opleiding kan meer teams hebben, zoals het opleidingsteam en de moduleteams. De leden van dit team zien haar dan ook, de teamleider beheert haar mee.",
   programmesNew: "Nieuwe opleiding voor dit team",
   programmesNone: "Dit team heeft nog geen opleiding.",
-  programmesOnlyTeam:
-    "Het enige team van deze opleiding. Moet ze hier weg, voeg dan eerst een ander team toe aan de opleiding, of verwijder haar.",
   search: "Zoek op team of persoon",
   searchRegion: "Teams zoeken",
   stepDown: "Stoppen als teamleider",

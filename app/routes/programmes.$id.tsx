@@ -16,7 +16,7 @@ import {
   updateProgramme,
 } from "~/server/repositories/programmes.server";
 import { listCourses } from "~/server/repositories/courses.server";
-import { listTeams } from "~/server/repositories/teams.server";
+import { listTeams, listTeamsForUser } from "~/server/repositories/teams.server";
 import {
   linkProgrammeTeam,
   unlinkProgrammeTeam,
@@ -44,6 +44,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const { user, programme } = await loadProgramme(request, params.id);
   const locale = getLocale(request);
   const m = getMessages(locale).programmes;
+  const leads = new Set((await listTeamsForUser(user.id)).filter((t) => t.isLead).map((t) => t.id));
   const kind = `${programme.sector}:${programme.track ?? ""}`;
   const kinds = await kindOptions(user, locale);
   // A programme keeps its level even when the admin later switches that sector off.
@@ -78,18 +79,19 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     available,
     // The teams that can still be added: for an admin or a lead of the programme only
     // (BESLUIT-2026-11-16-4). Names and sizes, never who is in them.
-    teamOptions: programme.canManage
-      ? (await listTeams())
-          .filter((t) => !programme.teamIds.includes(t.id))
-          .map((t) => ({
-            id: t.id,
-            label: t.name,
-            hint:
-              t.members.length === 1
-                ? m.memberOne
-                : fmt(m.memberCount, { count: t.members.length }),
-          }))
-      : [],
+    // The teams this person may add (BESLUIT-2026-11-16-4): an admin any team, a lead only
+    // the teams they lead. Names and sizes, never who is in them.
+    teamOptions: (await listTeams())
+      .filter((t) => !programme.teamIds.includes(t.id))
+      .filter((t) => user.role === "admin" || leads.has(t.id))
+      .map((t) => ({
+        id: t.id,
+        label: t.name,
+        hint:
+          t.members.length === 1 ? m.memberOne : fmt(m.memberCount, { count: t.members.length }),
+      })),
+    // The teams whose Weghalen this person may use: an admin all, a lead their own.
+    myTeamIds: user.role === "admin" ? programme.teamIds : [...leads],
     canPlace: programme.isMember,
     // Only an admin deletes a programme (BESLUIT-2026-11-16-4).
     canDelete: user.role === "admin",
@@ -158,20 +160,18 @@ export async function action({ request, params }: Route.ActionArgs) {
       : { ok: false as const, error: m.errorNotFound };
   }
   if (intent === "link-teams" || intent === "unlink-team") {
-    if (!programme.canManage) return { ok: false as const, error: m.errorNotAllowed };
+    // The repository decides: an admin any team, a lead only their own (BESLUIT-2026-11-16-4).
     if (intent === "unlink-team") {
       const result = await unlinkProgrammeTeam(user, programme.id, String(fd.get("teamId") ?? ""));
-      if (result === "unlinked") return { ok: true as const, message: m.teamRemoved };
-      return {
-        ok: false as const,
-        error: result === "lastTeam" ? m.errorLastTeam : m.errorNotFound,
-      };
+      return result === "unlinked"
+        ? { ok: true as const, message: m.teamRemoved }
+        : { ok: false as const, error: m.errorOwnTeam };
     }
     const chosen = ids("teamId");
     if (chosen.length === 0) return { ok: false as const, error: m.errorNoChoice };
     let n = 0;
     for (const id of chosen) if (await linkProgrammeTeam(user, programme.id, id)) n++;
-    return n ? added(n, m.teamAdded, m.teamsAdded) : { ok: false as const, error: m.errorNotFound };
+    return n ? added(n, m.teamAdded, m.teamsAdded) : { ok: false as const, error: m.errorOwnTeam };
   }
   if (intent === "delete") {
     if (user.role !== "admin") return { ok: false as const, error: m.errorDeleteAdminOnly };
@@ -202,6 +202,7 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
     },
   });
   const { programme, kinds, available, canPlace, teamOptions = [], lines = [] } = loaderData;
+  const myTeamIds = "myTeamIds" in loaderData ? loaderData.myTeamIds : [];
   const canDelete = "canDelete" in loaderData && loaderData.canDelete;
 
   return (
@@ -217,13 +218,16 @@ export default function ProgrammePage({ loaderData }: Route.ComponentProps) {
         {programme.name}
       </h1>
       <p className="mt-1 text-slate-600">
-        {programme.kindLabel} · {programme.teamCount > 1 ? p.teams : p.team} {programme.teamName}
+        {programme.kindLabel} ·{" "}
+        {programme.teamCount === 0
+          ? p.noTeamYet
+          : `${programme.teamCount > 1 ? p.teams : p.team} ${programme.teamName}`}
       </p>
 
       <div className="mt-6 space-y-10">
         <ProgrammeCourses id={id} programme={programme} available={available} canPlace={canPlace} />
 
-        <ProgrammeTeams programme={programme} teamOptions={teamOptions} />
+        <ProgrammeTeams programme={programme} teamOptions={teamOptions} myTeamIds={myTeamIds} />
 
         <LearningLinesSection
           programmeId={programme.id}

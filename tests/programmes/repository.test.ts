@@ -214,13 +214,16 @@ describe("courses in a programme", () => {
     expect(await repo.programmesOfCourse(c!.id)).toEqual([]);
   });
 
-  it("goes with its team", async () => {
+  it("stays without a team when its only team goes, for the admin (BESLUIT-2026-11-16-4)", async () => {
     const { lead, member, team } = await world();
     const p = await repo.createProgramme(lead, team.id, hbo("Opleiding"));
     const c = await courses.createCourse(member.id, { name: "Cursus" });
     await repo.placeCourse(member, p!.id, c.id, {});
     await teams.deleteTeam(team.id);
-    expect(await repo.getProgramme({ id: lead.id, role: "admin" }, p!.id)).toBeNull();
+    expect(await repo.getProgramme({ id: lead.id, role: "admin" }, p!.id)).toMatchObject({
+      teamIds: [],
+      courses: [],
+    });
     expect(await repo.programmesOfCourse(c.id)).toEqual([]);
   });
 

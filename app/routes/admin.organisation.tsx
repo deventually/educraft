@@ -11,7 +11,9 @@ import {
   setDivisionKind,
   setProgrammeDivision,
 } from "~/server/repositories/organisation.server";
-import { listProgrammes } from "~/server/repositories/programmes.server";
+import { listProgrammes, manageableTeams } from "~/server/repositories/programmes.server";
+import { kindOptions } from "~/server/programmes.server";
+import { NewProgramme } from "~/components/programmes/NewProgramme";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { programmeKindLabel } from "~/lib/programmes/schema";
 import { DIVISION_KINDS, divisionWord } from "~/lib/organisation/kinds";
@@ -34,6 +36,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   return {
     kind: await getDivisionKind(),
     divisions: await listDivisions(),
+    // For "Nieuwe opleiding" in each faculty (BESLUIT-2026-11-16-4).
+    kinds: await kindOptions(admin, locale),
+    teams: await manageableTeams(admin),
     programmes: programmes.map((p) => ({
       id: p.id,
       name: p.name,
@@ -89,6 +94,8 @@ export default function AdminOrganisation({ loaderData }: Route.ComponentProps) 
   const locale = useLocale();
   const actionData = useActionData<typeof action>();
   const { kind, divisions, programmes } = loaderData;
+  const kinds = "kinds" in loaderData ? loaderData.kinds : [];
+  const teams = "teams" in loaderData ? loaderData.teams : [];
   const word = loc(divisionWord(kind), locale);
   const options = divisions.map((d) => ({ id: d.id, name: d.name }));
   const errors = { invalid: o.errorInvalid, name: o.errorName, notEmpty: o.errorNotEmpty };
@@ -161,6 +168,15 @@ export default function AdminOrganisation({ loaderData }: Route.ComponentProps) 
           division={d}
           programmes={programmes.filter((p) => p.divisionId === d.id)}
           options={options}
+          newProgramme={
+            <NewProgramme
+              kinds={kinds}
+              teams={teams}
+              isAdmin
+              division={d}
+              title={fmt(t.programmes.createIn, { name: d.name })}
+            />
+          }
         />
       ))}
 

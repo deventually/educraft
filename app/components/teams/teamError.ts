@@ -10,7 +10,6 @@ export function teamError(t: Messages, code: string): string {
     noneSelected: t.teams.noneSelected,
     atLeastOne: t.admin.models.atLeastOne,
     invalid: t.error.invalidRequest,
-    lastTeam: t.teams.programmesLastTeam,
   };
   return map[code] ?? t.error.generic;
 }

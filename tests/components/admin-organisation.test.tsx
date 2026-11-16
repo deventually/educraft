@@ -10,6 +10,8 @@ const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
 const data = {
   kind: "faculty" as const,
+  kinds: [{ value: "hbo:bachelor", label: "hbo-bachelor" }],
+  teams: [{ id: "t-1", name: "Team VPK" }],
   divisions: [
     {
       id: "d-1",
@@ -93,10 +95,25 @@ describe("/admin/organisation", () => {
     const user = userEvent.setup();
     page();
     const techniek = await screen.findByRole("region", { name: "Faculteit Techniek" });
-    await user.click(within(techniek).getByRole("button", { name: "Verwijderen: Faculteit Techniek" }));
+    await user.click(
+      within(techniek).getByRole("button", { name: "Verwijderen: Faculteit Techniek" }),
+    );
     const dialog = screen.getByRole("dialog", { name: "Faculteit Techniek verwijderen?" });
     expect(within(dialog).getByText(/Er staan geen opleidingen of teams meer onder/)).toBeVisible();
     expect(within(dialog).getByRole("button", { name: "Verwijderen" })).toBeVisible();
+  });
+
+  it("starts a new programme right in a faculty (BESLUIT-2026-11-16-4)", async () => {
+    const user = userEvent.setup();
+    page();
+    const techniek = await screen.findByRole("region", { name: "Faculteit Techniek" });
+    await user.click(within(techniek).getByRole("button", { name: "Nieuwe opleiding" }));
+    const dialog = screen.getByRole("dialog", { name: "Nieuwe opleiding in Faculteit Techniek" });
+    expect(within(dialog).getByLabelText("Team")).toHaveDisplayValue("Nog geen team");
+    expect(within(dialog).queryByLabelText("Faculteit")).toBeNull();
+    const form = within(dialog).getByRole("button", { name: "Opleiding aanmaken" }).closest("form");
+    expect(form).toHaveAttribute("action", "/programmes");
+    expect(form?.querySelector('input[name="divisionId"]')).toHaveValue("d-2");
   });
 
   it("moves a programme with a choice of division per programme", async () => {

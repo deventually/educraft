@@ -12,17 +12,15 @@
  * A lead never demotes or removes another lead; an admin does (`setLead`, `removeMember`).
  */
 import { randomUUID } from "node:crypto";
-import { and, asc, eq, inArray, ne, notInArray, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, notInArray, sql } from "drizzle-orm";
 import { getDb } from "../db.server";
 import {
   announcementDismissals,
   announcements,
   courseTeams,
   invites,
-  learningLines,
   programmeCourses,
   programmeTeams,
-  programmes,
   shares,
   slideTemplates,
   teamMembers,
@@ -113,24 +111,8 @@ export async function renameTeam(id: string, name: string): Promise<void> {
  */
 export async function deleteTeam(id: string): Promise<void> {
   getDb().transaction((tx) => {
-    // A programme of this team alone goes with it, with the courses placed in it; a programme
-    // with another team stays and only loses this one (BESLUIT-2026-11-16-1).
-    const own = tx
-      .select({ id: programmeTeams.programmeId })
-      .from(programmeTeams)
-      .where(eq(programmeTeams.teamId, id))
-      .all()
-      .map((r) => r.id);
-    const shared = tx
-      .select({ id: programmeTeams.programmeId })
-      .from(programmeTeams)
-      .where(and(inArray(programmeTeams.programmeId, own), ne(programmeTeams.teamId, id)))
-      .all()
-      .map((r) => r.id);
-    const alone = own.filter((p) => !shared.includes(p));
-    tx.delete(programmeCourses).where(inArray(programmeCourses.programmeId, alone)).run();
-    tx.delete(learningLines).where(inArray(learningLines.programmeId, alone)).run();
-    tx.delete(programmes).where(inArray(programmes.id, alone)).run();
+    // Its programmes stay and only lose this team; one without a team is the admin's
+    // (BESLUIT-2026-11-16-4).
     tx.delete(programmeTeams).where(eq(programmeTeams.teamId, id)).run();
     tx.delete(shares).where(eq(shares.teamId, id)).run();
     tx.delete(courseTeams).where(eq(courseTeams.teamId, id)).run();

@@ -129,13 +129,10 @@ describe("/admin/teams/:id, the team page", () => {
     divisions: [{ id: "d-1", name: "Faculteit Gezondheid" }],
     divisionId: null as string | null,
     divisionWord: "Faculteit",
-    programmes: [
-      { id: "p-1", name: "Verpleegkunde voltijd", onlyTeam: false },
-      { id: "p-3", name: "Verpleegkunde deeltijd", onlyTeam: true },
-    ],
+    programmes: [{ id: "p-1", name: "Verpleegkunde voltijd" }],
     otherProgrammes: [
-      { id: "p-2", name: "Pabo", teamName: "Team Pabo" },
-      { id: "p-4", name: "Pabo deeltijd", teamName: "Team Pabo" },
+      { id: "p-2", name: "Pabo", divisionName: "Faculteit Onderwijs" },
+      { id: "p-4", name: "Pabo deeltijd", divisionName: null },
     ],
   };
   const page = (action?: (args: { request: Request }) => unknown, d: unknown = data) =>
@@ -155,7 +152,7 @@ describe("/admin/teams/:id, the team page", () => {
     ).toHaveAttribute("href", "/programmes?team=team-1");
     await user.click(within(section).getByRole("button", { name: "Opleiding toevoegen" }));
     const dialog = screen.getByRole("dialog", { name: "Opleidingen toevoegen aan Verpleegkunde" });
-    await user.click(within(dialog).getByRole("checkbox", { name: /^Pabo Team Pabo/ }));
+    await user.click(within(dialog).getByRole("checkbox", { name: /^Pabo Faculteit Onderwijs/ }));
     await user.click(within(dialog).getByRole("checkbox", { name: /Pabo deeltijd/ }));
     await user.click(within(dialog).getByRole("button", { name: "Toevoegen (2)" }));
     await waitFor(() => expect(bodies).toHaveLength(1));
@@ -176,22 +173,6 @@ describe("/admin/teams/:id, the team page", () => {
     await waitFor(() => expect(bodies).toHaveLength(1));
     expect(bodies[0]!.get("intent")).toBe("unlinkProgramme");
     expect(bodies[0]!.get("programmeId")).toBe("p-1");
-  });
-
-  it("offers no Weghalen where this is the programme's only team, but says why and offers delete", async () => {
-    const user = userEvent.setup();
-    const { bodies, action } = recorder();
-    page(action);
-    expect(screen.queryByRole("button", { name: "Weghalen: Verpleegkunde deeltijd" })).toBeNull();
-    expect(screen.getByText(/Het enige team van deze opleiding/)).toBeVisible();
-    await user.click(
-      screen.getByRole("button", { name: "Opleiding verwijderen: Verpleegkunde deeltijd" }),
-    );
-    const dialog = screen.getByRole("dialog", { name: "Opleiding verwijderen?" });
-    await user.click(within(dialog).getByRole("button", { name: "Verwijderen" }));
-    await waitFor(() => expect(bodies).toHaveLength(1));
-    expect(bodies[0]!.get("intent")).toBe("deleteProgramme");
-    expect(bodies[0]!.get("programmeId")).toBe("p-3");
   });
 
   it("says so when the team has no programme and none can be linked", () => {
@@ -268,7 +249,9 @@ describe("/admin/teams/:id, the team page", () => {
     await user.click(screen.getByRole("button", { name: "Leden toevoegen" }));
     const dialog = screen.getByRole("dialog", { name: "Leden toevoegen aan Verpleegkunde" });
     await user.keyboard("bram");
-    expect(within(dialog).getByRole("checkbox", { name: /anna aal/i, hidden: true })).not.toBeVisible();
+    expect(
+      within(dialog).getByRole("checkbox", { name: /anna aal/i, hidden: true }),
+    ).not.toBeVisible();
     await user.click(within(dialog).getByRole("checkbox", { name: /bram beuk/i }));
     await user.click(within(dialog).getByRole("button", { name: "Toevoegen (1)" }));
     await waitFor(() => expect(bodies).toHaveLength(1));
@@ -336,6 +319,8 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     selfId: "u-lead",
     team: { id: "team-1", name: "Verpleegkunde", members, settings: noChoices },
     offer,
+    programmes: [{ id: "p-1", name: "Verpleegkunde voltijd" }],
+    programmeChoices: [{ id: "p-2", name: "Pabo", divisionName: "Faculteit Onderwijs" }],
   };
   const page = (action?: (args: { request: Request }) => unknown) =>
     renderWith(LeadTeam, "/teams/:id", data, action);
@@ -397,6 +382,33 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     await waitFor(() =>
       expect(screen.getByRole("alert")).toHaveTextContent(/geen account met dit e-mailadres/i),
     );
+  });
+
+  it("lets the lead add the team to programmes, and take it off after a confirm", async () => {
+    const user = userEvent.setup();
+    const bodies: FormData[] = [];
+    page(async ({ request }) => {
+      bodies.push(await request.formData());
+      return { saved: true };
+    });
+    const section = screen.getByRole("region", { name: "Opleidingen" });
+    expect(within(section).getByRole("link", { name: "Verpleegkunde voltijd" })).toHaveAttribute(
+      "href",
+      "/programmes/p-1",
+    );
+    await user.click(within(section).getByRole("button", { name: "Opleiding toevoegen" }));
+    const dialog = screen.getByRole("dialog", { name: "Opleidingen toevoegen aan Verpleegkunde" });
+    await user.click(within(dialog).getByRole("checkbox", { name: /Pabo/ }));
+    await user.click(within(dialog).getByRole("button", { name: "Toevoegen (1)" }));
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0]!.get("intent")).toBe("linkProgramme");
+    expect(bodies[0]!.getAll("programmeId")).toEqual(["p-2"]);
+    await user.click(screen.getByRole("button", { name: "Weghalen: Verpleegkunde voltijd" }));
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", { name: "Weghalen" }),
+    );
+    await waitFor(() => expect(bodies).toHaveLength(2));
+    expect(bodies[1]!.get("intent")).toBe("unlinkProgramme");
   });
 
   it("mints an invite link for the team and shows it", async () => {

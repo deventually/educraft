@@ -4,26 +4,27 @@ import { fmt } from "~/lib/i18n/format";
 import { useT } from "~/lib/i18n/useT";
 
 /**
- * The teams of a programme (BESLUIT-2026-11-16-1 and -4): everyone sees them; an admin or a
- * lead of one of them adds teams ("Team toevoegen") and takes one off (Weghalen, asks first).
- * The last team has no Weghalen: a programme always keeps one.
+ * The teams of a programme (BESLUIT-2026-11-16-1 and -4): everyone sees them. "Team toevoegen"
+ * offers what this person may add (an admin any team, a lead the teams they lead), and
+ * Weghalen, which asks first, sits on the teams they speak for (`myTeamIds`).
  */
 export function ProgrammeTeams({
   programme,
   teamOptions,
+  myTeamIds,
 }: {
-  programme: { name: string; canManage: boolean; teams: { id: string; name: string }[] };
+  programme: { name: string; teams: { id: string; name: string }[] };
   teamOptions: AddOption[];
+  myTeamIds: string[];
 }) {
   const p = useT().programmes;
-  const removable = programme.canManage && programme.teams.length > 1;
   return (
     <ConnectionList
       title={p.teams}
       intro={p.teamsIntro}
-      empty=""
+      empty={p.teamsEmpty}
       add={
-        programme.canManage && (
+        teamOptions.length > 0 && (
           <AddDialog
             triggerLabel={p.addTeam}
             title={fmt(p.addTeamTitle, { programme: programme.name })}
@@ -36,7 +37,7 @@ export function ProgrammeTeams({
       items={programme.teams.map((t) => ({
         id: t.id,
         name: t.name,
-        remove: removable
+        remove: myTeamIds.includes(t.id)
           ? {
               fields: { intent: "unlink-team", teamId: t.id },
               title: fmt(p.removeTeamTitle, { team: t.name, programme: programme.name }),

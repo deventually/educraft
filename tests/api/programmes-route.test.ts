@@ -97,6 +97,40 @@ describe("/programmes", () => {
     });
   });
 
+  it("lets an admin create one without a team, under a faculty (BESLUIT-2026-11-16-4)", async () => {
+    const org = await import("~/server/repositories/organisation.server");
+    const adminId = `route-admin-create-${n}`;
+    await signInAs({ id: adminId, name: "Beheer", role: "admin" });
+    const d = (await org.createDivision({ id: adminId, role: "admin" }, `Faculteit ${n}`))!;
+    const data = await list.loader({ request: get("/programmes") } as never);
+    expect(data.isAdmin).toBe(true);
+    expect(data.divisions).toContainEqual({ id: d.id, name: d.name });
+    const r = await list.action({
+      request: post("/programmes", {
+        intent: "create",
+        teamId: "",
+        divisionId: d.id,
+        name: "Verpleegkunde",
+        kind: "hbo:bachelor",
+      }),
+    } as never);
+    const id = ((r as Response).headers.get("Location") ?? "").split("/").pop() ?? "";
+    expect(await repo.getProgramme({ id: adminId, role: "admin" }, id)).toMatchObject({
+      name: "Verpleegkunde",
+      teamIds: [],
+      divisionId: d.id,
+    });
+  });
+
+  it("refuses a lead who creates one without a team", async () => {
+    expect(
+      await list.action({
+        request: post("/programmes", { intent: "create", teamId: "", name: "x", kind: "hbo:bachelor" }),
+      } as never),
+    ).toEqual({ ok: false, error: "Alleen de teamleider of een beheerder kan dat." });
+    expect((await list.loader({ request: get("/programmes") } as never)).isAdmin).toBe(false);
+  });
+
   it("refuses an empty name, an unknown level, and a team I don't lead", async () => {
     const other = await teams.createTeam(`Ander team ${n}`);
     await teams.addMember(other.id, me.id);
@@ -285,19 +319,54 @@ describe("/programmes/:id: the fixed pattern (plan step 3)", () => {
     expect((await load(p!.id)).programme.courses).toEqual([]);
   });
 
-  it("shows its teams, and to its lead the other teams to add", async () => {
+  it("shows its teams, and offers a lead only the other teams they lead", async () => {
     const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
-    const module = await teams.createTeam(`Moduleteam ${n}`);
+    const mine = await teams.createTeam(`Mijn moduleteam ${n}`);
+    await teams.addMember(mine.id, me.id);
+    await teams.setLead(mine.id, me.id, true);
+    const theirs = await teams.createTeam(`Ander moduleteam ${n}`);
     const data = await load(p!.id);
     expect(data.programme.teams).toEqual([{ id: teamId, name: teamName }]);
-    expect(data.teamOptions).toContainEqual({ id: module.id, label: module.name, hint: "0 leden" });
-    expect(data.teamOptions.map((t) => t.id)).not.toContain(teamId);
+    expect(data.teamOptions).toEqual([{ id: mine.id, label: mine.name, hint: "1 lid" }]);
+    expect(data.teamOptions.map((t) => t.id)).not.toContain(theirs.id);
+    expect(data.myTeamIds).toEqual(expect.arrayContaining([teamId, mine.id]));
   });
 
-  it("lets its lead add several teams and take one off, never the last", async () => {
+  it("lets a lead add their own teams, not another's, and take their team off", async () => {
+    const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
+    const web = await teams.createTeam(`Moduleteam Web ${n}`);
+    await teams.addMember(web.id, me.id);
+    await teams.setLead(web.id, me.id, true);
+    const data = await teams.createTeam(`Moduleteam Data ${n}`);
+    expect(
+      await actMany(p!.id, [
+        ["intent", "link-teams"],
+        ["teamId", web.id],
+      ]),
+    ).toEqual({ ok: true, message: "Het team is toegevoegd." });
+    expect(
+      await actMany(p!.id, [
+        ["intent", "link-teams"],
+        ["teamId", data.id],
+      ]),
+    ).toEqual({ ok: false, error: "Je kunt alleen je eigen team toevoegen of weghalen." });
+    expect((await repo.getProgramme(me, p!.id))?.teamIds).toHaveLength(2);
+    expect(
+      await actMany(p!.id, [
+        ["intent", "unlink-team"],
+        ["teamId", web.id],
+      ]),
+    ).toEqual({ ok: true, message: "Het team is weggehaald." });
+  });
+
+  it("lets an admin add any teams at once", async () => {
     const p = await repo.createProgramme(me, teamId, hbo("Voltijd"));
     const web = await teams.createTeam(`Moduleteam Web ${n}`);
     const data = await teams.createTeam(`Moduleteam Data ${n}`);
+    await signInAs({ id: `route-admin-teams-${n}`, name: "Beheer", role: "admin" });
+    expect((await load(p!.id)).teamOptions.map((t) => t.id)).toEqual(
+      expect.arrayContaining([web.id, data.id]),
+    );
     expect(
       await actMany(p!.id, [
         ["intent", "link-teams"],
@@ -305,24 +374,6 @@ describe("/programmes/:id: the fixed pattern (plan step 3)", () => {
         ["teamId", data.id],
       ]),
     ).toEqual({ ok: true, message: "2 teams toegevoegd." });
-    expect((await repo.getProgramme(me, p!.id))?.teamIds).toHaveLength(3);
-    expect(
-      await actMany(p!.id, [
-        ["intent", "unlink-team"],
-        ["teamId", web.id],
-      ]),
-    ).toEqual({ ok: true, message: "Het team is weggehaald." });
-    await repo.getProgramme(me, p!.id);
-    await actMany(p!.id, [
-      ["intent", "unlink-team"],
-      ["teamId", data.id],
-    ]);
-    expect(
-      await actMany(p!.id, [
-        ["intent", "unlink-team"],
-        ["teamId", teamId],
-      ]),
-    ).toEqual({ ok: false, error: "Een opleiding houdt altijd minstens één team." });
   });
 
   it("refuses a plain member who adds or takes off a team, and offers them none", async () => {
@@ -335,7 +386,13 @@ describe("/programmes/:id: the fixed pattern (plan step 3)", () => {
         ["intent", "link-teams"],
         ["teamId", web.id],
       ]),
-    ).toEqual({ ok: false, error: "Alleen de teamleider of een beheerder kan dat." });
+    ).toEqual({ ok: false, error: "Je kunt alleen je eigen team toevoegen of weghalen." });
+    expect(
+      await actMany(p!.id, [
+        ["intent", "unlink-team"],
+        ["teamId", teamId],
+      ]),
+    ).toEqual({ ok: false, error: "Je kunt alleen je eigen team toevoegen of weghalen." });
     expect((await repo.getProgramme(me, p!.id))?.teamIds).toEqual([teamId]);
   });
 });

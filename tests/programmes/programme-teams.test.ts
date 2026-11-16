@@ -49,6 +49,27 @@ async function world() {
   return { admin, coordinator, moduleLead, moduleMember, outsider, programmeTeam, moduleTeam, p };
 }
 
+describe("a programme made by the admin (BESLUIT-2026-11-16-4)", () => {
+  it("starts without a team, under a faculty, and only the admin sees it", async () => {
+    const { admin, coordinator } = await world();
+    const org = await import("~/server/repositories/organisation.server");
+    const d = (await org.createDivision(admin, `Faculteit ${n}`))!;
+    const p = (await repo.createProgramme(admin, null, hbo("HBO-ICT"), d.id))!;
+    expect(p).toMatchObject({ teamIds: [], divisionId: d.id });
+    expect(await repo.getProgramme(coordinator, p.id)).toBeNull();
+    expect((await repo.listProgrammes(admin)).map((x) => x.id)).toContain(p.id);
+  });
+
+  it("refuses a teacher without a team, and an unknown faculty", async () => {
+    const { admin, coordinator, programmeTeam } = await world();
+    expect(await repo.createProgramme(coordinator, null, hbo("Mag niet"))).toBeNull();
+    expect(await repo.createProgramme(admin, null, hbo("Mag niet"), "nope")).toBeNull();
+    // A lead puts it under no faculty; that is the admin's choice.
+    const p = (await repo.createProgramme(coordinator, programmeTeam.id, hbo("Mag wel"), "x"))!;
+    expect(p).toMatchObject({ divisionId: null });
+  });
+});
+
 describe("a programme with several teams", () => {
   it("starts with the team it was made for", async () => {
     const { coordinator, programmeTeam, p } = await world();
@@ -72,39 +93,55 @@ describe("a programme with several teams", () => {
     expect((await repo.getProgramme(admin, p.id))?.teams).toHaveLength(2);
   });
 
-  it("is linked to another team by a lead of one of its teams (BESLUIT-2026-11-16-3)", async () => {
-    const { coordinator, moduleMember, moduleTeam, p } = await world();
-    expect(await links.linkProgrammeTeam(coordinator, p.id, moduleTeam.id)).toBe(true);
+  it("is linked by a team lead to their own team, and taken off again (BESLUIT-2026-11-16-4)", async () => {
+    const { moduleLead, moduleMember, moduleTeam, p } = await world();
+    expect(await links.linkProgrammeTeam(moduleLead, p.id, moduleTeam.id)).toBe(true);
     expect(await repo.getProgramme(moduleMember, p.id)).toMatchObject({ canManage: false });
+    expect(await repo.getProgramme(moduleLead, p.id)).toMatchObject({ canManage: true });
+    expect(await links.unlinkProgrammeTeam(moduleLead, p.id, moduleTeam.id)).toBe("unlinked");
+    expect(await repo.getProgramme(moduleMember, p.id)).toBeNull();
   });
 
-  it("refuses a plain member, an outsider, an unknown team and an unknown programme", async () => {
-    const { admin, coordinator, moduleLead, moduleMember, outsider, moduleTeam, programmeTeam, p } =
+  it("refuses a lead who links another team, a plain member, an outsider, unknown ids", async () => {
+    const { admin, coordinator, moduleMember, outsider, moduleTeam, programmeTeam, p } =
       await world();
-    // A lead of a team that is not (yet) the programme's has no say over it.
-    expect(await links.linkProgrammeTeam(moduleLead, p.id, moduleTeam.id)).toBe(false);
+    // Leading the programme's team is no say over another team.
+    expect(await links.linkProgrammeTeam(coordinator, p.id, moduleTeam.id)).toBe(false);
+    expect(await links.linkProgrammeTeam(moduleMember, p.id, moduleTeam.id)).toBe(false);
     expect(await links.linkProgrammeTeam(outsider, p.id, moduleTeam.id)).toBe(false);
-    await links.linkProgrammeTeam(admin, p.id, moduleTeam.id);
-    const other = await teams.createTeam(`Ander team ${n}`);
-    expect(await links.linkProgrammeTeam(moduleMember, p.id, other.id)).toBe(false);
-    expect(await links.linkProgrammeTeam(coordinator, p.id, "nope")).toBe(false);
+    expect(await links.linkProgrammeTeam(admin, p.id, "nope")).toBe(false);
     expect(await links.linkProgrammeTeam(admin, "nope", programmeTeam.id)).toBe(false);
-    expect((await repo.getProgramme(admin, p.id))?.teams).toHaveLength(2);
+    expect((await repo.getProgramme(admin, p.id))?.teams).toHaveLength(1);
   });
 
-  it("is unlinked from a team by an admin or a lead, but never from its last team", async () => {
+  it("is unlinked by an admin or the team's own lead; the last team may go too", async () => {
     const { admin, coordinator, moduleMember, outsider, programmeTeam, moduleTeam, p } =
       await world();
     await links.linkProgrammeTeam(admin, p.id, moduleTeam.id);
     expect(await links.unlinkProgrammeTeam(moduleMember, p.id, moduleTeam.id)).toBe("refused");
     expect(await links.unlinkProgrammeTeam(outsider, p.id, moduleTeam.id)).toBe("refused");
-    expect(await links.unlinkProgrammeTeam(coordinator, p.id, moduleTeam.id)).toBe("unlinked");
-    expect(await repo.getProgramme(moduleMember, p.id)).toBeNull();
-    await links.linkProgrammeTeam(admin, p.id, moduleTeam.id);
+    expect(await links.unlinkProgrammeTeam(coordinator, p.id, moduleTeam.id)).toBe("refused");
     expect(await links.unlinkProgrammeTeam(admin, p.id, moduleTeam.id)).toBe("unlinked");
-    expect(await links.unlinkProgrammeTeam(admin, p.id, programmeTeam.id)).toBe("lastTeam");
-    expect(await links.unlinkProgrammeTeam(coordinator, p.id, programmeTeam.id)).toBe("lastTeam");
-    expect((await repo.getProgramme(admin, p.id))?.teamIds).toEqual([programmeTeam.id]);
+    expect(await links.unlinkProgrammeTeam(admin, p.id, moduleTeam.id)).toBe("refused");
+    // Without a team the programme stays, for the admin to link again.
+    expect(await links.unlinkProgrammeTeam(coordinator, p.id, programmeTeam.id)).toBe("unlinked");
+    expect(await repo.getProgramme(coordinator, p.id)).toBeNull();
+    expect((await repo.getProgramme(admin, p.id))?.teamIds).toEqual([]);
+  });
+
+  it("names the programmes a lead can link their team to: all, but those it is in", async () => {
+    const { admin, coordinator, moduleLead, moduleMember, moduleTeam, programmeTeam, p } =
+      await world();
+    const q = (await repo.createProgramme(admin, null, hbo("Zonder team")))!;
+    const choices = await links.programmeChoices(moduleLead, moduleTeam.id);
+    expect(choices.map((c) => c.id)).toEqual(expect.arrayContaining([p.id, q.id]));
+    expect(choices.find((c) => c.id === p.id)).toMatchObject({ name: "Informatica VT" });
+    expect(
+      (await links.programmeChoices(coordinator, programmeTeam.id)).map((c) => c.id),
+    ).not.toContain(p.id);
+    expect(await links.programmeChoices(moduleMember, moduleTeam.id)).toEqual([]);
+    expect(await links.programmeChoices(coordinator, moduleTeam.id)).toEqual([]);
+    expect((await links.programmeChoices(admin, moduleTeam.id)).map((c) => c.id)).toContain(q.id);
   });
 
   it("lets a member of any of its teams place an own course, visible to every team", async () => {
@@ -130,13 +167,13 @@ describe("a programme with several teams", () => {
     expect((await repo.getProgramme(coordinator, p.id))?.courses).toEqual([]);
   });
 
-  it("stays when one of its teams is deleted; goes with its last team", async () => {
+  it("stays when its teams are deleted, also the last one (BESLUIT-2026-11-16-4)", async () => {
     const { admin, programmeTeam, moduleTeam, p } = await world();
     await links.linkProgrammeTeam(admin, p.id, moduleTeam.id);
     await teams.deleteTeam(programmeTeam.id);
     expect((await repo.getProgramme(admin, p.id))?.teamIds).toEqual([moduleTeam.id]);
     await teams.deleteTeam(moduleTeam.id);
-    expect(await repo.getProgramme(admin, p.id)).toBeNull();
+    expect((await repo.getProgramme(admin, p.id))?.teamIds).toEqual([]);
   });
 
   it("names every team in the list and on the course page", async () => {
