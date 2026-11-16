@@ -1,5 +1,6 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 import { Form } from "react-router";
+import { Modal } from "./Modal";
 import { Button, Input, Label } from "./ui";
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
@@ -9,6 +10,8 @@ interface ConfirmDialogProps {
   triggerLabel: string;
   triggerIcon?: React.ReactNode;
   triggerIconOnly?: boolean;
+  /** Added to the visible label in the name, e.g. what "Weghalen" acts on ("Weghalen: X"). */
+  triggerContext?: string;
   triggerVariant?: ButtonVariant;
   triggerSize?: "sm" | "md";
   triggerClassName?: string;
@@ -42,6 +45,7 @@ export function ConfirmDialog({
   triggerLabel,
   triggerIcon,
   triggerIconOnly = false,
+  triggerContext,
   triggerVariant = "danger",
   triggerSize = "sm",
   triggerClassName,
@@ -56,45 +60,13 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
-  const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const descId = useId();
   const inputId = useId();
 
   const close = () => setOpen(false);
 
-  // Move focus into the dialog on open; restore it to the trigger on close.
-  useEffect(() => {
-    if (!open) return;
-    const previouslyFocused = document.activeElement as HTMLElement | null;
-    dialogRef.current?.querySelector<HTMLElement>("[data-autofocus]")?.focus();
-    return () => previouslyFocused?.focus?.();
-  }, [open]);
-
   const confirmDisabled = typeToConfirm ? typed.trim() !== typeToConfirm.word.trim() : false;
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      e.stopPropagation();
-      close();
-      return;
-    }
-    if (e.key !== "Tab") return;
-    const focusables = dialogRef.current?.querySelectorAll<HTMLElement>(
-      'a[href],button:not([disabled]),input:not([disabled]):not([type="hidden"]),[tabindex]:not([tabindex="-1"])',
-    );
-    if (!focusables || focusables.length === 0) return;
-    const first = focusables[0];
-    const last = focusables[focusables.length - 1];
-    if (!first || !last) return;
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
-  };
 
   return (
     <>
@@ -103,7 +75,13 @@ export function ConfirmDialog({
         variant={triggerVariant}
         size={triggerSize}
         className={triggerClassName}
-        aria-label={triggerIconOnly ? triggerLabel : undefined}
+        aria-label={
+          triggerIconOnly
+            ? triggerLabel
+            : triggerContext
+              ? `${triggerLabel}: ${triggerContext}`
+              : undefined
+        }
         onClick={() => {
           setTyped("");
           setOpen(true);
@@ -114,62 +92,51 @@ export function ConfirmDialog({
       </Button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/40" aria-hidden="true" />
-          <div
-            ref={dialogRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            aria-describedby={descId}
-            onKeyDown={onKeyDown}
-            className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl"
-          >
-            <h2 id={titleId} className="text-lg font-semibold text-slate-900">
-              {title}
-            </h2>
-            <p id={descId} className="mt-2 text-sm text-slate-600">
-              {description}
-            </p>
+        <Modal titleId={titleId} descriptionId={descId} onClose={close}>
+          <h2 id={titleId} className="text-lg font-semibold text-slate-900">
+            {title}
+          </h2>
+          <p id={descId} className="mt-2 text-sm text-slate-600">
+            {description}
+          </p>
 
-            {typeToConfirm && (
-              <div className="mt-4">
-                <Label htmlFor={inputId}>{typeToConfirm.label}</Label>
-                <Input
-                  id={inputId}
-                  value={typed}
-                  onChange={(e) => setTyped(e.target.value)}
-                  autoComplete="off"
-                  placeholder={typeToConfirm.placeholder}
-                  className="mt-1"
-                  data-autofocus
-                />
-              </div>
-            )}
+          {typeToConfirm && (
+            <div className="mt-4">
+              <Label htmlFor={inputId}>{typeToConfirm.label}</Label>
+              <Input
+                id={inputId}
+                value={typed}
+                onChange={(e) => setTyped(e.target.value)}
+                autoComplete="off"
+                placeholder={typeToConfirm.placeholder}
+                className="mt-1"
+                data-autofocus
+              />
+            </div>
+          )}
 
-            <Form method="post" onSubmit={close}>
-              {Object.entries(fields).map(([k, v]) => (
-                <input key={k} type="hidden" name={k} value={v} />
-              ))}
-              {children && <div className="mt-4 space-y-4">{children}</div>}
-              <div className="mt-6 flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={close}
-                  // The fallback: a field marked earlier in the dialog (the type-to-confirm
-                  // input, or a child) comes first in document order and wins.
-                  data-autofocus
-                >
-                  {cancelLabel}
-                </Button>
-                <Button type="submit" variant={confirmVariant} disabled={confirmDisabled}>
-                  {confirmLabel}
-                </Button>
-              </div>
-            </Form>
-          </div>
-        </div>
+          <Form method="post" onSubmit={close}>
+            {Object.entries(fields).map(([k, v]) => (
+              <input key={k} type="hidden" name={k} value={v} />
+            ))}
+            {children && <div className="mt-4 space-y-4">{children}</div>}
+            <div className="mt-6 flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={close}
+                // The fallback: a field marked earlier in the dialog (the type-to-confirm
+                // input, or a child) comes first in document order and wins.
+                data-autofocus
+              >
+                {cancelLabel}
+              </Button>
+              <Button type="submit" variant={confirmVariant} disabled={confirmDisabled}>
+                {confirmLabel}
+              </Button>
+            </div>
+          </Form>
+        </Modal>
       )}
     </>
   );
