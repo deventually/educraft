@@ -23,7 +23,8 @@ const link =
 /**
  * The members of a team on the one team page (plan step 5), with the controls of the role:
  * - **admin**: Leden toevoegen, a Teamleider tick that autosaves, Weghalen for anyone;
- * - **lead**: Leden toevoegen, Teamleider maken and Weghalen on a plain member only;
+ * - **lead**: Leden toevoegen, Teamleider maken on a plain member, Weghalen on anyone but
+ *   themselves, also another lead (Bastiaan, 2026-11-16);
  * - **member**: names and who leads, nothing to press (BESLUIT-2026-11-16-7).
  * Every Weghalen asks first.
  */
@@ -147,9 +148,9 @@ export function TeamMembers({
                   )}
                   {manages && (
                     <td className="px-4 py-2.5">
-                      {(role === "admin" || !m.isLead) && (
+                      {(role === "admin" || m.userId !== selfId) && (
                         <div className="flex flex-col items-end gap-2 sm:flex-row sm:justify-end">
-                          {role === "lead" && (
+                          {role === "lead" && !m.isLead && (
                             <Form method="post">
                               <input type="hidden" name="intent" value="makeLead" />
                               <input type="hidden" name="userId" value={m.userId} />

@@ -51,11 +51,11 @@ If you are a team lead, you open your team under **Education › Teams**. There 
 
 - add colleagues with **Add members**: search by name or email address, tick who should join and choose **Add**. You see every teacher with an active account who is not in your team yet; admins are not listed;
 - create an **invite link** for a new colleague, who then becomes a teacher and a member of your team;
-- remove a colleague from the team with **Remove** (it asks first), or make them team lead too;
+- remove anyone from the team with **Remove**, also another team lead (it asks first), or make a colleague team lead too;
 - link your team to programmes with **Add programme**, or take it off with **Remove**;
 - stop being team lead yourself.
 
-Removing another team lead is done by an administrator.
+You do not remove yourself; for that, choose **Stop being team lead**.
 
 ## For administrators
 

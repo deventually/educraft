@@ -51,11 +51,11 @@ Ben je teamleider, dan open je je team bij **Onderwijs › Teams**. Daar kun je:
 
 - collega's toevoegen met **Leden toevoegen**: zoek op naam of e-mailadres, vink aan wie erbij moet en kies **Toevoegen**. Je ziet elke docent met een actief account die nog niet in je team zit; beheerders staan er niet tussen;
 - een **uitnodigingslink** maken voor een nieuwe collega, die daarmee docent en lid van je team wordt;
-- een collega uit het team halen met **Weghalen** (dat vraagt eerst of je het zeker weet), of ook teamleider maken;
+- iemand uit het team halen met **Weghalen**, ook een andere teamleider (dat vraagt eerst of je het zeker weet), of een collega ook teamleider maken;
 - je team aan opleidingen koppelen met **Opleiding toevoegen**, of het eraf halen met **Weghalen**;
 - zelf stoppen als teamleider.
 
-Een andere teamleider weghalen doet een beheerder.
+Jezelf haal je niet weg; daarvoor kies je **Stoppen als teamleider**.
 
 ## Voor beheerders
 

@@ -381,13 +381,19 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     expect(within(lea).getByText(/^teamleider$/i)).toBeInTheDocument();
   });
 
-  it("offers make-lead and remove on a plain member only, never on a lead", () => {
-    page();
+  it("lets the lead remove anyone but themselves, also another lead (Bastiaan, 16-11)", () => {
+    const kim = { userId: "u-kim", name: "Kim Lead", email: "kim@school.nl", isLead: true };
+    page(undefined, { ...data, team: { ...data.team, members: [...members, kim] } });
     const mo = screen.getByRole("row", { name: /mo member/i });
     expect(within(mo).getByRole("button", { name: /teamleider maken/i })).toBeInTheDocument();
     expect(within(mo).getByRole("button", { name: "Weghalen: Mo Member" })).toBeInTheDocument();
-    const lea = screen.getByRole("row", { name: /lea lead/i });
-    expect(within(lea).queryByRole("button")).toBeNull();
+    // Another lead: Weghalen, and nothing to make them lead again.
+    const other = screen.getByRole("row", { name: /kim lead/i });
+    expect(within(other).getByRole("button", { name: "Weghalen: Kim Lead" })).toBeInTheDocument();
+    expect(within(other).queryByRole("button", { name: /teamleider maken/i })).toBeNull();
+    // Myself: no buttons; stepping down is further down the page.
+    const me = screen.getByRole("row", { name: /lea lead/i });
+    expect(within(me).queryByRole("button")).toBeNull();
   });
 
   it("lets the lead choose colleagues to add, with search and ticks (Bastiaan, 16-11)", async () => {

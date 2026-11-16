@@ -106,9 +106,9 @@ lead** is a stand per team (`team_members.is_lead`), not a role: `users.role` st
   `getTeamForLead(callerId, teamId)`, which is `null` unless the caller leads that team; anyone
   who is not admin, lead or member gets a 404. A lead ticks colleagues to add from
   active teachers not yet in the team, never admins (`leadCandidates`, `leadAddMembers`,
-  BESLUIT-2026-11-16-6), removes a plain member, makes a member lead, steps down, and mints a
-  team invite.
-  A lead never removes another lead or takes the stand away; an admin does.
+  BESLUIT-2026-11-16-6), removes anyone in the team but themselves, also another lead
+  (`leadRemoveMember`, error `self`; BESLUIT-2026-11-16-9), makes a member lead, steps down, and
+  mints a team invite. A lead never takes the lead stand away from someone; an admin does.
 - An invite with a `team_id` makes the new teacher a member on redeem (`joinTeamFromInvite`).
   Invites stay `teacher` (BESLUIT-2026-07-03-2). Deleting a team keeps the accounts and turns
   its open invites into plain ones; deleting an account removes its memberships.

@@ -118,3 +118,14 @@ describe("help on Waar hoort dit team bij? (plan step 5)", () => {
     expect(teams("en")).toMatch(/first remove the programmes/i);
   });
 });
+
+describe("a lead removes anyone from the team but themselves (Bastiaan, 16-11)", () => {
+  it("says so in both languages, and no longer that an admin removes a lead", () => {
+    const nl = readFileSync("app/content/help/topics/teams.nl.md", "utf8");
+    const en = readFileSync("app/content/help/topics/teams.en.md", "utf8");
+    expect(nl).toContain("ook een andere teamleider");
+    expect(nl).not.toContain("Een andere teamleider weghalen doet een beheerder");
+    expect(en).toContain("also another team lead");
+    expect(en).not.toContain("Removing another team lead is done by an administrator");
+  });
+});

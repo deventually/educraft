@@ -439,7 +439,7 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     expect(await memberIds(team.id)).toEqual(expect.arrayContaining([colleague.id, second.id]));
   });
 
-  it("makes a member lead, and removes a plain member", async () => {
+  it("makes a member lead, and removes anyone but themselves, also another lead", async () => {
     const { team, lead, member } = await setup();
     const colleague = await mk("Colleague");
     await teams.addMember(team.id, colleague.id);
@@ -447,14 +447,17 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     expect(await act(team.id, { intent: "makeLead", userId: member.id })).toEqual({
       saved: true,
     });
-    // Now a lead: a lead cannot remove them.
-    expect(await act(team.id, { intent: "removeMember", userId: member.id })).toEqual({
-      error: "isLead",
-    });
     expect(await act(team.id, { intent: "removeMember", userId: colleague.id })).toEqual({
       saved: true,
     });
-    expect((await memberIds(team.id)).sort()).toEqual([lead.id, member.id].sort());
+    // Another lead goes too (Bastiaan, 16-11); a lead never removes themselves.
+    expect(await act(team.id, { intent: "removeMember", userId: lead.id })).toEqual({
+      error: "self",
+    });
+    expect(await act(team.id, { intent: "removeMember", userId: member.id })).toEqual({
+      saved: true,
+    });
+    expect(await memberIds(team.id)).toEqual([lead.id]);
   });
 
   it("mints a teacher invite for this team", async () => {

@@ -56,7 +56,7 @@ const withSettings = ({ settingsJson, ...team }: TeamRow) => ({
 /** What a lead's write returns: done, or why not. */
 export type LeadResult =
   | { ok: true }
-  | { error: "notLead" | "noSuchUser" | "isLead" | "notMember" };
+  | { error: "notLead" | "noSuchUser" | "self" | "notMember" };
 
 const NAME_MAX = 100;
 
@@ -342,9 +342,9 @@ export async function leadRemoveMember(
 ): Promise<LeadResult> {
   const team = await getTeamForLead(callerId, teamId);
   if (!team) return { error: "notLead" };
-  const member = team.members.find((m) => m.userId === memberId);
-  if (!member) return { error: "notMember" };
-  if (member.isLead) return { error: "isLead" };
+  // Anyone in the team, also another lead (Bastiaan, 2026-11-16); never yourself: step down.
+  if (memberId === callerId) return { error: "self" };
+  if (!team.members.some((m) => m.userId === memberId)) return { error: "notMember" };
   await removeMember(teamId, memberId);
   return { ok: true };
 }
