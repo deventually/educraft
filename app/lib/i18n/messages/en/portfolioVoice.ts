@@ -24,5 +24,20 @@ export const portfolioVoice = {
       tip: "End with what you will do differently next time instead.",
     },
   },
+  needs: {
+    add: "Add evidence",
+    criterion: "Criterion {n}: {text}",
+    intro:
+      "LimeOnIt has no evidence from you for these yet. Add it before you have a draft written, so nothing has to stay open.",
+    title: "Still needed as evidence",
+  },
+  spots: {
+    fill: "Fill in",
+    filled: "Filled in in your text. Save your text to keep it.",
+    fillLabel: "Fill in: {q}",
+    intro:
+      "For each spot, fill in what really happened, in a few words. It goes in that place in your text.",
+    title: "Fill in open spots",
+  },
   title: "Does this sound like you?",
 };

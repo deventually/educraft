@@ -24,5 +24,20 @@ export const portfolioVoice = {
       tip: "Eindig liever met wat je de volgende keer anders doet.",
     },
   },
+  needs: {
+    add: "Bewijs toevoegen",
+    criterion: "Criterium {n}: {text}",
+    intro:
+      "Hier heeft LimeOnIt nog geen bewijs van je. Voeg het toe voordat je laat opstellen, dan hoeft er niets open te blijven.",
+    title: "Nog nodig als bewijs",
+  },
+  spots: {
+    fill: "Invullen",
+    filled: "Ingevuld in je tekst. Sla je tekst op om het te bewaren.",
+    fillLabel: "Invullen: {q}",
+    intro:
+      "Vul per plek in wat er echt was, in een paar woorden. Het komt op die plek in je tekst.",
+    title: "Open plekken invullen",
+  },
   title: "Klinkt dit als jij?",
 };

@@ -496,6 +496,17 @@ describe("Portfolio outcome page", () => {
     ).toBeInTheDocument();
   });
 
+  it("names on the chapter tab the evidence the chapter still lacks", () => {
+    const required = [{ line: "Video van de les", linked: [] }];
+    renderRoute(PortfolioOutcome, { ...outcomeData(), required }, "chapter");
+    const region = screen.getByRole("region", { name: "Nog nodig als bewijs" });
+    expect(within(region).getByText("Video van de les")).toBeInTheDocument();
+    expect(within(region).getByRole("link", { name: "Bewijs toevoegen" })).toHaveAttribute(
+      "href",
+      expect.stringContaining("?tab=evidence#add-evidence-title"),
+    );
+  });
+
   it("counts the open spots in the chapter as the teacher types", async () => {
     const { container } = renderRoute(PortfolioOutcome, outcomeData(), "chapter");
     const chapter = screen.getByLabelText("Je tekst bij deze leeruitkomst");
