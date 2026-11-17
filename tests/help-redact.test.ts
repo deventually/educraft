@@ -11,3 +11,14 @@ describe("help: anonymising before sending", () => {
     for (const p of patterns) expect(topic).toMatch(p);
   });
 });
+
+/** Anonymiseerpoort PR 2: the help says the server counts, and does not replace yet. */
+describe("help: the gate on the server", () => {
+  it.each([
+    ["nl", /op de server/i, /telt/i, /collega/i, /nog niets vervangen/i],
+    ["en", /on the server/i, /counts/i, /colleague/i, /nothing is replaced yet/i],
+  ] as const)("in %s", (locale, ...patterns) => {
+    const topic = getTopic("using-tools", locale);
+    for (const p of patterns) expect(topic).toMatch(p);
+  });
+});

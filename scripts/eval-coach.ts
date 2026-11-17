@@ -6,6 +6,7 @@
  *   ANTHROPIC_API_KEY=… npm run eval:coach                 # public cases
  *   EVALS_PRIVATE_DIR=~/… npm run eval:coach -- --repeat 3 # + private cases, 3 runs each
  *   npm run eval:coach -- --dry-run                        # build messages only, no API
+ *   npm run eval:coach -- --privacy-gate --label poort     # through the anonymiseerpoort
  *
  * Private cases (`<EVALS_PRIVATE_DIR>/*.json`, same shape as cases.json) never
  * enter the repo: the report names only their case ids and scores. Costs roughly
@@ -25,6 +26,7 @@ import {
   coachReportMarkdown,
   scoreCoachCase,
 } from "./eval-coach-helpers";
+import { EVAL_CIRCLE, privacyGated } from "./eval-privacy-helpers";
 
 const EVALS_DIR = join(process.cwd(), "evals");
 const REPORTS_DIR = join(EVALS_DIR, "reports");
@@ -54,6 +56,8 @@ async function main() {
   const dryRun = process.argv.includes("--dry-run");
   const repeat = Math.max(1, Number(arg("repeat") ?? 1));
   const model = arg("model") ?? DEFAULT_MODEL;
+  const gate = process.argv.includes("--privacy-gate");
+  const label = (arg("label") ?? "").replace(/[^a-z0-9-]/gi, "");
   const cases = loadCases();
   const rows: (CoachScore & { private: boolean })[] = [];
 
@@ -65,7 +69,10 @@ async function main() {
       continue;
     }
     for (let i = 0; i < repeat; i++) {
-      const { text } = await providerForModel(model).generate({
+      const provider = gate
+        ? privacyGated(providerForModel(model), EVAL_CIRCLE, c.locale)
+        : providerForModel(model);
+      const { text } = await provider.generate({
         model,
         system: getRuntimePrompt("portfolio-coach@v1", c.locale),
         messages: [{ role: "user", content: message }],
@@ -81,8 +88,8 @@ async function main() {
 
   const date = new Date().toISOString().slice(0, 10);
   mkdirSync(REPORTS_DIR, { recursive: true });
-  const file = join(REPORTS_DIR, `${date}-portfolio-coach.md`);
-  writeFileSync(file, coachReportMarkdown({ date, model, repeat, rows }));
+  const file = join(REPORTS_DIR, `${date}${label}-portfolio-coach.md`);
+  writeFileSync(file, coachReportMarkdown({ date, model: gate ? `${model} + anonimiseerpoort` : model, repeat, rows }));
   console.log(`Report: ${file}`);
 }
 

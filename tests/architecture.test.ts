@@ -157,6 +157,18 @@ describe("AI SDKs stay behind app/lib/ai/", () => {
   });
 });
 
+describe("everything that leaves goes through the anonymiseerpoort (BESLUIT-2026-11-17-5)", () => {
+  const exits = [resolve(app, "lib/ai/provider.ts"), resolve(app, "lib/ai/decisions.ts")];
+  const outsideAi = (f: string) => !f.startsWith(`${resolve(app, "lib/ai")}/`);
+  const reachesExit = (f: string) =>
+    imports.get(f)?.some((s) => exits.includes(resolveLocal(s, f) ?? "")) ?? false;
+
+  it("only privacyGate.server.ts calls a model or Jev", () => {
+    const callers = files.filter((f) => outsideAi(f) && reachesExit(f)).map(rel);
+    expect(callers).toEqual(["app/server/privacyGate.server.ts"]);
+  });
+});
+
 describe("a tool's mode is a strategy, not a branch", () => {
   // Principle 4 (deep modules): what differs between a chat, chained stages and a single
   // generation lives in `app/lib/registry/modes.ts`. Validating the raw data may still look.

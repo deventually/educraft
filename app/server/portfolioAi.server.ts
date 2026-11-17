@@ -1,10 +1,9 @@
 /**
  * The one structured model call outside the tool stream (BDB/BKE coach, draft,
  * framework extraction; the course import of P26.3): the user's selectable
- * default model, the quota gate, usage accounting and a log line. Never throws;
- * `null` = no usable call.
+ * default model, the quota gate, usage accounting and a log line. It leaves through the
+ * anonymiseerpoort (`privacyGate.server`). Never throws; `null` = no usable call.
  */
-import { providerForModel } from "~/lib/ai/provider";
 import { DEFAULT_MODEL } from "~/lib/ai/models";
 import { getRuntimePrompt } from "~/lib/prompts";
 import type { Locale } from "~/lib/i18n";
@@ -14,6 +13,7 @@ import { currentAiSignal } from "./aiCalls.server";
 import { meterCall } from "./aiMeter.server";
 import { aiGate } from "./aiLimits.server";
 import { log } from "./log.server";
+import { gatedGenerate } from "./privacyGate.server";
 
 /**
  * `"quota"` when a teacher is over the daily quota or their monthly limit in euros (PR D);
@@ -40,14 +40,21 @@ export async function callPortfolioModel(
   const started = Date.now();
   const meter = meterCall(user.id, event, model);
   try {
-    const { text, usage } = await providerForModel(model).generate({
-      model,
-      system: getRuntimePrompt(promptId, locale),
-      messages: [{ role: "user", content: message }],
-      temperature: 0,
-      maxTokens,
-      signal,
-    });
+    const gated = await gatedGenerate(
+      user,
+      {
+        model,
+        system: getRuntimePrompt(promptId, locale),
+        messages: [{ role: "user", content: message }],
+        temperature: 0,
+        maxTokens,
+        signal,
+      },
+      { exit: "portfolio", locale },
+    );
+    // Without the teacher's approval the gate only counts, so it always sends (step 2 of 5).
+    if (!gated.ok) throw new Error("privacy review");
+    const { text, usage } = gated.value;
     if (usage) meter.onUsage(usage);
     await meter.done(text.length);
     log(event, { promptId, model, outcome: "ok", durationMs: Date.now() - started });

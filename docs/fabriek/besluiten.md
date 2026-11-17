@@ -764,3 +764,20 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   eerst gemeten op echte, openbare studiegidsen die Bastiaan labelt. De release-checklist
   (`.claude/skills/release/SKILL.md`) vraagt ernaar. Bastiaan, 2026-11-17 ("Kan je dit ergens
   opslaan zodat we het niet vergeten?").
+- **BESLUIT-2026-11-17-5:** **Alles wat LimeOnIt naar een AI of naar Jev stuurt, gaat door één
+  poort op de server, en die telt eerst alleen.** De poort (`app/server/privacyGate.server.ts`)
+  is de enige plek die `providerForModel` of `postDecisions` aanroept; `tests/architecture.test.ts`
+  faalt als iets anders dat doet. Ze gebruikt dezelfde motor als de browser, met de namen die de
+  server kent: de docent zelf (`[DOCENT]`), wie met de docent in een team zit en iedereen op een
+  cursus van de docent (`[COLLEGA-n]`), niet de hele instelling. Ze vervangt **niets stil**: zolang
+  een aanvraag niet meestuurt wat de docent zag (dat komt met stap 3 en 4 van het ontwerp), telt
+  ze alleen per soort, nooit welke woorden, in de logregel `privacy-gate`. Met wat de docent zag
+  vervangt ze precies dat, stuurt ze niets zolang er iets is dat de docent niet zag (en legt ze dat
+  per woord voor), zet ze één vaste zin over codes in de prompt en zet ze de namen terug in het
+  antwoord, ook tijdens het streamen. De codetabel leeft alleen tijdens die ene aanroep.
+  Een naam komt terug zoals hij geschreven stond als hij overal hetzelfde stond ("Fatima"), anders
+  als de volledige naam. Gemeten met Claude Code, drie keer per case, met en zonder poort:
+  Studentwerk beoordelen op twee cases met namen 4,00 en 4,00 met poort tegen 4,07 en 4,00
+  zonder (binnen de spreiding, `evals/reports/2026-11-17poort-*.md`); de BDB-coach op de enige
+  case met een collega 2 van 3 geslaagd met én zonder poort (`2026-11-17poort-*-portfolio-coach.md`).
+  Bastiaan, 2026-11-17 (ontwerp "Eén anonimiseerpoort", PR 2; keuze "Eerst alleen tellen").

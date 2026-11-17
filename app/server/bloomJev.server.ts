@@ -3,11 +3,11 @@
  * (`app/lib/courses/bloomJev.ts` builds it and reads the answer), a few at a time, each call
  * metered at the cost Jev reports. Nothing goes to Jev unless `jevAccess` allows it.
  */
-import { postDecisions } from "~/lib/ai/decisions";
 import { usdInEuroMicros } from "~/lib/ai/models";
 import { buildBloomJevRequest, type LevelP, parseBloomJevAnswer } from "~/lib/courses/bloomJev";
 import type { Locale } from "~/lib/i18n";
 import { currentAiSignal } from "./aiCalls.server";
+import { gatedDecisions } from "./privacyGate.server";
 import type { User } from "./auth.server";
 import { jevAccess } from "./jev.server";
 import { recordAiUsage } from "./repositories/aiUsage.server";
@@ -31,10 +31,19 @@ export async function askJevBloom(
   const signal = currentAiSignal();
 
   const ask = async (text: string): Promise<LevelP | null> => {
-    const answer = await postDecisions(url, buildBloomJevRequest(text, locale, model), {
-      apiKey,
-      ...(signal ? { signal } : {}),
-    }).then(parseBloomJevAnswer, () => null);
+    const answer = await gatedDecisions(
+      user,
+      url,
+      buildBloomJevRequest(text, locale, model),
+      {
+        apiKey,
+        ...(signal ? { signal } : {}),
+      },
+      { exit: "jev", locale },
+    ).then(
+      (r) => (r.ok ? parseBloomJevAnswer(r.value) : null),
+      () => null,
+    );
     const costMicros = answer?.costUsd === undefined ? undefined : usdInEuroMicros(answer.costUsd);
     await recordAiUsage(user.id, {
       source,

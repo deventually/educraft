@@ -19,7 +19,9 @@ app for Dutch education (VO/mbo/hbo/wo). Depth: [Architecture](wiki/Architecture
   with `{{placeholder}}` syntax, validated at build time.
 - **Providers are abstracted** behind `app/lib/ai/provider.ts`; nothing outside `app/lib/ai/` imports
   an AI SDK, and nothing `app/components` imports reaches a `*.server` module
-  (`tests/architecture.test.ts`).
+  (`tests/architecture.test.ts`). Everything that leaves goes through the anonymiseerpoort:
+  only `app/server/privacyGate.server.ts` calls `providerForModel` or `postDecisions`
+  (BESLUIT-2026-11-17-5).
 - **Context:** the per-tool sandbox plus the user profile, injected as `{{context}}` /
   `{{contextProfile}}` ([Context Model](wiki/Context-Model.md)).
 

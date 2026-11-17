@@ -4,9 +4,8 @@ import { getToolBySlug } from "~/lib/registry";
 import { buildSystemPrompt } from "~/lib/template/buildSystemPrompt";
 import { guardOutput } from "~/lib/template/guards";
 import { modeOf } from "~/lib/registry/modes";
-import { providerForModel } from "~/lib/ai/provider";
 import { resolveModelInfo } from "~/lib/ai/models";
-import { sseStream, sseError, SSE_HEADERS } from "~/lib/ai/sse";
+import { sseStream, sseError, ssePrivacyReview, SSE_HEADERS } from "~/lib/ai/sse";
 import { getProfile } from "~/server/repositories/profiles.server";
 import { servedModelFor, isToolAvailable } from "~/server/availability.server";
 import { saveGeneration, upsertChatGeneration } from "~/server/repositories/generations.server";
@@ -27,6 +26,7 @@ import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { getDossier } from "~/server/repositories/portfolio.server";
 import { getInvalidToolSlugs } from "~/lib/registry/boot.server";
 import { dossierPromptValues } from "~/lib/portfolio/rehearsal";
+import { gatedStream, PrivacyApprovalSchema } from "~/server/privacyGate.server";
 
 // Boundaries: every value is length/count-capped so a hostile body can never
 // balloon the prompt (and thus the owner's token bill) or exhaust memory.
@@ -86,6 +86,8 @@ const StreamBodySchema = z.object({
   images: z.array(ImageInputSchema).max(10).optional(),
   /** The caller's own dossier, for a tool with `contextFrom: "dossier"` (P29.3). */
   dossierId: z.string().max(100).optional(),
+  /** What the teacher saw replaced (anonymiseerpoort); absent = the gate only counts. */
+  privacy: PrivacyApprovalSchema.optional(),
 });
 
 /**
@@ -215,19 +217,11 @@ export async function action({ request }: Route.ActionArgs) {
       audience,
     });
 
-    // Server-side model allow-list: a caller may only pick a model in THEIR effective
-    // set — the instance allow-list, or the teacher's own set when they have one
-    // (override, P18). The same gate governs local/CLI/discovered models, which exist
-    // only outside production. Anything else falls back to the tool/stage
-    // default, so a hostile body can't force an expensive, disabled, or un-granted
-    // model on the owner.
-    // A stage may pin a specific model (infra), respected as-is (but upgraded);
-    // otherwise the soft default (tool.defaultModel) is resolved to a model THIS
-    // caller may actually use — so a disabled/un-granted default can't leak past the
-    // teacher gate when the requested model is refused (Phase 14 bugfix). A retired
-    // model hands over to its newest version; a retiring one still finishes a chat.
+    // Server-side model allow-list: only a model in the caller's effective set (instance, or
+    // their own set, P18; local/CLI models only outside production). Anything else falls back
+    // to the stage pin or the tool default resolved for THIS caller (Phase 14), so a hostile
+    // body can't force an expensive, disabled or un-granted model. Retired → newest version.
     const model = await servedModelFor(user, body.model, tool.defaultModel, stage.model);
-    const provider = providerForModel(model);
 
     // Vision gate. The image array is already shape/size/count-validated by the
     // schema; here we only refuse images to a non-vision model.
@@ -243,8 +237,7 @@ export async function action({ request }: Route.ActionArgs) {
       images = body.images;
     }
 
-    // Structured metadata for the per-generation log line — metadata only, never
-    // prompt/response content (user data stays out of logs).
+    // The per-generation log line: metadata only, never prompt or response content.
     const logFields = {
       userId: user.id,
       toolSlug: tool.slug,
@@ -270,11 +263,8 @@ export async function action({ request }: Route.ActionArgs) {
     const messages = mode.turns(body.messages, outputLanguage);
     const promptMessages = mode.promptTurns(messages, outputLanguage);
 
-    // Reserve a rate + concurrency slot as late as possible: only a request that
-    // will actually stream counts against the budget. The slot is freed in
-    // onFinally, which runs whether the stream completes, errors, or is closed.
-    // Keyed by the authenticated user id (Phase 1) — abuse budgets follow the
-    // account, not a spoofable IP/session pair.
+    // A rate + concurrency slot as late as possible, per user id (Phase 1); freed in onFinally
+    // (complete, error or close), or when the gate sends nothing.
     const gate = rateLimiter.acquire(user.id);
     if (!gate.ok) {
       log("generation", { ...logFields, outcome: "rate_limited", durationMs: 0 });
@@ -286,21 +276,31 @@ export async function action({ request }: Route.ActionArgs) {
     const cancelled = new AbortController();
     const signal = AbortSignal.any([request.signal, cancelled.signal]);
 
+    // Everything leaves through the anonymiseerpoort, which may send nothing yet (review).
+    const gated = await gatedStream(
+      user,
+      {
+        model,
+        system,
+        messages: promptMessages,
+        images,
+        temperature: stage.temperature ?? tool.defaultTemperature,
+        maxTokens: stage.maxTokens ?? tool.defaultMaxTokens,
+        // Reasoning switch, only for the native Ollama adapter; absent = model default.
+        thinking: body.thinking,
+        cacheKey: mode.cachesPrompt ? `${user.id}:${tool.slug}` : undefined,
+        signal,
+        onUsage: (usage) => meter.onUsage(usage),
+      },
+      { exit: "stream", locale: outputLanguage, approval: body.privacy },
+    );
+    if (!gated.ok) {
+      gate.release();
+      return new Response(ssePrivacyReview(gated.review), { headers: SSE_HEADERS });
+    }
     const startedAt = Date.now();
     const meter = meterCall(user.id, tool.slug, model);
-    const tokens = provider.streamChat({
-      model,
-      system,
-      messages: promptMessages,
-      images,
-      temperature: stage.temperature ?? tool.defaultTemperature,
-      maxTokens: stage.maxTokens ?? tool.defaultMaxTokens,
-      // Reasoning switch, only for the native Ollama adapter; absent = model default.
-      thinking: body.thinking,
-      cacheKey: mode.cachesPrompt ? `${user.id}:${tool.slug}` : undefined,
-      signal,
-      onUsage: meter.onUsage,
-    });
+    const tokens = gated.value;
 
     const stream = sseStream(tokens, {
       formatError: (err) => {

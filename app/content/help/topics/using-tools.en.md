@@ -38,6 +38,8 @@ A full name always goes. A single part of a name goes only when it starts with a
 
 The real names stay in your browser and come back in the result. *Earlier work* keeps the version with codes. Note: figures and photos are not anonymised, and a misspelt name can slip through. So do check the text.
 
+Everything that goes to the AI also passes a check **on the server**. It knows your name and those of your colleagues (your teams and the people on your courses) and recognises e-mail addresses and numbers. For now the check only counts how often it finds something, never what; nothing is replaced yet on the server. That changes once you see what goes before you send.
+
 ## Read aloud and dictation
 
 - **Read aloud** reads a result out loud with a voice on your own device. If your device has no Dutch or English voice, you won't see the button.

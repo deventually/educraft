@@ -5,7 +5,6 @@
  * (the one admin switch, BESLUIT-2026-11-17-1); a test Jev does not answer stays as the LLM read it. Each call is metered at the cost Jev
  * reports.
  */
-import { postDecisions } from "~/lib/ai/decisions";
 import { usdInEuroMicros } from "~/lib/ai/models";
 import {
   coverageJevRequests,
@@ -15,6 +14,7 @@ import {
 import type { ImportAssessment, ImportProposal } from "~/lib/courses/import";
 import type { Locale } from "~/lib/i18n";
 import { currentAiSignal } from "./aiCalls.server";
+import { gatedDecisions } from "./privacyGate.server";
 import type { User } from "./auth.server";
 import { jevAccess } from "./jev.server";
 import { log } from "./log.server";
@@ -43,10 +43,19 @@ export async function withJevCoverage(
   const check = async (a: ImportAssessment): Promise<ImportAssessment> => {
     const request = requests.get(a.key);
     if (!request) return a;
-    const answer = await postDecisions(url, request, {
-      apiKey,
-      ...(signal ? { signal } : {}),
-    }).then(parseCoverageJevAnswer, () => null);
+    const answer = await gatedDecisions(
+      user,
+      url,
+      request,
+      {
+        apiKey,
+        ...(signal ? { signal } : {}),
+      },
+      { exit: "jev", locale },
+    ).then(
+      (r) => (r.ok ? parseCoverageJevAnswer(r.value) : null),
+      () => null,
+    );
     const costMicros = answer?.costUsd === undefined ? undefined : usdInEuroMicros(answer.costUsd);
     await recordAiUsage(user.id, {
       source: EVENT,

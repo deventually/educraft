@@ -9,6 +9,7 @@
  * pure template helpers, which are network-free too.)
  */
 
+import type { KnownPeople } from "~/lib/privacy/gate";
 import type { ContextProfile } from "~/lib/context/types";
 import type { OutputLanguage, Tool, ToolStage } from "~/lib/registry/types";
 import { DEFAULT_MODEL, isResolvableModel, resolveModelInfo } from "~/lib/ai/models";
@@ -609,6 +610,8 @@ export interface EvalCase {
   userTurns?: string[];
   /** Vision tools (e.g. math-grading): image file, relative to evals/<slug>/. */
   imagePath?: string;
+  /** `--privacy-gate`: the names the gate knows for this case (default `EVAL_CIRCLE`). */
+  privacyKnown?: KnownPeople;
 }
 
 const JUDGE_SPINE = `You are a strict but fair evaluator of AI-generated teaching material. Score the OUTPUT against the RUBRIC. Reply with ONLY a JSON object, no prose, in this exact shape:
