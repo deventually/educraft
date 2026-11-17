@@ -83,7 +83,9 @@ describe("Admin never-words", () => {
 
   it("puts focus back on the list's heading, since the word's row is gone (a11y review)", async () => {
     renderRoute(full);
-    await userEvent.click(screen.getByRole("button", { name: "Engelmann voor iedereen laten staan" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Engelmann voor iedereen laten staan" }),
+    );
     await waitFor(() =>
       expect(screen.getByRole("heading", { name: "Voorstellen van docenten" })).toHaveFocus(),
     );
@@ -92,11 +94,11 @@ describe("Admin never-words", () => {
   it("names the column of buttons for a screen reader (a11y review)", () => {
     renderRoute(full);
     const table = screen.getByRole("table", { name: /nooit-lijst/i });
-    expect(within(table).getAllByRole("columnheader").map((h) => h.textContent)).toEqual([
-      "Woord",
-      "Docenten",
-      "Actie",
-    ]);
+    expect(
+      within(table)
+        .getAllByRole("columnheader")
+        .map((h) => h.textContent),
+    ).toEqual(["Woord", "Docenten", "Actie"]);
   });
 
   it("says so plainly when there is nothing yet", () => {
