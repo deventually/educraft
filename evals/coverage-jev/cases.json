@@ -1,0 +1,138 @@
+{
+  "about": "Fictieve cursusdocumenten (de repo is publiek), elk met wat het document over dekking en soort toets zegt. De labels volgen uit de tekst zelf: wie het document leest, komt op hetzelfde uit. Geschreven vóór enige meting; er wordt niets op afgestemd.",
+  "cases": [
+    {
+      "id": "cov-table-codes-nl",
+      "locale": "nl",
+      "courseName": "Webtechnologie",
+      "description": "Toetstabel met codes; de leeruitkomsten staan ver boven de tabel.",
+      "document": "Hogeschool Fictief — Studiehandleiding Webtechnologie (WT1), 5 EC\n\n2. Leeruitkomsten\nLU1 Je bouwt een toegankelijke webpagina met HTML en CSS.\nLU2 Je schrijft JavaScript dat reageert op invoer van de gebruiker.\nLU3 Je test een webapplicatie met geautomatiseerde tests.\nLU4 Je licht je technische keuzes toe aan een opdrachtgever.\n\n3. Werkwijze\nIn de eerste zes weken volg je hoorcolleges en werk je wekelijks aan practicumopdrachten. De practica worden besproken in de werkgroep. Je werkt in tweetallen aan een kleine webwinkel.\n\n4. Toetsing\n| Toets | Week | Weging | Leeruitkomsten |\n| Kennistoets webstandaarden | 5 | 30% | LU1 |\n| Praktijkopdracht webwinkel | 9 | 50% | LU2, LU3 |\n| Presentatie aan de opdrachtgever | 10 | 20% | LU4 |\nHerkansing in week 20.",
+      "outcomes": [
+        "Je bouwt een toegankelijke webpagina met HTML en CSS.",
+        "Je schrijft JavaScript dat reageert op invoer van de gebruiker.",
+        "Je test een webapplicatie met geautomatiseerde tests.",
+        "Je licht je technische keuzes toe aan een opdrachtgever."
+      ],
+      "assessments": [
+        { "title": "Kennistoets webstandaarden", "kind": "summative", "covers": [1] },
+        { "title": "Praktijkopdracht webwinkel", "kind": "summative", "covers": [2, 3] },
+        { "title": "Presentatie aan de opdrachtgever", "kind": "summative", "covers": [4] }
+      ]
+    },
+    {
+      "id": "cov-prose-no-codes-nl",
+      "locale": "nl",
+      "courseName": "Pedagogiek",
+      "description": "Geen codes en geen tabel: welke leeruitkomst een toets dekt, staat alleen in de beschrijving van de toets.",
+      "document": "Studiehandleiding Pedagogiek 2 (fictief)\n\nLeeruitkomsten\nDe student beschrijft de ontwikkeling van kinderen van 4 tot 12 jaar.\nDe student vergelijkt twee opvoedstijlen aan de hand van theorie.\nDe student ontwerpt een activiteit die aansluit bij de ontwikkeling van een groep.\n\nToetsing\nCasusanalyse: je krijgt een casus over een gezin en vergelijkt de opvoedstijl van de ouders met een tweede opvoedstijl uit de literatuur. Je onderbouwt je vergelijking met theorie. De casusanalyse telt voor 40% mee.\n\nActiviteitenontwerp: je ontwerpt een activiteit voor een groep kinderen op je stageplek. In de verantwoording beschrijf je eerst de ontwikkelingsfase van de groep en laat je zien hoe je activiteit daarop aansluit. Het activiteitenontwerp telt voor 60% mee.",
+      "outcomes": [
+        "De student beschrijft de ontwikkeling van kinderen van 4 tot 12 jaar.",
+        "De student vergelijkt twee opvoedstijlen aan de hand van theorie.",
+        "De student ontwerpt een activiteit die aansluit bij de ontwikkeling van een groep."
+      ],
+      "assessments": [
+        { "title": "Casusanalyse", "kind": "summative", "covers": [2] },
+        { "title": "Activiteitenontwerp", "kind": "summative", "covers": [1, 3] }
+      ]
+    },
+    {
+      "id": "cov-formative-practice-nl",
+      "locale": "nl",
+      "courseName": "Statistiek",
+      "description": "Een oefentoets die niet meetelt naast een tentamen; de oefentoets staat ook in de tabel.",
+      "document": "Fictieve Hogeschool — Statistiek 1, 4 EC\n\nLeeruitkomsten\nLU1 Je berekent beschrijvende maten voor een dataset.\nLU2 Je voert een t-toets uit en interpreteert de uitkomst.\nLU3 Je kiest een passende toets bij een onderzoeksvraag.\n\nToetsoverzicht\n| Onderdeel | Week | Weging | Leeruitkomsten |\n| Oefentoets statistiek | 4 | - | LU1, LU2 |\n| Tentamen statistiek | 8 | 100% | LU1, LU2, LU3 |\nDe oefentoets is bedoeld om te zien waar je staat. Je krijgt er feedback op, maar hij telt niet mee voor je cijfer. Het tentamen bepaalt je eindcijfer; je hebt minimaal een 5,5 nodig.",
+      "outcomes": [
+        "Je berekent beschrijvende maten voor een dataset.",
+        "Je voert een t-toets uit en interpreteert de uitkomst.",
+        "Je kiest een passende toets bij een onderzoeksvraag."
+      ],
+      "assessments": [
+        { "title": "Oefentoets statistiek", "kind": "formative", "covers": [1, 2] },
+        { "title": "Tentamen statistiek", "kind": "summative", "covers": [1, 2, 3] }
+      ]
+    },
+    {
+      "id": "cov-handbook-en",
+      "locale": "en",
+      "courseName": "Research Methods",
+      "description": "English handbook with LO codes in the text and a feedback round that does not count.",
+      "document": "Fictional University College — Course Handbook Research Methods (RM201)\n\nLearning outcomes\nLO1 Formulate a research question that can be answered with empirical data.\nLO2 Design a data collection plan that fits the research question.\nLO3 Analyse qualitative data with a coding scheme.\n\nAssessment\nResearch proposal (week 5): students write a proposal with a research question (LO1) and a data collection plan (LO2). The proposal counts for 40% of the final grade.\nPeer feedback round (week 7): students give each other feedback on a first coding of their interviews (LO3). This round is for feedback only and is not graded.\nFinal paper (week 10): students report their analysis of the interview data (LO3) and reflect on their research question (LO1). The final paper counts for 60% of the final grade.",
+      "outcomes": [
+        "Formulate a research question that can be answered with empirical data.",
+        "Design a data collection plan that fits the research question.",
+        "Analyse qualitative data with a coding scheme."
+      ],
+      "assessments": [
+        { "title": "Research proposal", "kind": "summative", "covers": [1, 2] },
+        { "title": "Peer feedback round", "kind": "formative", "covers": [3] },
+        { "title": "Final paper", "kind": "summative", "covers": [1, 3] }
+      ]
+    },
+    {
+      "id": "cov-matrix-x-nl",
+      "locale": "nl",
+      "courseName": "Bedrijfseconomie",
+      "description": "Een toetsmatrijs met een kruisje per leeruitkomst in plaats van een lijst.",
+      "document": "OER-bijlage Bedrijfseconomie (fictief)\n\nLeeruitkomsten\nLU1 Je stelt een begroting op voor een kleine onderneming.\nLU2 Je berekent het break-evenpunt van een product.\nLU3 Je beoordeelt een investering met de netto contante waarde.\n\nToetsmatrijs\n| Toets | LU1 | LU2 | LU3 | Weging |\n| Schriftelijke toets rekenen | | X | X | 50% |\n| Adviesrapport ondernemer | X | | X | 50% |",
+      "outcomes": [
+        "Je stelt een begroting op voor een kleine onderneming.",
+        "Je berekent het break-evenpunt van een product.",
+        "Je beoordeelt een investering met de netto contante waarde."
+      ],
+      "assessments": [
+        { "title": "Schriftelijke toets rekenen", "kind": "summative", "covers": [2, 3] },
+        { "title": "Adviesrapport ondernemer", "kind": "summative", "covers": [1, 3] }
+      ]
+    },
+    {
+      "id": "cov-go-no-go-nl",
+      "locale": "nl",
+      "courseName": "Beroepsvaardigheden",
+      "description": "Een voorwaarde zonder weging (go/no-go) en een tussentijds feedbackgesprek.",
+      "document": "Moduleboek Beroepsvaardigheden (fictief), mbo niveau 4\n\nLeeruitkomsten\n1. Je voert een intakegesprek met een cliënt.\n2. Je rapporteert volgens de afspraken van je instelling.\n3. Je reflecteert op je eigen handelen in de praktijk.\n\nBeoordeling\nPraktijkexamen intakegesprek: je voert een intakegesprek met een cliënt in de praktijk en rapporteert het daarna volgens de afspraken van je instelling (leeruitkomsten 1 en 2). Je krijgt een cijfer; dit is het eindcijfer van de module.\nReflectieverslag: je schrijft een reflectieverslag over je handelen in de praktijk (leeruitkomst 3). Het verslag krijgt geen cijfer, maar moet voldoende zijn: zonder voldoende reflectieverslag haal je de module niet.\nVoortgangsgesprek: halverwege de periode bespreek je met je begeleider hoe het gaat met je intakegesprekken (leeruitkomst 1). Dit gesprek is alleen bedoeld voor feedback.",
+      "outcomes": [
+        "Je voert een intakegesprek met een cliënt.",
+        "Je rapporteert volgens de afspraken van je instelling.",
+        "Je reflecteert op je eigen handelen in de praktijk."
+      ],
+      "assessments": [
+        { "title": "Praktijkexamen intakegesprek", "kind": "summative", "covers": [1, 2] },
+        { "title": "Reflectieverslag", "kind": "summative", "covers": [3] },
+        { "title": "Voortgangsgesprek", "kind": "formative", "covers": [1] }
+      ]
+    },
+    {
+      "id": "cov-all-but-nl",
+      "locale": "nl",
+      "courseName": "Projectmanagement",
+      "description": "Dekking als uitzondering geschreven: 'alle leeruitkomsten behalve LU3'.",
+      "document": "Studiehandleiding Projectmanagement (fictief), 5 EC\n\nLeeruitkomsten\nLU1 Je stelt een projectplan op met doelen, planning en begroting.\nLU2 Je stuurt een projectteam aan tijdens de uitvoering.\nLU3 Je evalueert een afgerond project met de opdrachtgever.\nLU4 Je beheerst de risico's van een project met een risicoanalyse.\n\nToetsing\nProjectdossier (week 9, 70%): het dossier toetst alle leeruitkomsten behalve LU3.\nEindgesprek met de opdrachtgever (week 10, 30%): in dit gesprek evalueer je het project; het toetst alleen LU3.",
+      "outcomes": [
+        "Je stelt een projectplan op met doelen, planning en begroting.",
+        "Je stuurt een projectteam aan tijdens de uitvoering.",
+        "Je evalueert een afgerond project met de opdrachtgever.",
+        "Je beheerst de risico's van een project met een risicoanalyse."
+      ],
+      "assessments": [
+        { "title": "Projectdossier", "kind": "summative", "covers": [1, 2, 4] },
+        { "title": "Eindgesprek met de opdrachtgever", "kind": "summative", "covers": [3] }
+      ]
+    },
+    {
+      "id": "cov-two-mentions-nl",
+      "locale": "nl",
+      "courseName": "Didactiek",
+      "description": "De toets staat in een overzicht en verderop in een eigen beschrijving; de dekking staat alleen in de beschrijving.",
+      "document": "Studiehandleiding Didactiek 1 (fictief)\n\nLeeruitkomsten\nLU1 Je formuleert lesdoelen die aansluiten bij het niveau van je klas.\nLU2 Je kiest werkvormen die passen bij je lesdoelen.\nLU3 Je geeft leerlingen feedback die hen verder helpt.\n\nToetsoverzicht\n- Lesontwerp (week 6, 50%)\n- Lesbezoek (week 9, 50%)\n\nBeschrijving van de toetsen\nLesontwerp. Je schrijft een lesontwerp voor je stageklas. Je formuleert lesdoelen (LU1) en verantwoordt de werkvormen die je kiest (LU2).\nLesbezoek. Je docent-begeleider bezoekt een les die je geeft. Er wordt gekeken naar je werkvormen (LU2) en naar de feedback die je leerlingen geeft (LU3).",
+      "outcomes": [
+        "Je formuleert lesdoelen die aansluiten bij het niveau van je klas.",
+        "Je kiest werkvormen die passen bij je lesdoelen.",
+        "Je geeft leerlingen feedback die hen verder helpt."
+      ],
+      "assessments": [
+        { "title": "Lesontwerp", "kind": "summative", "covers": [1, 2] },
+        { "title": "Lesbezoek", "kind": "summative", "covers": [2, 3] }
+      ]
+    }
+  ]
+}

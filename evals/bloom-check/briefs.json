@@ -1,0 +1,198 @@
+{
+  "about": "Nieuwe cursusbeschrijvingen voor de Bloom-check in de wizard, geschreven vóór enige run (2026-11-17). Niets wordt hierop afgestemd: Jev, de vragen en de drempel liggen vast.",
+  "cases": [
+    {
+      "id": "check-mbo-logistiek-nl",
+      "locale": "nl",
+      "name": "Magazijnbeheer",
+      "brief": {
+        "description": "Studenten leren hoe een magazijn werkt: goederen ontvangen, controleren en opslaan, orders verzamelen en verzenden, en de voorraad bijhouden in een WMS. Ze werken veilig met een palletwagen en een heftruck en lossen een tekort of een verkeerde levering op met hun leidinggevende.",
+        "weeks": 10
+      },
+      "context": "Context van de opleiding (mbo, middelbaar beroepsonderwijs):\n- Opleiding: Logistiek medewerker\n- EQF-niveau: EQF 3\n- Stem de complexiteit, voorbeelden en verwachtingen af op dit niveau (EQF 3); pas het taalregister alleen aan bij tekst die de lerende zelf leest. Noem het niveau zelf niet.\n- Spreek over de lerenden als \"student\" en over de begeleider als \"docent\", passend bij dit onderwijstype."
+    },
+    {
+      "id": "check-mbo-horeca-nl",
+      "locale": "nl",
+      "name": "Gastheerschap",
+      "brief": {
+        "description": "In deze cursus leren studenten gasten ontvangen, adviseren over menu en wijn, bestellingen opnemen en afrekenen. Ze gaan om met klachten en met gasten met allergieën, en werken samen met de keuken tijdens een drukke avond in het leerrestaurant.",
+        "weeks": 10
+      },
+      "context": "Context van de opleiding (mbo, middelbaar beroepsonderwijs):\n- Opleiding: Gastheer/gastvrouw\n- EQF-niveau: EQF 3\n- Stem de complexiteit, voorbeelden en verwachtingen af op dit niveau (EQF 3); pas het taalregister alleen aan bij tekst die de lerende zelf leest. Noem het niveau zelf niet.\n- Spreek over de lerenden als \"student\" en over de begeleider als \"docent\", passend bij dit onderwijstype."
+    },
+    {
+      "id": "check-mbo-ict-nl",
+      "locale": "nl",
+      "name": "Netwerken",
+      "brief": {
+        "description": "Studenten installeren en configureren een klein bedrijfsnetwerk met switches, een router en wifi. Ze documenteren de configuratie, sporen storingen op en lossen ze op, en leggen aan een klant uit wat er is veranderd.",
+        "weeks": 12
+      },
+      "context": "Context van de opleiding (mbo, middelbaar beroepsonderwijs):\n- Opleiding: Expert IT systems and devices\n- EQF-niveau: EQF 4\n- Stem de complexiteit, voorbeelden en verwachtingen af op dit niveau (EQF 4); pas het taalregister alleen aan bij tekst die de lerende zelf leest. Noem het niveau zelf niet.\n- Spreek over de lerenden als \"student\" en over de begeleider als \"docent\", passend bij dit onderwijstype."
+    },
+    {
+      "id": "check-mbo-zorg-nl",
+      "locale": "nl",
+      "name": "Begeleiden van ouderen",
+      "brief": {
+        "description": "Studenten leren ouderen met dementie begeleiden in het dagelijks leven. Ze observeren gedrag, rapporteren in het zorgdossier, stemmen af met familie, en bedenken samen met het team passende dagactiviteiten.",
+        "weeks": 10
+      },
+      "context": "Context van de opleiding (mbo, middelbaar beroepsonderwijs):\n- Opleiding: Maatschappelijke zorg\n- EQF-niveau: EQF 4\n- Stem de complexiteit, voorbeelden en verwachtingen af op dit niveau (EQF 4); pas het taalregister alleen aan bij tekst die de lerende zelf leest. Noem het niveau zelf niet.\n- Spreek over de lerenden als \"student\" en over de begeleider als \"docent\", passend bij dit onderwijstype."
+    },
+    {
+      "id": "check-hbo-pabo-nl",
+      "locale": "nl",
+      "name": "Rekenen-wiskunde didactiek",
+      "brief": {
+        "description": "Pabo-studenten leren hoe kinderen breuken en verhoudingen leren. Ze analyseren veelvoorkomende misconcepties, ontwerpen een lessenreeks met concreet materiaal en modellen, voeren die uit in de stageklas en reflecteren op de opbrengst met toetsgegevens.",
+        "weeks": 10,
+        "ec": 7.5
+      },
+      "context": "Context van de opleiding (hbo, hoger beroepsonderwijs):\n- Opleiding: Pabo\n- EQF-niveau: EQF 6\n- Stem de complexiteit, voorbeelden en verwachtingen af op dit niveau (EQF 6); pas het taalregister alleen aan bij tekst die de lerende zelf leest. Noem het niveau zelf niet.\n- Spreek over de lerenden als \"student\" en over de begeleider als \"docent\", passend bij dit onderwijstype."
+    },
+    {
+      "id": "check-hbo-hrm-nl",
+      "locale": "nl",
+      "name": "Verzuimbeleid",
+      "brief": {
+        "description": "Studenten onderzoeken het verzuim in een echte organisatie. Ze verzamelen cijfers en interviewen leidinggevenden, vergelijken de aanpak met wet- en regelgeving en literatuur, en adviseren de directie over een beter verzuimbeleid, dat ze mondeling verdedigen.",
+        "weeks": 10,
+        "ec": 15
+      },
+      "context": "Context van de opleiding (hbo, hoger beroepsonderwijs):\n- Opleiding: HRM\n- EQF-niveau: EQF 6\n- Stem de complexiteit, voorbeelden en verwachtingen af op dit niveau (EQF 6); pas het taalregister alleen aan bij tekst die de lerende zelf leest. Noem het niveau zelf niet.\n- Spreek over de lerenden als \"student\" en over de begeleider als \"docent\", passend bij dit onderwijstype."
+    },
+    {
+      "id": "check-hbo-verpleegkunde-nl",
+      "locale": "nl",
+      "name": "Klinisch redeneren",
+      "brief": {
+        "description": "Studenten verpleegkunde oefenen klinisch redeneren bij patiënten met hartfalen. Ze verzamelen gegevens, herkennen tekenen van verslechtering, stellen verpleegkundige diagnoses en een zorgplan op, en evalueren het effect van interventies met het team.",
+        "weeks": 8,
+        "ec": 5
+      },
+      "context": "Context van de opleiding (hbo, hoger beroepsonderwijs):\n- Opleiding: HBO-Verpleegkunde\n- EQF-niveau: EQF 6\n- Stem de complexiteit, voorbeelden en verwachtingen af op dit niveau (EQF 6); pas het taalregister alleen aan bij tekst die de lerende zelf leest. Noem het niveau zelf niet.\n- Spreek over de lerenden als \"student\" en over de begeleider als \"docent\", passend bij dit onderwijstype."
+    },
+    {
+      "id": "check-hbo-ict-nl",
+      "locale": "nl",
+      "name": "Software testen",
+      "brief": {
+        "description": "Studenten leren software systematisch testen. Ze schrijven unit- en integratietests, passen testtechnieken zoals grenswaardenanalyse toe, automatiseren tests in een CI-pipeline en beoordelen de testdekking van een bestaand project.",
+        "weeks": 8,
+        "ec": 5
+      },
+      "context": "Context van de opleiding (hbo, hoger beroepsonderwijs):\n- Opleiding: HBO-ICT\n- EQF-niveau: EQF 6\n- Stem de complexiteit, voorbeelden en verwachtingen af op dit niveau (EQF 6); pas het taalregister alleen aan bij tekst die de lerende zelf leest. Noem het niveau zelf niet.\n- Spreek over de lerenden als \"student\" en over de begeleider als \"docent\", passend bij dit onderwijstype."
+    },
+    {
+      "id": "check-hbo-communicatie-nl",
+      "locale": "nl",
+      "name": "Crisiscommunicatie",
+      "brief": {
+        "description": "Studenten leren communiceren tijdens een crisis. Ze bestuderen echte cases, stellen een crisiscommunicatieplan op voor een opdrachtgever, schrijven persberichten en berichten voor sociale media, en spelen een persconferentie na.",
+        "weeks": 7,
+        "ec": 5
+      },
+      "context": "Context van de opleiding (hbo, hoger beroepsonderwijs):\n- Opleiding: Communicatie\n- EQF-niveau: EQF 6\n- Stem de complexiteit, voorbeelden en verwachtingen af op dit niveau (EQF 6); pas het taalregister alleen aan bij tekst die de lerende zelf leest. Noem het niveau zelf niet.\n- Spreek over de lerenden als \"student\" en over de begeleider als \"docent\", passend bij dit onderwijstype."
+    },
+    {
+      "id": "check-wo-psychologie-nl",
+      "locale": "nl",
+      "name": "Onderzoeksmethoden",
+      "brief": {
+        "description": "Psychologiestudenten leren een kwantitatief onderzoek opzetten en uitvoeren. Ze formuleren een onderzoeksvraag en hypothesen, kiezen een design, analyseren data in R met regressie, en bespreken de validiteit van hun conclusies in een rapport.",
+        "weeks": 8,
+        "ec": 6
+      },
+      "context": "Context van de opleiding (wo, wetenschappelijk onderwijs):\n- Opleiding: Psychologie\n- EQF-niveau: EQF 6\n- Stem de complexiteit, voorbeelden en verwachtingen af op dit niveau (EQF 6); pas het taalregister alleen aan bij tekst die de lerende zelf leest. Noem het niveau zelf niet.\n- Spreek over de lerenden als \"student\" en over de begeleider als \"docent\", passend bij dit onderwijstype."
+    },
+    {
+      "id": "check-wo-recht-nl",
+      "locale": "nl",
+      "name": "Europees recht",
+      "brief": {
+        "description": "Rechtenstudenten bestuderen de instellingen en rechtsbronnen van de EU, de verhouding tussen Unierecht en nationaal recht, en het vrij verkeer van goederen. Ze lossen casusvragen op met jurisprudentie van het Hof en schrijven een betoog over een actuele kwestie.",
+        "weeks": 7,
+        "ec": 5
+      },
+      "context": "Context van de opleiding (wo, wetenschappelijk onderwijs):\n- Opleiding: Rechtsgeleerdheid\n- EQF-niveau: EQF 6\n- Stem de complexiteit, voorbeelden en verwachtingen af op dit niveau (EQF 6); pas het taalregister alleen aan bij tekst die de lerende zelf leest. Noem het niveau zelf niet.\n- Spreek over de lerenden als \"student\" en over de begeleider als \"docent\", passend bij dit onderwijstype."
+    },
+    {
+      "id": "check-wo-biologie-en",
+      "locale": "en",
+      "name": "Ecology field course",
+      "brief": {
+        "description": "Students carry out an ecological field study in a coastal dune area. They identify plant and insect species, design a sampling plan, collect and analyse data on species diversity, and present their findings in a scientific poster.",
+        "weeks": 4,
+        "ec": 6
+      },
+      "context": "Programme context (university):\n- Programme: Biology\n- EQF level: EQF 6\n- Match complexity, examples and expectations to this level (EQF 6); adapt the register only in text the learner reads. Do not name the level itself.\n- Refer to learners as \"student\" and to the supervisor as \"lecturer\", as fits this type of education."
+    },
+    {
+      "id": "check-wo-econ-en",
+      "locale": "en",
+      "name": "Public finance",
+      "brief": {
+        "description": "Students learn how governments raise and spend money. They study taxation, public goods and fiscal policy, use simple models to predict the effects of a tax change, and critically assess a national budget proposal in a policy brief.",
+        "weeks": 7,
+        "ec": 5
+      },
+      "context": "Programme context (university):\n- Programme: Economics\n- EQF level: EQF 6\n- Match complexity, examples and expectations to this level (EQF 6); adapt the register only in text the learner reads. Do not name the level itself.\n- Refer to learners as \"student\" and to the supervisor as \"lecturer\", as fits this type of education."
+    },
+    {
+      "id": "check-hbo-business-en",
+      "locale": "en",
+      "name": "International marketing",
+      "brief": {
+        "description": "Students develop an entry strategy for a Dutch company that wants to sell abroad. They analyse the target market and competitors, compare entry modes, adapt the marketing mix to the local culture, and pitch their plan to the company.",
+        "weeks": 10,
+        "ec": 15
+      },
+      "context": "Programme context (university of applied sciences):\n- Programme: International Business\n- EQF level: EQF 6\n- Match complexity, examples and expectations to this level (EQF 6); adapt the register only in text the learner reads. Do not name the level itself.\n- Refer to learners as \"student\" and to the supervisor as \"lecturer\", as fits this type of education."
+    },
+    {
+      "id": "check-hbo-engineering-en",
+      "locale": "en",
+      "name": "Control systems",
+      "brief": {
+        "description": "Students learn to model and control dynamic systems. They derive transfer functions, simulate system behaviour in MATLAB, tune a PID controller for a lab setup, and justify their design choices in a technical report.",
+        "weeks": 8,
+        "ec": 5
+      },
+      "context": "Programme context (university of applied sciences):\n- Programme: Mechanical Engineering\n- EQF level: EQF 6\n- Match complexity, examples and expectations to this level (EQF 6); adapt the register only in text the learner reads. Do not name the level itself.\n- Refer to learners as \"student\" and to the supervisor as \"lecturer\", as fits this type of education."
+    },
+    {
+      "id": "check-mbo-sport-en",
+      "locale": "en",
+      "name": "Fitness coaching",
+      "brief": {
+        "description": "Students learn to coach clients in a gym. They take an intake, set up a personal training programme, demonstrate exercises safely, motivate clients and adjust the programme based on progress.",
+        "weeks": 10
+      },
+      "context": "Programme context (vocational education):\n- Programme: Sport and fitness coach\n- EQF level: EQF 4\n- Match complexity, examples and expectations to this level (EQF 4); adapt the register only in text the learner reads. Do not name the level itself.\n- Refer to learners as \"student\" and to the supervisor as \"lecturer\", as fits this type of education."
+    },
+    {
+      "id": "check-wo-history-en",
+      "locale": "en",
+      "name": "Decolonisation",
+      "brief": {
+        "description": "Students study the end of European empires after 1945. They describe the main events, explain causes and consequences, compare cases from Asia and Africa, and write an argued essay based on primary sources.",
+        "weeks": 7,
+        "ec": 5
+      },
+      "context": "Programme context (university):\n- Programme: History\n- EQF level: EQF 6\n- Match complexity, examples and expectations to this level (EQF 6); adapt the register only in text the learner reads. Do not name the level itself.\n- Refer to learners as \"student\" and to the supervisor as \"lecturer\", as fits this type of education."
+    },
+    {
+      "id": "check-hbo-lerarenopleiding-nl",
+      "locale": "nl",
+      "name": "Formatief evalueren",
+      "brief": {
+        "description": "Studenten van de tweedegraads lerarenopleiding leren formatief evalueren in hun lessen. Ze formuleren leerdoelen en succescriteria, ontwerpen activiteiten die het leren zichtbaar maken, geven feedback en passen hun les aan op wat ze zien.",
+        "weeks": 8,
+        "ec": 5
+      },
+      "context": "Context van de opleiding (hbo, hoger beroepsonderwijs):\n- Opleiding: Tweedegraads lerarenopleiding\n- EQF-niveau: EQF 6\n- Stem de complexiteit, voorbeelden en verwachtingen af op dit niveau (EQF 6); pas het taalregister alleen aan bij tekst die de lerende zelf leest. Noem het niveau zelf niet.\n- Spreek over de lerenden als \"student\" en over de begeleider als \"docent\", passend bij dit onderwijstype."
+    }
+  ]
+}

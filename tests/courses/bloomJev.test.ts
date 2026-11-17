@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { BLOOM_LEVELS } from "~/lib/courses/bloom";
 import {
   BLOOM_JEV_THRESHOLD,
+  bloomCheck,
   buildBloomJevRequest,
   jevLevel,
   parseBloomJevAnswer,
@@ -49,5 +50,32 @@ describe("Jev on the Bloom level: one yes/no per level, code takes the highest",
   it("uses the threshold the three measurements ran with (set on the tuning sets only)", () => {
     expect(BLOOM_JEV_THRESHOLD).toBe(0.7);
     expect(jevLevel({ apply: 0.7, create: 0.69 })).toBe("apply");
+  });
+});
+
+describe("the Bloom check in the course wizard: does the verb fit the intended level?", () => {
+  const p = {
+    remember: 0.1,
+    understand: 0.9,
+    apply: 0.2,
+    analyze: 0.1,
+    evaluate: 0.1,
+    create: 0.1,
+  };
+
+  it("says nothing when Jev hears the intended level", () => {
+    expect(bloomCheck("understand", p)).toBeUndefined();
+  });
+
+  it("names the level Jev hears when it differs, with the same threshold as the import", () => {
+    expect(bloomCheck("analyze", p)).toBe("understand");
+    expect(bloomCheck("remember", { ...p, create: BLOOM_JEV_THRESHOLD })).toBe("create");
+  });
+
+  it("is null when Jev hears no clear level, and says nothing when neither has one", () => {
+    const vague = { remember: 0.3, understand: 0.5 };
+    expect(bloomCheck("apply", vague)).toBeNull();
+    expect(bloomCheck(undefined, vague)).toBeUndefined();
+    expect(bloomCheck(undefined, p)).toBe("understand");
   });
 });

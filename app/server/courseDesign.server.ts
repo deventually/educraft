@@ -7,6 +7,7 @@
  * `import-apply` (steps 1 and 2) and `design-lessons-apply` (step 3) add what the teacher ticks.
  */
 import { formatProfile } from "~/lib/context/format";
+import { bloomCheck } from "~/lib/courses/bloomJev";
 import {
   applyDesignBrief,
   buildOutcomesDesignMessage,
@@ -34,6 +35,7 @@ import type { CourseData } from "~/lib/courses/types";
 import { getMessages, type Locale } from "~/lib/i18n";
 import type { User } from "./auth.server";
 import { requireFeature } from "./availability.server";
+import { askJevBloom } from "./bloomJev.server";
 import { log } from "./log.server";
 import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
 import { type Course, updateCourse } from "./repositories/courses.server";
@@ -131,9 +133,37 @@ async function designCourseOutcomes(
     disciplines: (data.disciplines ?? []).map((d) => d.name),
     context: await courseContext(course, locale),
   });
-  return propose(user, "course-design-outcomes@v1", message, locale, (raw) =>
+  const r = await propose(user, "course-design-outcomes@v1", message, locale, (raw) =>
     parseOutcomesDesign(raw, data),
   );
+  return r.ok ? { ...r, proposal: await withBloomCheck(user, r.proposal, locale) } : r;
+}
+
+/**
+ * Jev's Bloom check (Jev's switch, off by default): per proposed outcome, does the
+ * verb fit the intended level? Where Jev hears another level, or none, the outcome carries it as
+ * `bloomCheck`; the level itself stays the AI's, and the teacher decides.
+ */
+async function withBloomCheck(
+  user: User,
+  proposal: ImportProposal,
+  locale: Locale,
+): Promise<ImportProposal> {
+  const texts = proposal.outcomes.map((o) => o.text);
+  const heard = await askJevBloom(user, texts, locale, EVENT);
+  if (!heard) return proposal;
+  const outcomes = proposal.outcomes.map((o, i) => {
+    const p = heard[i];
+    const check = p ? bloomCheck(o.bloom, p) : undefined;
+    return check === undefined ? o : { ...o, bloomCheck: check };
+  });
+  log(EVENT, {
+    outcome: "bloom-check",
+    asked: texts.length,
+    unanswered: heard.filter((p) => !p).length,
+    flagged: outcomes.filter((o) => "bloomCheck" in o).length,
+  });
+  return { ...proposal, outcomes };
 }
 
 /** The `design-assessments` intent (step 2): a test programme over the course's outcomes. */

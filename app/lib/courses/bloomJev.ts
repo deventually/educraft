@@ -149,3 +149,16 @@ export function jevLevel(p: LevelP, threshold = BLOOM_JEV_THRESHOLD): BloomLevel
   for (const l of BLOOM_LEVELS) if ((p[l] ?? 0) >= threshold) best = l;
   return best;
 }
+
+/**
+ * The course wizard's Bloom check: the level Jev hears in the verb of an outcome the AI wrote,
+ * only where it differs from the intended level (null: no clear level); undefined when they
+ * agree. Advice for the teacher, never a change to the level.
+ */
+export function bloomCheck(
+  intended: BloomLevel | undefined,
+  p: LevelP,
+): BloomLevel | null | undefined {
+  const heard = jevLevel(p);
+  return heard === (intended ?? null) ? undefined : heard;
+}

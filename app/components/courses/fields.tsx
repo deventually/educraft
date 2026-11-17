@@ -17,18 +17,27 @@ export function BloomSelect({
   name,
   value,
   label,
+  describedBy,
 }: {
   id: string;
   name: string;
   value?: BloomLevel;
   label: string;
+  /** The id of a hint about this level, such as the wizard's Bloom check. */
+  describedBy?: string;
 }) {
   const t = useT();
   const locale = useLocale();
   return (
     <div>
       <Label htmlFor={id}>{label}</Label>
-      <Select id={id} name={name} defaultValue={value ?? ""} className="mt-1">
+      <Select
+        id={id}
+        name={name}
+        defaultValue={value ?? ""}
+        aria-describedby={describedBy}
+        className="mt-1"
+      >
         <option value="">{t.courses.bloomNone}</option>
         {BLOOM_LEVELS.map((level) => (
           <option key={level} value={level}>

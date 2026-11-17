@@ -117,6 +117,32 @@ describe("CourseImport", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("marks what the second reading doubts, tied to the field, and changes no tick", async () => {
+    const [a1] = proposal.assessments;
+    const doubted: ImportProposal = {
+      ...proposal,
+      assessments: [{ ...a1!, check: { kind: true, outcomeKeys: ["o1", "o2"] } }],
+    };
+    const { container } = renderImport(doubted, false);
+    const toets = within(screen.getByRole("form", { name: "Voorstel" })).getByRole("group", {
+      name: "Toets 1",
+    });
+    const kind = within(toets).getByLabelText("Soort");
+    expect(kind).toHaveDisplayValue("Summatief");
+    expect(kind).toHaveAccessibleDescription(/Controleer/);
+    const lu1 = within(toets).getByRole("checkbox", {
+      name: "Leeruitkomst 1: Je schrijft SQL-queries.",
+    });
+    expect(lu1).toBeChecked();
+    expect(lu1).toHaveAccessibleDescription(/Controleer/);
+    const lu2 = within(toets).getByRole("checkbox", { name: /Je beheert een server/ });
+    expect(lu2).not.toBeChecked();
+    expect(lu2).toHaveAccessibleDescription(/Controleer/);
+    const lu3 = within(toets).getByRole("checkbox", { name: /Je ontwerpt een datamodel/ });
+    expect(lu3).not.toHaveAccessibleDescription(/Controleer/);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
   it("shows the AI's explanation when the document had nothing to import", async () => {
     const why = "Dit is een domeinbeschrijving; er staan geen vakken in.";
     const { container } = renderImport(null, false, why);
