@@ -4,16 +4,15 @@
  * stores nothing; the teacher picks, and `import-apply` adds what was picked.
  */
 import { postDecisions } from "~/lib/ai/decisions";
-import { DECISIONS, usdInEuroMicros } from "~/lib/ai/models";
+import { usdInEuroMicros } from "~/lib/ai/models";
 import { buildBloomJevRequest, jevLevel, parseBloomJevAnswer } from "~/lib/courses/bloomJev";
 import { buildImportMessage, type ImportProposal, parseImport } from "~/lib/courses/import";
 import type { CourseData } from "~/lib/courses/types";
 import type { Locale } from "~/lib/i18n";
 import { currentAiSignal } from "./aiCalls.server";
 import type { User } from "./auth.server";
-import { isFeatureOn } from "./availability.server";
 import { withJevCoverage } from "./coverageJev.server";
-import { providerSetting } from "./env.server";
+import { jevAccess } from "./jev.server";
 import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
 import { log } from "./log.server";
 import { recordAiUsage } from "./repositories/aiUsage.server";
@@ -66,9 +65,9 @@ export async function extractCourseImport(
 const JEV_PARALLEL = 6;
 
 /**
- * Jev's Bloom level instead of the LLM's (setting `bloomJev`, off by default): one request per
+ * Jev's Bloom level instead of the LLM's (Jev's switch, off by default): one request per
  * outcome, the level from code (`jevLevel`), none when no level is clear. An outcome Jev does
- * not answer keeps the LLM's level, and nothing goes to Jev without the setting and Jev's own key. Each
+ * not answer keeps the LLM's level, and nothing goes to Jev unless `jevAccess` allows it. Each
  * call is metered at the cost Jev reports. The teacher confirms every level, as before.
  */
 async function withJevBloom(
@@ -76,9 +75,9 @@ async function withJevBloom(
   proposal: ImportProposal,
   locale: Locale,
 ): Promise<ImportProposal> {
-  const apiKey = DECISIONS ? providerSetting(DECISIONS.keyEnv) : undefined;
-  if (!DECISIONS || !apiKey || !(await isFeatureOn(user, "bloomJev"))) return proposal;
-  const { url, model, provider } = DECISIONS;
+  const jev = await jevAccess();
+  if (!jev) return proposal;
+  const { url, model, provider, apiKey } = jev;
   const signal = currentAiSignal();
 
   const ask = async (outcome: ImportProposal["outcomes"][number]) => {

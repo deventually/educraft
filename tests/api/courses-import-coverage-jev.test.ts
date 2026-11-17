@@ -4,8 +4,8 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 process.env.DATABASE_URL = "file::memory:";
 
 // Jev checks the LLM's reading of each test in the course import: which outcomes it covers and
-// whether it is formative or summative (TypeSafe's "verify and escalate"). Behind the instance
-// setting `coverageJev`, off by default. Jev never changes a tick; it marks what to check.
+// whether it is formative or summative (TypeSafe's "verify and escalate"). Only with Jev's one
+// admin switch on (off by default). Jev never changes a tick; it marks what to check.
 const { generate, currentUser } = vi.hoisted(() => ({
   generate: vi.fn(),
   currentUser: { value: { id: "teacher-cov", name: "C", email: null, role: "teacher" } as never },
@@ -77,9 +77,13 @@ function jevAnswer(state: { assessment: string }) {
   };
 }
 
+/** The same switch also asks Jev for the Bloom level per outcome; those requests get no answers. */
+const isCoverage = (init: RequestInit) => "assessment" in JSON.parse(String(init.body)).state;
+
 async function jev(_url: string, init: RequestInit) {
   const req = JSON.parse(String(init.body)) as { state: { assessment: string } };
-  return new Response(JSON.stringify(jevAnswer(req.state)), { status: 200 });
+  const body = isCoverage(init) ? jevAnswer(req.state) : { answers: {} };
+  return new Response(JSON.stringify(body), { status: 200 });
 }
 const fetchMock = vi.fn(jev);
 
@@ -95,7 +99,7 @@ beforeEach(() => {
 afterEach(async () => {
   vi.unstubAllGlobals();
   delete process.env.JEV_API_KEY;
-  await settings.setFeatureStand("coverageJev", "off");
+  await settings.setJevConsent(false, "admin-1");
 });
 
 async function extract(name: string) {
@@ -122,15 +126,16 @@ describe("import-extract with Jev's check of coverage and kind", () => {
   });
 
   it("when on, marks what Jev reads differently, and keeps the LLM's ticks", async () => {
-    await settings.setFeatureStand("coverageJev", "on");
+    await settings.setJevConsent(true, "admin-1");
     const [sql, product, oral] = await extract("On");
     expect(sql?.outcomeKeys).toEqual(["o1"]);
     expect(sql?.check).toEqual({ kind: false, outcomeKeys: ["o1", "o2"] });
     expect(product?.check).toBeUndefined();
     expect(oral?.check).toBeUndefined();
     // One request per test found in the document; only the passage, never the whole document.
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    const [url, init] = fetchMock.mock.calls[0]!;
+    const calls = fetchMock.mock.calls.filter(([, init]) => isCoverage(init));
+    expect(calls).toHaveLength(2);
+    const [url, init] = calls[0]!;
     expect(url).toBe("https://openrouter.ai/api/alpha/decisions");
     expect(new Headers(init.headers).get("authorization")).toBe("Bearer test-key");
     const sent = JSON.parse(String(init.body));
@@ -139,7 +144,7 @@ describe("import-extract with Jev's check of coverage and kind", () => {
   });
 
   it("counts Jev's cost in the usage dashboard, under OpenRouter", async () => {
-    await settings.setFeatureStand("coverageJev", "on");
+    await settings.setJevConsent(true, "admin-1");
     await extract("Cost");
     const rows = (await usage.listAiUsage("teacher-cov", "2000-01-01")).filter(
       (r) => r.model === "typesafe/jev-1.14",
@@ -150,7 +155,7 @@ describe("import-extract with Jev's check of coverage and kind", () => {
   });
 
   it("adds no check without Jev's own key, or for a test Jev did not answer", async () => {
-    await settings.setFeatureStand("coverageJev", "on");
+    await settings.setJevConsent(true, "admin-1");
     delete process.env.JEV_API_KEY;
     expect((await extract("No key")).map((a) => a.check)).toEqual([
       undefined,

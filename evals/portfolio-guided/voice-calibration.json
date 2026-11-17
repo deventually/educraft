@@ -1,0 +1,125 @@
+{
+  "about": "Calibration for the voice judge (rubric.md, 'Voice judge'). Its own material, on purpose unrelated to cases.json: the judge is checked here, never tuned on the cases it measures. Each item has a paragraph whose quality is known by construction and the score range a sound judge gives it.",
+  "items": [
+    {
+      "id": "kal-eigen-woorden",
+      "note": "Follows the teacher's words and keeps the student's remark verbatim; nothing added.",
+      "material": {
+        "locale": "nl",
+        "criteria": ["Je zet werkvormen in die passen bij het doel van de les."],
+        "answers": [
+          {
+            "question": "Welke werkvorm koos je, en waarom?",
+            "answer": "Ik liet ze met hun telefoon filmen hoe een knikker van een plank rolt, want uitleggen over versnelling werkt bij deze klas gewoon niet, die haken na twee minuten af. Ze moesten zelf de tijd per meter opmeten."
+          },
+          {
+            "question": "Wat merkte je daarvan in de les?",
+            "answer": "Het was best rumoerig, maar iedereen was bezig. Daan zei aan het eind: \"Ik snap nu pas waarom hij steeds sneller gaat.\" Dat had ik bij hem nog nooit gehoord."
+          }
+        ],
+        "evidence": []
+      },
+      "paragraph": "Uitleggen over versnelling werkt bij deze klas niet: na twee minuten haken ze af. Daarom liet ik ze met hun telefoon filmen hoe een knikker van een plank rolt, en moesten ze zelf de tijd per meter opmeten. Het was best rumoerig, maar iedereen was bezig. Aan het eind zei Daan: \"Ik snap nu pas waarom hij steeds sneller gaat.\" Dat had ik bij hem nog nooit gehoord.",
+      "expect": { "ownWords": [4, 5], "onlyAnswers": [4, 5], "plainFirstPerson": [4, 5] }
+    },
+    {
+      "id": "kal-gladgestreken",
+      "note": "The same material in polished, generic words: the quote is gone and 'aanzienlijk' claims more than the teacher said.",
+      "material": {
+        "locale": "nl",
+        "criteria": ["Je zet werkvormen in die passen bij het doel van de les."],
+        "answers": [
+          {
+            "question": "Welke werkvorm koos je, en waarom?",
+            "answer": "Ik liet ze met hun telefoon filmen hoe een knikker van een plank rolt, want uitleggen over versnelling werkt bij deze klas gewoon niet, die haken na twee minuten af. Ze moesten zelf de tijd per meter opmeten."
+          },
+          {
+            "question": "Wat merkte je daarvan in de les?",
+            "answer": "Het was best rumoerig, maar iedereen was bezig. Daan zei aan het eind: \"Ik snap nu pas waarom hij steeds sneller gaat.\" Dat had ik bij hem nog nooit gehoord."
+          }
+        ],
+        "evidence": []
+      },
+      "paragraph": "Om de betrokkenheid van de leerlingen te vergroten heb ik gekozen voor een activerende, onderzoekende werkvorm waarin digitale middelen een centrale rol speelden. Door leerlingen zelfstandig metingen te laten verrichten, ontstond een rijke leeromgeving die aansloot bij hun belevingswereld. De betrokkenheid nam hierdoor aanzienlijk toe en ook leerlingen die normaliter minder gemotiveerd zijn, lieten een duidelijke groei in begrip zien.",
+      "expect": { "ownWords": [1, 2], "onlyAnswers": [1, 3], "plainFirstPerson": [1, 3] }
+    },
+    {
+      "id": "kal-verzonnen",
+      "note": "Uses the teacher's words, but adds an outcome, a follow-up talk and a theory the teacher never mentioned.",
+      "material": {
+        "locale": "nl",
+        "criteria": ["Je voert begeleidingsgesprekken die aansluiten bij de vraag van de student."],
+        "answers": [
+          {
+            "question": "Waar ging het gesprek over?",
+            "answer": "Sanne zat vast met haar stageverslag, ze had al drie weken niks ingeleverd. Ik heb vooral gevraagd waar ze tegenaan liep en niet meteen tips gegeven."
+          },
+          {
+            "question": "Wat deed je daarna?",
+            "answer": "We hebben samen het eerste kopje opgeschreven. Meer niet. Ze ging er zelf mee verder."
+          }
+        ],
+        "evidence": []
+      },
+      "paragraph": "Sanne zat vast met haar stageverslag: ze had al drie weken niks ingeleverd. In het gesprek heb ik vooral gevraagd waar ze tegenaan liep, en niet meteen tips gegeven, zoals Rogers dat beschrijft in zijn cliëntgerichte benadering. Samen schreven we het eerste kopje op. Een week later leverde ze het hele verslag in, en in ons tweede gesprek vertelde ze dat ze zich voor het eerst gehoord voelde.",
+      "expect": { "ownWords": [3, 5], "onlyAnswers": [1, 2] }
+    },
+    {
+      "id": "kal-opvulling",
+      "note": "Every fact is the teacher's, but it is written about 'de docent' and padded with general truths.",
+      "material": {
+        "locale": "nl",
+        "criteria": ["Je reflecteert op je eigen handelen en stelt het bij."],
+        "answers": [
+          {
+            "question": "Wat ging er mis?",
+            "answer": "Ik had de opdracht alleen mondeling uitgelegd. De helft van de groep wist na tien minuten niet meer wat ze moesten doen."
+          },
+          {
+            "question": "Wat doe je nu anders?",
+            "answer": "Ik zet de stappen nu altijd op het bord, genummerd, en laat ze daar staan."
+          }
+        ],
+        "evidence": []
+      },
+      "paragraph": "Reflectie is een essentieel onderdeel van professionele groei in het onderwijs. De docent had de opdracht alleen mondeling uitgelegd, waarna de helft van de groep na tien minuten niet meer wist wat er moest gebeuren. Dit onderstreept het belang van heldere instructie. Inmiddels zet de docent de stappen altijd genummerd op het bord en laat ze daar staan. Zo draagt deze aanpassing bij aan een veilige en gestructureerde leeromgeving voor alle leerlingen.",
+      "expect": { "ownWords": [2, 4], "onlyAnswers": [3, 5], "plainFirstPerson": [1, 2] }
+    },
+    {
+      "id": "cal-open-spot",
+      "note": "English, in the teacher's words, with an honest open spot and nothing pretending to fill it.",
+      "material": {
+        "locale": "en",
+        "criteria": ["You use feedback from colleagues to improve your teaching."],
+        "answers": [
+          {
+            "question": "Who observed your lesson, and what did they say?",
+            "answer": "Mark from the maths team sat in on my Thursday class. He said I answered my own questions before anyone had a chance, like after three seconds."
+          },
+          { "question": "What did you change afterwards?", "answer": "" }
+        ],
+        "evidence": []
+      },
+      "paragraph": "Mark from the maths team sat in on my Thursday class. He said I answered my own questions before anyone had a chance, after about three seconds. [to add: what you changed in your questioning after Mark's feedback, and what you noticed in the next lesson]",
+      "expect": { "ownWords": [4, 5], "onlyAnswers": [4, 5], "plainFirstPerson": [4, 5] }
+    },
+    {
+      "id": "cal-filler-round-spot",
+      "note": "English, the same material, but sentences around the open spot pretend the change and its effect are already known.",
+      "material": {
+        "locale": "en",
+        "criteria": ["You use feedback from colleagues to improve your teaching."],
+        "answers": [
+          {
+            "question": "Who observed your lesson, and what did they say?",
+            "answer": "Mark from the maths team sat in on my Thursday class. He said I answered my own questions before anyone had a chance, like after three seconds."
+          },
+          { "question": "What did you change afterwards?", "answer": "" }
+        ],
+        "evidence": []
+      },
+      "paragraph": "Mark from the maths team sat in on my Thursday class and noticed that I answered my own questions after about three seconds. This valuable feedback prompted a meaningful shift in my practice. [to add: what you changed] As a result, my students became noticeably more engaged and confident in sharing their thinking, which underlines the importance of wait time in creating an inclusive classroom.",
+      "expect": { "onlyAnswers": [1, 2], "plainFirstPerson": [1, 3] }
+    }
+  ]
+}

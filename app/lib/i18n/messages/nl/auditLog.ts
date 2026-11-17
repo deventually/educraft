@@ -9,6 +9,8 @@ export const auditLog = {
     instanceModelsChanged: "Modellen van de instantie gewijzigd",
     inviteCreated: "Uitnodiging gemaakt",
     inviteRevoked: "Uitnodiging ingetrokken",
+    jevSwitchedOff: "TypeSafe Jev uitgezet",
+    jevSwitchedOn: "TypeSafe Jev aangezet (akkoord)",
     logCleaned: "Logboek opgeruimd",
     modelPriceChanged: "Prijs van een model gewijzigd",
     passwordSet: "Wachtwoord ingesteld",

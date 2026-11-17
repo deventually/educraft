@@ -8,14 +8,17 @@ import { markerQuestion, markersIn } from "~/lib/portfolio/openSpots";
 /**
  * Every open spot of the chapter as a question of its own: the teacher answers in a few words
  * and the answer takes the marker's place in the text. Only the editor's text changes; the
- * teacher saves the chapter as usual. The fields have no name, so they never post.
+ * teacher saves the chapter as usual. The fields have no name, so they never post. After the
+ * last spot, focus goes to `doneFocusId` (the chapter text) rather than to the page.
  */
 export function OpenSpotFill({
   text,
   onFill,
+  doneFocusId,
 }: {
   text: string;
   onFill: (index: number, answer: string) => void;
+  doneFocusId: string;
 }) {
   const t = useT().portfolioVoice.spots;
   const { showToast } = useToast();
@@ -26,7 +29,9 @@ export function OpenSpotFill({
 
   useEffect(() => {
     if (focusAt === null) return;
-    document.getElementById(fieldId(Math.min(focusAt, markers.length - 1)))?.focus();
+    const next =
+      markers.length === 0 ? doneFocusId : fieldId(Math.min(focusAt, markers.length - 1));
+    document.getElementById(next)?.focus();
     setFocusAt(null);
   });
 

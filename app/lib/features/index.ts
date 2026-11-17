@@ -13,10 +13,7 @@ export type FeatureId =
   | "roleAgents"
   | "utilities"
   | "pilotCheckin"
-  | "supervisionTracks"
-  | "bloomJev"
-  | "evidenceJev"
-  | "coverageJev";
+  | "supervisionTracks";
 
 export interface Feature {
   id: FeatureId;
@@ -58,39 +55,8 @@ export const FEATURES: readonly Feature[] = [
     name: { nl: "Stage- en afstudeertrajecten", en: "Internship and thesis tracks" },
     defaultStand: "on",
   },
-  // TypeSafe's Jev proposes the Bloom level in the course import (evals/bloom-jev). Off by
-  // default: the outcomes then go to OpenRouter as well, a processor the institution has to accept.
-  {
-    id: "bloomJev",
-    name: {
-      nl: "Bloom-voorstel bij de import door TypeSafe Jev (via OpenRouter)",
-      en: "Bloom proposal on import by TypeSafe Jev (via OpenRouter)",
-    },
-    defaultStand: "off",
-    instanceOnly: true,
-  },
-  // TypeSafe's Jev sorts the files of "Bewijs in één keer" (evals/portfolio-evidence). Off by
-  // default for the same reason: the files' text then goes to OpenRouter.
-  {
-    id: "evidenceJev",
-    name: {
-      nl: "Bewijs in één keer sorteren door TypeSafe Jev (via OpenRouter)",
-      en: "Evidence in one go sorted by TypeSafe Jev (via OpenRouter)",
-    },
-    defaultStand: "off",
-    instanceOnly: true,
-  },
-  // TypeSafe's Jev checks the course import's coverage and kind per test (evals/coverage-jev).
-  // Off by default for the same reason: the passages about each test then go to OpenRouter.
-  {
-    id: "coverageJev",
-    name: {
-      nl: "Dekking en soort toets bij de import laten controleren door TypeSafe Jev (via OpenRouter)",
-      en: "Coverage and kind of test on import checked by TypeSafe Jev (via OpenRouter)",
-    },
-    defaultStand: "off",
-    instanceOnly: true,
-  },
+  // TypeSafe's Jev is not a part per use: it has one switch of its own (BESLUIT-2026-11-17-1,
+  // `app/server/jev.server.ts`).
 ];
 
 const FEATURE_IDS = FEATURES.map((f) => f.id);

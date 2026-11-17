@@ -63,7 +63,7 @@ describe("the on/off rule (P28.3)", () => {
 });
 
 describe("the feature register (P28.3)", () => {
-  it("holds the parts with their default stands", () => {
+  it("holds the seven parts with their default stands", () => {
     expect(FEATURES.map((f) => [f.id, f.defaultStand])).toEqual([
       ["portfolio", "request"],
       ["courses", "on"],
@@ -73,16 +73,8 @@ describe("the feature register (P28.3)", () => {
       ["pilotCheckin", "on"],
       // P38: on; an admin can switch it off for now (BESLUIT-2026-11-12-15).
       ["supervisionTracks", "on"],
-      // Jev's Bloom proposal: off until the institution accepts OpenRouter as a processor.
-      ["bloomJev", "off"],
-      // Jev's evidence sort: off for the same reason.
-      ["evidenceJev", "off"],
-      // Jev's check of coverage and kind in the course import: off for the same reason.
-      ["coverageJev", "off"],
+      // Jev is not a part per use: one switch of its own (BESLUIT-2026-11-17-1, `jevAccess`).
     ]);
-    expect(FEATURES.find((f) => f.id === "bloomJev")?.instanceOnly).toBe(true);
-    expect(FEATURES.find((f) => f.id === "evidenceJev")?.instanceOnly).toBe(true);
-    expect(FEATURES.find((f) => f.id === "coverageJev")?.instanceOnly).toBe(true);
     for (const f of FEATURES) {
       expect(f.name.nl.length).toBeGreaterThan(0);
       expect(f.name.en.length).toBeGreaterThan(0);

@@ -4,7 +4,7 @@
  * escalate" pattern: the LLM extracts, Jev answers one yes/no per field, and code marks what the
  * teacher should check. Jev never changes a tick; it only fills a kind the LLM left open. Pure:
  * the passage, the request and the reading of the answer; the call is
- * `app/server/coverageJev.server.ts`, behind the instance setting `coverageJev`.
+ * `app/server/coverageJev.server.ts`, only when `jevAccess()` allows it.
  *
  * Built to TypeSafe's skill and docs (the SDE-cascade cookbook, the jaggedness page):
  * - judgments from Jev, the decision in code (the truth table in `coverageVerdict`);

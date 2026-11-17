@@ -1,12 +1,12 @@
 /**
- * Jev's check of the course import's tests (setting `coverageJev`, off by default): per test the
+ * Jev's check of the course import's tests (only with Jev's switch on): per test the
  * document finds by its title, one request with the passage that names it; code marks what the
- * teacher should check (`coverageVerdict`). Nothing goes to Jev without the setting and Jev's own
- * key; a test Jev does not answer stays as the LLM read it. Each call is metered at the cost Jev
+ * teacher should check (`coverageVerdict`). Nothing goes to Jev unless `jevAccess()` allows it
+ * (the one admin switch, BESLUIT-2026-11-17-1); a test Jev does not answer stays as the LLM read it. Each call is metered at the cost Jev
  * reports.
  */
 import { postDecisions } from "~/lib/ai/decisions";
-import { DECISIONS, usdInEuroMicros } from "~/lib/ai/models";
+import { usdInEuroMicros } from "~/lib/ai/models";
 import {
   coverageJevRequests,
   coverageVerdict,
@@ -16,8 +16,7 @@ import type { ImportAssessment, ImportProposal } from "~/lib/courses/import";
 import type { Locale } from "~/lib/i18n";
 import { currentAiSignal } from "./aiCalls.server";
 import type { User } from "./auth.server";
-import { isFeatureOn } from "./availability.server";
-import { providerSetting } from "./env.server";
+import { jevAccess } from "./jev.server";
 import { log } from "./log.server";
 import { recordAiUsage } from "./repositories/aiUsage.server";
 
@@ -31,9 +30,9 @@ export async function withJevCoverage(
   documentText: string,
   locale: Locale,
 ): Promise<ImportProposal> {
-  const apiKey = DECISIONS ? providerSetting(DECISIONS.keyEnv) : undefined;
-  if (!DECISIONS || !apiKey || !(await isFeatureOn(user, "coverageJev"))) return proposal;
-  const { url, model, provider } = DECISIONS;
+  const jev = await jevAccess();
+  if (!jev) return proposal;
+  const { url, model, provider, apiKey } = jev;
   const signal = currentAiSignal();
   const keys = proposal.outcomes.map((o) => o.key);
   const requests = new Map(

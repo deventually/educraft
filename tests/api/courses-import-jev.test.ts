@@ -4,7 +4,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 process.env.DATABASE_URL = "file::memory:";
 
 // Jev's Bloom proposal in the course import (after three measurements, evals/bloom-jev): behind
-// the instance setting `bloomJev`, off by default. The LLM still reads the document; Jev only
+// the instance switch for Jev (`jevAccess`), off by default. The LLM still reads the document; Jev only
 // sets the Bloom level, per outcome, and the teacher confirms it as before.
 const { generate, currentUser } = vi.hoisted(() => ({
   generate: vi.fn(),
@@ -72,7 +72,7 @@ beforeEach(() => {
 afterEach(async () => {
   vi.unstubAllGlobals();
   delete process.env.JEV_API_KEY;
-  await settings.setFeatureStand("bloomJev", "off");
+  await settings.setJevConsent(false, "admin-1");
 });
 
 async function extract(name: string) {
@@ -98,7 +98,7 @@ describe("import-extract with Jev's Bloom proposal", () => {
   });
 
   it("when on, Jev sets each outcome's level: the highest clear one, else none", async () => {
-    await settings.setFeatureStand("bloomJev", "on");
+    await settings.setJevConsent(true, "admin-1");
     expect(await extract("On")).toEqual(["create", null]);
     expect(fetchMock).toHaveBeenCalledTimes(2);
     const [url, init] = fetchMock.mock.calls[0]!;
@@ -110,7 +110,7 @@ describe("import-extract with Jev's Bloom proposal", () => {
   });
 
   it("counts Jev's cost in the usage dashboard, under OpenRouter", async () => {
-    await settings.setFeatureStand("bloomJev", "on");
+    await settings.setJevConsent(true, "admin-1");
     await extract("Cost");
     const rows = (await usage.listAiUsage("teacher-jev", "2000-01-01")).filter(
       (r) => r.model === "typesafe/jev-1.14",
@@ -121,7 +121,7 @@ describe("import-extract with Jev's Bloom proposal", () => {
   });
 
   it("keeps the LLM's level without a key, and for an outcome Jev did not answer", async () => {
-    await settings.setFeatureStand("bloomJev", "on");
+    await settings.setJevConsent(true, "admin-1");
     delete process.env.JEV_API_KEY;
     expect(await extract("No key")).toEqual(["apply", "remember"]);
     // OpenRouter's own key is for its chat models, never for Jev.

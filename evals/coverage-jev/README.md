@@ -43,7 +43,7 @@ dan zijn deze cases afstemmateriaal en is een nieuwe set nodig voordat iets aan 
 
 **Eerlijk:** de cases zijn door ons geschreven, niet door een docent, en niet uit echte OER's.
 Een tweede set echte (openbare) studiegidsen, gelabeld door Bastiaan, is de betere toets voordat
-de instelling bij een instelling aan gaat.
+Jev bij een instelling aan gaat.
 
 ## Wat het rapport toont
 

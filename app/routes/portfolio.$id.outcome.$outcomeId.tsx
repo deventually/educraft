@@ -359,6 +359,7 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
               outcomeId={outcome.id}
               defaultValue={chapter}
               maxWords={maxWords}
+              focusAfter={actionData?.ok ? actionData.intent : undefined}
             >
               <GuidedWriting sections={guided} draftMode={coachMode === "draft"} />
             </ChapterEditor>

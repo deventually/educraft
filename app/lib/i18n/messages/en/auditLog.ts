@@ -11,6 +11,8 @@ export const auditLog: Messages["auditLog"] = {
     instanceModelsChanged: "Instance models changed",
     inviteCreated: "Invite created",
     inviteRevoked: "Invite revoked",
+    jevSwitchedOff: "TypeSafe Jev switched off",
+    jevSwitchedOn: "TypeSafe Jev switched on (consent)",
     logCleaned: "Audit log cleaned up",
     modelPriceChanged: "Model price changed",
     passwordSet: "Password set",
