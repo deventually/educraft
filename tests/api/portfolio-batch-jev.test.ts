@@ -6,7 +6,7 @@ import { C1, LU, sampleDossier } from "../portfolio/fixtures";
 process.env.DATABASE_URL = "file::memory:";
 
 // "Bewijs in één keer" with TypeSafe's Jev (evals/portfolio-evidence, 13 Nov): behind the
-// instance setting `evidenceJev`, off by default. Jev sorts each file as typed decisions; a file
+// instance switch for Jev (`jevAccess`), off by default. Jev sorts each file as typed decisions; a file
 // Jev does not answer goes to the LLM as before. The teacher confirms every row, as before.
 const { generate, currentUser } = vi.hoisted(() => ({
   generate: vi.fn(),
@@ -80,7 +80,7 @@ beforeEach(() => {
 afterEach(async () => {
   vi.unstubAllGlobals();
   delete process.env.JEV_API_KEY;
-  await settings.setFeatureStand("evidenceJev", "off");
+  await settings.setJevConsent(false, "admin-1");
 });
 
 const confirmed = (): DossierData => {
@@ -122,7 +122,7 @@ describe("evidence in one go with Jev", () => {
   });
 
   it("when on, Jev sorts each file, each criterion asked whole, and the LLM is not asked", async () => {
-    await settings.setFeatureStand("evidenceJev", "on");
+    await settings.setJevConsent(true, "admin-1");
     const sorted = await propose("On");
     expect(generate).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -150,7 +150,7 @@ describe("evidence in one go with Jev", () => {
   });
 
   it("counts Jev's cost in the usage dashboard, under OpenRouter", async () => {
-    await settings.setFeatureStand("evidenceJev", "on");
+    await settings.setJevConsent(true, "admin-1");
     await propose("Cost");
     const rows = await jevRows();
     expect(rows.length).toBeGreaterThan(0);
@@ -159,7 +159,7 @@ describe("evidence in one go with Jev", () => {
   });
 
   it("asks the LLM without Jev's own key, and for a file Jev did not answer", async () => {
-    await settings.setFeatureStand("evidenceJev", "on");
+    await settings.setJevConsent(true, "admin-1");
     delete process.env.JEV_API_KEY;
     // OpenRouter's own key is for its chat models, never for Jev.
     process.env.OPENROUTER_API_KEY = "chat-key";

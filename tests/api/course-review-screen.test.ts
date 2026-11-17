@@ -19,12 +19,14 @@ vi.mock("~/server/auth.server", () => ({
 let courses: typeof import("~/server/repositories/courses.server");
 let reviews: typeof import("~/server/repositories/agentReviews.server");
 let usage: typeof import("~/server/repositories/aiUsage.server");
+let settings: typeof import("~/server/repositories/settings.server");
 let detail: typeof import("~/routes/courses.$id");
 
 beforeAll(async () => {
   courses = await import("~/server/repositories/courses.server");
   reviews = await import("~/server/repositories/agentReviews.server");
   usage = await import("~/server/repositories/aiUsage.server");
+  settings = await import("~/server/repositories/settings.server");
   detail = await import("~/routes/courses.$id");
 });
 
@@ -39,7 +41,8 @@ async function allNo(_url: string, init: RequestInit) {
 const fetchMock = vi.fn(allNo);
 const ANSWER = { text: JSON.stringify({ findings: [] }), usage: {} };
 
-beforeEach(() => {
+beforeEach(async () => {
+  await settings.setJevConsent(true, "admin-1");
   generate.mockReset();
   generate.mockResolvedValue(ANSWER);
   fetchMock.mockReset();
@@ -103,6 +106,14 @@ describe("the quick check before the review team", () => {
     fetchMock.mockImplementation(async () => new Response("down", { status: 500 }));
     const c = await newCourse();
     await review(c.id);
+    expect(generate).toHaveBeenCalledTimes(2);
+  });
+
+  it("sends nothing to Jev while the admin's Jev switch is off", async () => {
+    await settings.setJevConsent(false, "admin-1");
+    const c = await newCourse();
+    await review(c.id);
+    expect(fetchMock).not.toHaveBeenCalled();
     expect(generate).toHaveBeenCalledTimes(2);
   });
 

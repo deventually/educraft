@@ -18,6 +18,8 @@ import { Badge, Button, Input, Label, Select } from "~/components/ui";
 import { useActionToast } from "~/components/Toast";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { StandSelect } from "~/components/features/selects";
+import { JevSwitch } from "~/components/admin/JevSwitch";
+import { jevSwitchState, switchJev } from "~/server/jev.server";
 import { isModelIntent, modelAdminAction, modelAdminData } from "~/server/modelAdmin.server";
 import { ModelsTab } from "~/components/admin/models";
 import { ProvidersTab } from "~/components/admin/ProvidersTab";
@@ -77,7 +79,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     name: f.name,
     stand: featureStands[f.id] ?? f.defaultStand,
   }));
-  return { rows, features, ...(await modelAdminData()) };
+  return { rows, features, jev: await jevSwitchState(), ...(await modelAdminData()) };
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -105,6 +107,12 @@ export async function action({ request }: Route.ActionArgs) {
     if (!isInstanceStand(stand) || slugs.length === 0) return { error: "invalid" as const };
     for (const slug of slugs) await setToolStand(slug, stand);
     return { saved: true as const, count: slugs.length };
+  }
+
+  // ── TypeSafe Jev's one switch: on is the institution's consent (BESLUIT-2026-11-17-1) ──
+  if (intent === "jev") {
+    await switchJev(admin.id, fd.get("on") === "on");
+    return { saved: true as const };
   }
 
   if (intent === "feature") {
@@ -156,7 +164,7 @@ function ToolsBulkForm({ slugs }: { slugs: string[] }) {
 export default function AdminTools({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { rows, features, providers, models, choices, local } = loaderData;
+  const { rows, features, jev, providers, models, choices, local } = loaderData;
   const [params] = useSearchParams();
   const tab = tabFrom(params.get("tab"));
   const f = t.features;
@@ -232,6 +240,8 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
           </table>
         </div>
       </section>
+
+      <JevSwitch state={jev} />
 
       <section>
         <h2 className="font-display text-lg font-medium tracking-tight text-slate-900">

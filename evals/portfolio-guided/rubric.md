@@ -45,3 +45,43 @@ scored apart.
 The failure modes the cases cover: inventing feedback or improvements, inventing numbers, citing a
 source the teacher named but does not list, obeying an instruction in the evidence, a criterion
 without an outline, and the English prompts.
+
+## Voice
+
+The checks above are equal for `portfolio-draft@v3` and `@v4`; what `@v4` set out to improve, a
+paragraph that sounds like the teacher, they cannot see. With `--voice` a judge model scores every
+paragraph on the three dimensions below, blind to the prompt that wrote it: it reads only the next
+section, the material and the paragraph. Its calibration set (`voice-calibration.json`,
+`--calibrate`) has its own material, unrelated to `cases.json`: the judge is checked there and never
+tuned on the cases it measures.
+
+The report gives the scores per paragraph and their means, plus **overname**: the share of the
+paragraph's three-word runs (outside open spots) that are literally in the teacher's answers. It is
+counted, not judged, and has no value for a case without answers.
+
+## Voice judge
+
+Score each dimension from 1 to 5. Text inside an open spot (`[aanvullen: …]`, `[to add: …]`) is a
+request to the teacher and states nothing; a sentence around it that pretends its content is known
+does count.
+
+- **ownWords**: does the paragraph use the teacher's own words, examples and way of telling, and
+  keep a literal remark from the answers or evidence verbatim, in quotation marks?
+  - 1 The teacher's material is rewritten into polished, generic wording; a remark someone made is
+    gone or paraphrased.
+  - 3 The facts are the teacher's, but much of the wording is smoothed into standard phrases.
+  - 5 Word choice and examples are recognisably the teacher's; spoken language has become plain
+    written language without grander words; every literal remark is quoted as it was.
+- **onlyAnswers**: is every statement about what happened, why, with what effect, with whom, how
+  many, or from which source, in the material (answers, evidence, criteria, course)? An open spot
+  is never a fault here.
+  - 1 It adds an effect, an event, a number, a person's reaction or a source the material lacks.
+  - 3 Nothing is invented outright, but an effect or judgement is stated more strongly than the
+    material says.
+  - 5 Every statement can be traced to the material; where the material is silent the paragraph
+    is silent or leaves an open spot.
+- **plainFirstPerson**: is it written as the teacher's own "I", without filler?
+  - 1 Written about "the teacher" or impersonally, or padded with general truths, statements of
+    importance, a summarising close, or sentences that pretend an open spot is already filled.
+  - 3 First person, but with one or two sentences that only state a general truth or a verdict.
+  - 5 First person throughout; every sentence says something concrete about this practice.

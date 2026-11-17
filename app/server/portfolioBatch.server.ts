@@ -1,11 +1,11 @@
 /**
  * Evidence in one go, the server half: one model call per file for a proposal (stored
  * nowhere; the page shows it for the teacher to confirm), and adding what the teacher ticked
- * in one save. Pure checks live in `~/lib/portfolio/batch`; with the setting `evidenceJev`,
- * TypeSafe's Jev sorts a file first (`~/lib/portfolio/sortJev`).
+ * in one save. Pure checks live in `~/lib/portfolio/batch`; with Jev's switch on
+ * (`jevAccess`), TypeSafe's Jev sorts a file first (`~/lib/portfolio/sortJev`).
  */
 import { postDecisions } from "~/lib/ai/decisions";
-import { DECISIONS, usdInEuroMicros } from "~/lib/ai/models";
+import { usdInEuroMicros } from "~/lib/ai/models";
 import {
   addEvidenceBatch,
   type BatchFile,
@@ -22,8 +22,7 @@ import { buildJevRequest, parseJevAnswer } from "~/lib/portfolio/sortJev";
 import { getMessages, type Locale } from "~/lib/i18n";
 import { currentAiSignal } from "./aiCalls.server";
 import type { User } from "./auth.server";
-import { isFeatureOn } from "./availability.server";
-import { providerSetting } from "./env.server";
+import { jevAccess } from "./jev.server";
 import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
 import { recordAiUsage } from "./repositories/aiUsage.server";
 import { updateDossier, type Dossier } from "./repositories/portfolio.server";
@@ -36,14 +35,14 @@ const EVENT = "portfolio-sort";
 type Sorter = (f: BatchFile) => Promise<SortProposal | null>;
 
 /**
- * Jev's sort of one file (setting `evidenceJev`, off by default), each criterion asked whole:
- * `null` when Jev did not answer, so the LLM sorts that file. Nothing goes to Jev without the
- * setting and Jev's own key; each call is metered at the cost Jev reports.
+ * Jev's sort of one file (Jev's switch, off by default), each criterion asked whole: `null` when
+ * Jev did not answer, so the LLM sorts that file. Nothing goes to Jev unless `jevAccess` allows
+ * it; each call is metered at the cost Jev reports.
  */
 async function jevSorter(user: User, d: DossierData, locale: Locale): Promise<Sorter | null> {
-  const apiKey = DECISIONS ? providerSetting(DECISIONS.keyEnv) : undefined;
-  if (!DECISIONS || !apiKey || !(await isFeatureOn(user, "evidenceJev"))) return null;
-  const { url, model, provider } = DECISIONS;
+  const jev = await jevAccess();
+  if (!jev) return null;
+  const { url, model, provider, apiKey } = jev;
   const signal = currentAiSignal();
   return async (f) => {
     const answer = await postDecisions(url, buildJevRequest(d, f, locale, { model }), {
