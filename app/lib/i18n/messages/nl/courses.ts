@@ -142,6 +142,10 @@ export const courses = {
     assessmentN: "Toets {n}",
     assessmentsTitle: "Toetsen",
     bloom: "Bloom-niveau (voorstel van de AI)",
+    bloomCheck: {
+      level: "Bloom-check: het werkwoord wijst eerder op het niveau {level}.",
+      none: "Bloom-check: het werkwoord geeft geen duidelijk niveau aan.",
+    },
     body: "Begin met wat er al is: plak de tekst van een OER, studiehandleiding, modulewijzer, toetsmatrijs of nakijkmodel, of kies de bestanden. De AI zet de leeruitkomsten, succescriteria, toetsen en onderdelen klaar als voorstel; jij kiest wat in de cursus komt.",
     check: "Controleer dit: deze tekst staat niet letterlijk in het document.",
     checkCover: "Controleer dit vinkje: het document zegt het anders of niet duidelijk.",

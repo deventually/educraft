@@ -144,6 +144,7 @@ function OutcomeRow({
   designed: boolean;
 }) {
   const t = useT();
+  const locale = useLocale();
   const ti = t.courses.import;
   const id = useId();
   return (
@@ -183,8 +184,16 @@ function OutcomeRow({
               name={`${o.key}.bloom`}
               value={o.bloom}
               label={ti.bloom}
+              describedBy={o.bloomCheck !== undefined ? `${id}-check` : undefined}
             />
           </div>
+          {o.bloomCheck !== undefined && (
+            <p id={`${id}-check`} className="text-sm text-amber-800">
+              {o.bloomCheck
+                ? fmt(ti.bloomCheck.level, { level: bloomLabel(o.bloomCheck, locale) })
+                : ti.bloomCheck.none}
+            </p>
+          )}
           <CriteriaPreview outcome={o} designed={designed} />
         </div>
       )}

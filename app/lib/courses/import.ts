@@ -1,14 +1,13 @@
 /**
- * Importing learning outcomes and assessments from a document (brief P26, 26.3),
- * the pure half: what the model gets to see, how its answer is checked, how the
- * teacher's choice is read from the review form and applied. No server, no
- * provider: `app/server/courseImport.server.ts` does the call.
+ * Importing learning outcomes and assessments from a document (brief P26, 26.3), the pure half:
+ * what the model gets to see, how its answer is checked, how the teacher's choice is read from
+ * the review form and applied. No server, no provider: `app/server/courseImport.server.ts` calls.
  *
- * The answer is a proposal, never stored as such: an outcome whose text is not
- * verbatim in the document (modulo layout) is marked, and only what the teacher
- * ticks is added. Re-importing adds only new items: an outcome or assessment the
- * course already has (same text, normalized) is never duplicated or overwritten,
- * only completed where it is empty (a marking model after a study guide).
+ * The answer is a proposal, never stored as such: an outcome whose text is not verbatim in the
+ * document (modulo layout) is marked, and only what the teacher ticks is added. Re-importing adds
+ * only new items: an outcome or assessment the course already has (same text, normalized) is
+ * never duplicated or overwritten, only completed where it is empty (a marking model after a
+ * study guide).
  */
 import { z } from "zod";
 import { extractJson, verbatimIn, wrapAsData } from "~/lib/ai/structuredAnswer";
@@ -52,6 +51,8 @@ export interface ImportOutcome {
   text: string;
   /** The model's Bloom proposal; the teacher confirms it. */
   bloom?: BloomLevel;
+  /** The wizard's Bloom check: the level Jev hears where it differs from `bloom` (null: none). */
+  bloomCheck?: BloomLevel | null;
   /** The text is in the document (modulo layout); otherwise "check this". */
   verbatim: boolean;
   /** The course already has this outcome; importing it only fills in empty criteria. */
