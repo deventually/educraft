@@ -145,6 +145,8 @@ export const courses: Messages["courses"] = {
     },
     body: "Start from what exists: paste the text of a course catalogue (OER), study guide, module guide, test blueprint or marking model, or choose the files. The AI prepares the learning outcomes, success criteria, assessments and parts as a proposal; you choose what goes into the course.",
     check: "Check this: this text is not verbatim in the document.",
+    checkCover: "Check this tick: the document says otherwise or is unclear.",
+    checkKind: "Check the kind: the document says otherwise or is unclear.",
     checkShort: "check: not verbatim in the document",
     clipped: "The document had more than fits in a course; the rest was left out.",
     complete: "Fill in empty fields",

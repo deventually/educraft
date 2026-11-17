@@ -32,6 +32,7 @@
     "eval:evidence": "vite-node -c scripts/eval.config.ts scripts/eval-evidence.ts",
     "eval:bloom-check": "vite-node -c scripts/eval.config.ts scripts/eval-bloom-check.ts",
     "eval:bloom-jev": "vite-node -c scripts/eval.config.ts scripts/eval-bloom-jev.ts",
+    "eval:coverage-jev": "vite-node -c scripts/eval.config.ts scripts/eval-coverage-jev.ts",
     "eval:judge-jev": "vite-node -c scripts/eval.config.ts scripts/eval-judge-jev.ts",
     "eval:judge-jev3": "vite-node -c scripts/eval.config.ts scripts/eval-judge-jev3.ts",
     "eval:judge-jev4": "vite-node -c scripts/eval.config.ts scripts/eval-judge-jev4.ts",

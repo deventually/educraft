@@ -1,14 +1,13 @@
 /**
- * Importing learning outcomes and assessments from a document (brief P26, 26.3),
- * the pure half: what the model gets to see, how its answer is checked, how the
- * teacher's choice is read from the review form and applied. No server, no
- * provider: `app/server/courseImport.server.ts` does the call.
+ * Importing learning outcomes and assessments from a document (brief P26, 26.3), the pure half:
+ * what the model gets to see, how its answer is checked, how the teacher's choice is read from
+ * the review form and applied. No server, no provider: `app/server/courseImport.server.ts` calls.
  *
- * The answer is a proposal, never stored as such: an outcome whose text is not
- * verbatim in the document (modulo layout) is marked, and only what the teacher
- * ticks is added. Re-importing adds only new items: an outcome or assessment the
- * course already has (same text, normalized) is never duplicated or overwritten,
- * only completed where it is empty (a marking model after a study guide).
+ * The answer is a proposal, never stored as such: an outcome whose text is not verbatim in the
+ * document (modulo layout) is marked, and only what the teacher ticks is added. Re-importing adds
+ * only new items: an outcome or assessment the course already has (same text, normalized) is
+ * never duplicated or overwritten, only completed where it is empty (a marking model after a
+ * study guide).
  */
 import { z } from "zod";
 import { extractJson, verbatimIn, wrapAsData } from "~/lib/ai/structuredAnswer";
@@ -73,6 +72,8 @@ export interface ImportAssessment {
   /** From a test blueprint or marking model: form, owner, pass mark, conditions, … */
   details: ImportDetails;
   parts: ImportPart[];
+  /** Jev's second reading doubts the kind or these ticks: "check" (`coverageJev.ts`). */
+  check?: { kind: boolean; outcomeKeys: string[] };
 }
 
 export interface ImportProposal {

@@ -141,7 +141,11 @@ LimeOnIt is not tied to one model vendor.
   (`app/lib/portfolio/sortJev.ts`, `jevSorter` in `portfolioBatch.server.ts`), each criterion asked
   whole; a file Jev does not answer goes to the LLM. The course wizard's Bloom check (`bloomCheck`,
   asked through `askJevBloom` in `bloomJev.server.ts`) marks a proposed outcome whose verb Jev
-  hears at another level, or at none; the level stays the AI's (`evals/bloom-check`). A call is metered in `ai_usage` under its
+  hears at another level, or at none; the level stays the AI's (`evals/bloom-check`). And a check
+  of the import's tests (`app/lib/courses/coverageJev.ts`, `withJevCoverage` in
+  `coverageJev.server.ts`, TypeSafe's "verify and escalate"): per test, the passage that names it;
+  one yes/no per outcome and one for the kind; code marks a doubted tick or kind "Controleer" and
+  never changes a tick (`evals/coverage-jev`). A call is metered in `ai_usage` under its
   provider at the cost Jev reports. The evals build their requests with these modules, so they measure what the app sends.
 - Default model: `default` in `config/models.json`, read as `DEFAULT_MODEL` (`models.ts`). It is the
   only place a model is chosen: every tool's `defaultModel` and the eval judge point at it, and
