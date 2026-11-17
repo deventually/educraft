@@ -1,4 +1,4 @@
-- **Beheer: één schakelaar voor TypeSafe Jev:** op Beheer → Tools staat onder *Onderdelen* één
+- **Beheer: één schakelaar voor TypeSafe Jev (#369):** op Beheer → Tools staat onder *Onderdelen* één
   vinkje *Jev gebruiken*, standaard uit. Aanzetten is het akkoord van de instelling dat stukken
   cursusdocument en (bij *Bewijs in één keer*) bestandsnaam en begin van elk bestand naar
   OpenRouter en TypeSafe gaan. Bij het vinkje staat wie het aan- of uitzette en wanneer, en het
