@@ -2,7 +2,7 @@ import { Button, HelpText } from "~/components/ui";
 import { fmt } from "~/lib/i18n/format";
 import type { Messages } from "~/lib/i18n/messages/nl";
 import { useT } from "~/lib/i18n/useT";
-import type { GuidedSectionView } from "~/lib/portfolio/guided";
+import { canFollowUp, type GuidedSectionView } from "~/lib/portfolio/guided";
 import { listOf } from "./ChapterOutline";
 import { DictatedAnswer } from "./DictatedAnswer";
 
@@ -12,14 +12,24 @@ type GuidedMessages = Messages["portfolioGuided"];
 export function guidedPending(intent: string, t: GuidedMessages): string {
   if (intent === "guideQuestionsAll") return t.pendingQuestionsAll;
   if (intent === "guideDraftAll") return t.pendingChapter;
+  if (intent.startsWith("guideFollowUp")) return t.pendingFollowUp;
+  if (intent === "guideGrill") return t.pendingGrill;
   return intent.startsWith("guideDraft") ? t.pendingDraft : t.pendingQuestions;
 }
 
 /** The done toast for a guided-writing intent, saying how many parts did not work. */
 export function guidedDone(
-  r: { intent: string; drafted?: number; failed?: number },
+  r: { intent: string; drafted?: number; failed?: number; followUps?: number },
   t: GuidedMessages,
 ): string {
+  if (r.intent === "guideGrill")
+    return r.followUps ? fmt(t.grillDone, { n: r.followUps }) : t.grillNone;
+  if (r.intent === "guideFollowUp")
+    return !r.followUps
+      ? t.followUpNone
+      : r.followUps === 1
+        ? t.followUpDoneOne
+        : fmt(t.followUpDone, { n: r.followUps });
   const done =
     r.intent === "guideDraftAll"
       ? r.drafted === 1
@@ -62,6 +72,12 @@ export function GuidedWriting({
       </h3>
       <p className="mt-1 text-sm text-slate-600">{t.intro}</p>
       {!draftMode && <p className="mt-1 text-sm text-slate-600">{t.coachModeNote}</p>}
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <Button type="submit" name="intent" value="guideGrill" aria-describedby="guided-grill-hint">
+          {t.grill}
+        </Button>
+        <HelpText id="guided-grill-hint">{t.grillHint}</HelpText>
+      </div>
       {askAll && (
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <Button
@@ -127,6 +143,18 @@ export function GuidedWriting({
                     aria-label={fmt(t.draftLabel, { title: name })}
                   >
                     {t.draft}
+                  </Button>
+                )}
+                {canFollowUp(s) && (
+                  <Button
+                    type="submit"
+                    name="intent"
+                    value={`guideFollowUp:${s.id}`}
+                    variant="secondary"
+                    size="sm"
+                    aria-label={fmt(t.followUpLabel, { title: name })}
+                  >
+                    {t.followUp}
                   </Button>
                 )}
                 {(s.questions.length === 0 || unanswered) && (

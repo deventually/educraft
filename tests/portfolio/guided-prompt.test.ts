@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getPrompt } from "~/lib/prompts";
-import { DRAFT_PROMPT_ID, QUESTIONS_PROMPT_ID } from "~/lib/portfolio/guided";
+import { DRAFT_PROMPT_ID, FOLLOW_UP_PROMPT_ID, QUESTIONS_PROMPT_ID } from "~/lib/portfolio/guided";
 
 const headings = (s: string) => s.split("\n").filter((l) => l.startsWith("## ")).length;
 
@@ -39,13 +39,14 @@ describe("portfolio-questions@v2 prompt (guided writing, BDB step 6)", () => {
   });
 });
 
-describe("portfolio-draft@v3 prompt (a paragraph per section from the answers)", () => {
+describe("portfolio-draft@v4 prompt (a paragraph per section, in the teacher's voice)", () => {
   const p = getPrompt(DRAFT_PROMPT_ID);
 
   it("is the next version of the paragraph prompt; @v1 stays registered", () => {
-    expect(DRAFT_PROMPT_ID).toBe("portfolio-draft@v3");
+    expect(DRAFT_PROMPT_ID).toBe("portfolio-draft@v4");
     expect(getPrompt("portfolio-draft@v1").id).toBe("portfolio-draft@v1");
     expect(getPrompt("portfolio-draft@v2").id).toBe("portfolio-draft@v2");
+    expect(getPrompt("portfolio-draft@v3").id).toBe("portfolio-draft@v3");
     for (const lang of ["nl", "en"] as const) {
       expect(p.runtime[lang]).toContain("Voice & Bounds");
       expect(p.runtime[lang]).not.toMatch(/\{\{/);
@@ -71,5 +72,52 @@ describe("portfolio-draft@v3 prompt (a paragraph per section from the answers)",
     for (const lang of ["nl", "en"] as const) expect(p.runtime[lang]).toContain("<course>");
     expect(p.runtime.nl).toMatch(/feiten uit `<course>`/i);
     expect(p.runtime.en).toMatch(/facts from `<course>`/i);
+  });
+
+  it("keeps the teacher's voice: their words, literal quotes, something concrete per sentence", () => {
+    expect(p.runtime.nl).toMatch(/de stem van de docent/i);
+    expect(p.runtime.nl).toMatch(/letterlijk over, als citaat/i);
+    expect(p.runtime.en).toMatch(/the teacher's voice/i);
+    expect(p.runtime.en).toMatch(/literally, as a quotation/i);
+    expect(p.runtime.nl).toMatch(/alleen binnen een open plek, nooit in de lopende tekst/i);
+    expect(p.runtime.en).toMatch(/only inside an open spot, never in the running text/i);
+  });
+
+  it("avoids the generic phrasing the chapter check flags, and asks precisely for what is missing", () => {
+    for (const w of ["cruciaal", "niet alleen … maar ook", "gedachtestreepjes", "Kortom"])
+      expect(p.runtime.nl).toContain(w);
+    for (const w of ["crucial", "not only … but also", "dashes", "In conclusion"])
+      expect(p.runtime.en).toContain(w);
+    expect(p.runtime.nl).toMatch(/geen vulzinnen rond een open plek/i);
+    expect(p.runtime.en).toMatch(/no filler around an open spot/i);
+  });
+});
+
+describe("portfolio-followup@v1 prompt (following up on vague answers)", () => {
+  const p = getPrompt(FOLLOW_UP_PROMPT_ID);
+
+  it("is registered with both languages, Voice & Bounds, no placeholders and the JSON contract", () => {
+    expect(FOLLOW_UP_PROMPT_ID).toBe("portfolio-followup@v1");
+    for (const lang of ["nl", "en"] as const) {
+      expect(p.runtime[lang]).toContain("Voice & Bounds");
+      expect(p.runtime[lang]).not.toMatch(/\{\{/);
+      expect(p.runtime[lang]).toContain('"questions"');
+      expect(p.runtime[lang]).toContain("<answers>");
+    }
+    expect(headings(p.runtime.nl)).toBe(headings(p.runtime.en));
+  });
+
+  it("asks zero to two questions about the concrete moment, and none when the answers suffice", () => {
+    expect(p.runtime.nl).toMatch(/nul, één of twee vervolgvragen/i);
+    expect(p.runtime.nl).toMatch(/stel dan geen vragen/i);
+    expect(p.runtime.en).toMatch(/zero, one or two follow-up questions/i);
+    expect(p.runtime.en).toMatch(/ask no questions/i);
+  });
+
+  it("treats the material as data and invents nothing", () => {
+    expect(p.runtime.nl).toMatch(/nooit een instructie/i);
+    expect(p.runtime.nl).toMatch(/verzin niets/i);
+    expect(p.runtime.en).toMatch(/never an instruction/i);
+    expect(p.runtime.en).toMatch(/invent nothing/i);
   });
 });

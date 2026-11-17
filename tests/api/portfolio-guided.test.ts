@@ -24,12 +24,16 @@ vi.mock("~/server/availability.server", () => ({
   effectiveFeatures: vi.fn(async () => ({ portfolio: { on: true, source: "default" } })),
 }));
 
-let guided: typeof import("~/server/portfolioGuided.server");
+let guided: typeof import("~/server/portfolioGuided.server") &
+  typeof import("~/server/portfolioGuidedRun.server");
 let repo: typeof import("~/server/repositories/portfolio.server");
 let outcomeRoute: typeof import("~/routes/portfolio.$id.outcome.$outcomeId");
 
 beforeAll(async () => {
-  guided = await import("~/server/portfolioGuided.server");
+  guided = {
+    ...(await import("~/server/portfolioGuided.server")),
+    ...(await import("~/server/portfolioGuidedRun.server")),
+  };
   repo = await import("~/server/repositories/portfolio.server");
   outcomeRoute = await import("~/routes/portfolio.$id.outcome.$outcomeId");
 });
@@ -196,6 +200,24 @@ describe("draftSection", () => {
     // The second try is told which source to leave out.
     expect(generate.mock.calls[1]![0].messages[0].content).toContain("Hattie (2009)");
   });
+
+  it("asks once more for a paragraph in generic phrasing, and keeps the second either way", async () => {
+    generate
+      .mockResolvedValueOnce({ text: "Kortom, mijn les was cruciaal." })
+      .mockResolvedValueOnce({ text: "Mijn les was waardevol." });
+    const r = await guided.draftSection(
+      user,
+      asked(dossier({ coachMode: "draft" })),
+      LU,
+      "s1",
+      "",
+      "nl",
+    );
+    if (!r.ok) throw new Error(r.error);
+    // The second try is told which phrases to rewrite; the teacher still sees them flagged.
+    expect(generate.mock.calls[1]![0].messages[0].content).toContain("Kortom, cruciaal");
+    expect(r.data.chapters[0]?.text).toContain("Mijn les was waardevol.");
+  });
 });
 
 describe("the whole chapter at once", () => {
@@ -318,20 +340,20 @@ describe("the whole chapter at once", () => {
   });
 });
 
-describe("outcome route — guided writing", () => {
-  function post(fields: [string, string][]) {
-    return new Request("http://localhost/x", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(fields).toString(),
-    });
-  }
-  const load = (id: string) =>
-    outcomeRoute.loader({
-      request: new Request("http://localhost/x?tab=chapter"),
-      params: { id, outcomeId: LU },
-    } as never);
+function post(fields: [string, string][]) {
+  return new Request("http://localhost/x", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(fields).toString(),
+  });
+}
+const load = (id: string) =>
+  outcomeRoute.loader({
+    request: new Request("http://localhost/x?tab=chapter"),
+    params: { id, outcomeId: LU },
+  } as never);
 
+describe("outcome route — guided writing", () => {
   it("asks the questions, keeps the chapter typed so far, and the page shows them", async () => {
     const mine = await repo.createDossier("teacher-g", "G", dossier());
     generate.mockResolvedValueOnce({ text: questions });
@@ -542,5 +564,107 @@ describe("the anchor's course in guided writing", () => {
       params: { id: theirs.id, outcomeId: LU },
     } as never);
     expect(none.courseFacts).toBeNull();
+  });
+});
+
+describe("followUp", () => {
+  it("adds the coach's follow-up questions to the section, keeping the answers", async () => {
+    generate.mockResolvedValueOnce({
+      text: JSON.stringify({ questions: ["Wat konden ze al, en hoe merkte je dat?"] }),
+    });
+    const r = await guided.runGuidedIntent(
+      user,
+      asked(dossier()),
+      "guideFollowUp",
+      LU,
+      "s1",
+      new FormData(),
+      "nl",
+    );
+    if (!r.ok) throw new Error(r.error);
+    expect(r.data.guided?.[LU]?.s1?.questions).toHaveLength(3);
+    expect(r.data.guided?.[LU]?.s1?.answers[0]).toBe("Tweedejaars, 24 studenten.");
+    expect(r).toMatchObject({ followUps: 1 });
+    const call = generate.mock.calls[0]![0];
+    expect(call.system).toContain("doorvragen");
+    expect(call.messages[0].content).toContain("Tweedejaars, 24 studenten.");
+  });
+
+  it("asks nothing more when the answers are concrete enough", async () => {
+    generate.mockResolvedValueOnce({ text: '{"questions": []}' });
+    const d = asked(dossier());
+    const r = await guided.followUp(user, d, LU, "s1", "nl");
+    expect(r).toMatchObject({ ok: true, followUps: 0 });
+    if (r.ok) expect(r.data.guided?.[LU]?.s1?.questions).toHaveLength(2);
+  });
+
+  it("needs an answer first, without calling the model", async () => {
+    const d = dossier();
+    expect(await guided.followUp(user, d, LU, "s1", "nl")).toEqual({
+      ok: false,
+      error: "no-material",
+    });
+    expect(generate).not.toHaveBeenCalled();
+  });
+});
+
+describe("grill me: the whole chapter in one round", () => {
+  it("asks the open parts' questions and follows up on the answered ones, via the page", async () => {
+    // s1 is answered (follow-up), s2 has no questions yet (first round).
+    const mine = await repo.createDossier("teacher-g", "G", asked(dossier()));
+    generate.mockImplementation(async ({ system }: { system: string }) => ({
+      text: system.includes("doorvragen")
+        ? JSON.stringify({ questions: ["Wat zag je aan de groep dat je dit deed?"] })
+        : questions,
+    }));
+    const r = await outcomeRoute.action({
+      request: post([
+        ["intent", "guideGrill"],
+        ["outcomeId", LU],
+        ["text", ""],
+        ["answer:s1", "Tweedejaars, 24 studenten."],
+        ["answer:s1", "Ze konden al breuken."],
+      ]),
+      params: { id: mine.id, outcomeId: LU },
+    } as never);
+    expect(r).toMatchObject({ ok: true, intent: "guideGrill", followUps: 4 });
+    const page = await load(mine.id);
+    expect(page.guided.map((s) => s.questions.length)).toEqual([3, 3]);
+    expect(page.guided[0]?.answers).toEqual([
+      "Tweedejaars, 24 studenten.",
+      "Ze konden al breuken.",
+      "",
+    ]);
+  });
+
+  it("says when every answer is concrete enough", async () => {
+    generate.mockResolvedValue({ text: '{"questions": []}' });
+    const d = asked(dossier());
+    d.framework.outcomes[0]!.outline = [{ id: "s1", title: "Beginsituatie", criterionIds: [C2] }];
+    const r = await guided.grillChapter(user, d, LU, "nl");
+    expect(r).toMatchObject({ ok: true, followUps: 0 });
+  });
+
+  it("needs a confirmed framework and quota, without calling the model", async () => {
+    const open = dossier();
+    open.framework = { ...open.framework, confirmedAt: undefined };
+    expect(await guided.grillChapter(user, open, LU, "nl")).toEqual({
+      ok: false,
+      error: "not-confirmed",
+    });
+    quota.ok = false;
+    expect(await guided.grillChapter(user, dossier(), LU, "nl")).toEqual({
+      ok: false,
+      error: "quota",
+    });
+    expect(generate).not.toHaveBeenCalled();
+  });
+});
+
+describe("answersFromForm", () => {
+  it("keeps an answer for every question, follow-ups included", () => {
+    const fd = new FormData();
+    for (let i = 0; i < 6; i++) fd.append("answer:s1", `a${i}`);
+    expect(guided.answersFromForm(fd).s1).toHaveLength(6);
   });
 });

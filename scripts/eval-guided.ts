@@ -9,6 +9,9 @@
  *   ANTHROPIC_API_KEY=… npm run eval:guided -- --repeat 3        # consistency
  *   ANTHROPIC_API_KEY=… npm run eval:guided -- --label b         # <date>b-portfolio-guided.md
  *   npm run eval:guided -- --dry-run                             # build messages only, no API
+ *   npm run eval:guided -- --show                                # print every paragraph too
+ *   npm run eval:guided -- --draft-prompt portfolio-draft@v3 --no-style-retry  # a before-measurement
+ *   npm run eval:guided -- --follow-up                           # also score following up
  *
  * The paragraph is written from the case's own fixed answers, so the two steps are scored
  * apart. The model is the app default (config/models.json) unless `--model` says otherwise.
@@ -20,9 +23,12 @@ import { providerForModel } from "~/lib/ai/provider";
 import { DEFAULT_MODEL } from "~/lib/ai/models";
 import { getRuntimePrompt } from "~/lib/prompts";
 import {
+  buildFollowUpMessage,
   buildQuestionsMessage,
   buildSectionDraftMessage,
   DRAFT_PROMPT_ID,
+  FOLLOW_UP_PROMPT_ID,
+  parseFollowUps,
   parseQuestions,
   checkSectionDraft,
   retryDraftMessage,
@@ -34,6 +40,7 @@ import {
   type GuidedRow,
   guidedReportMarkdown,
   scoreDraft,
+  scoreFollowUps,
   scoreQuestions,
 } from "./eval-guided-helpers";
 
@@ -58,6 +65,11 @@ async function ask(model: string, promptId: string, locale: "nl" | "en", message
 
 async function main() {
   const dryRun = process.argv.includes("--dry-run");
+  const show = process.argv.includes("--show");
+  // A before-measurement runs the old paragraph prompt the way the app ran it then.
+  const draftPrompt = arg("draft-prompt") ?? DRAFT_PROMPT_ID;
+  const styleRetry = !process.argv.includes("--no-style-retry");
+  const withFollowUp = process.argv.includes("--follow-up");
   const repeat = Math.max(1, Number(arg("repeat") ?? 1));
   const model = arg("model") ?? DEFAULT_MODEL;
   const label = (arg("label") ?? "").replace(/[^a-z0-9-]/gi, "");
@@ -88,26 +100,44 @@ async function main() {
         await ask(model, QUESTIONS_PROMPT_ID, c.locale, questionsMessage),
         references,
       );
-      // As the app does: one more try, told which sources to leave out.
+      // As the app does: one more try, told which sources to leave out or phrases to rewrite.
       let message = draftMessage;
       let paragraph: string | null = null;
       let refused = "";
       for (let attempt = 0; attempt < 2 && paragraph === null; attempt++) {
-        refused = await ask(model, DRAFT_PROMPT_ID, c.locale, message);
-        const checked = checkSectionDraft(refused, references);
+        refused = await ask(model, draftPrompt, c.locale, message);
+        const checked = checkSectionDraft(refused, references, {
+          style: styleRetry && attempt === 0,
+        });
         if (checked.ok) paragraph = checked.text;
-        else message = retryDraftMessage(message, checked.unknown, c.locale);
+        else message = retryDraftMessage(message, checked.unknown, c.locale, checked.generic);
       }
+      const followUps = withFollowUp
+        ? parseFollowUps(
+            await ask(
+              model,
+              FOLLOW_UP_PROMPT_ID,
+              c.locale,
+              buildFollowUpMessage(data, outcomeId, sectionId, c.locale, course),
+            ),
+            references,
+            c.answers.map((a) => a.question),
+          )
+        : undefined;
       const row = {
         caseId: repeat > 1 ? `${c.id}#${i + 1}` : c.id,
         questions: scoreQuestions(c, questions),
         draft: scoreDraft(c, paragraph),
+        ...(followUps === undefined ? {} : { followUps: scoreFollowUps(c, followUps) }),
       };
       rows.push(row);
       const mark = (b: boolean) => (b ? "✓" : "×");
       console.log(`${mark(row.questions.pass)}${mark(row.draft.pass)} ${row.caseId}`);
       if (!row.questions.pass) console.log(`   vragen: ${JSON.stringify(questions)}`);
-      if (!row.draft.pass) console.log(`   alinea: ${paragraph ?? `(geweigerd) ${refused}`}`);
+      if (followUps !== undefined && (show || !row.followUps?.pass))
+        console.log(`   doorvragen: ${JSON.stringify(followUps)}`);
+      if (show || !row.draft.pass)
+        console.log(`   alinea: ${paragraph ?? `(geweigerd) ${refused}`}`);
     }
   }
   if (dryRun) return;
@@ -115,7 +145,7 @@ async function main() {
   const date = new Date().toISOString().slice(0, 10);
   mkdirSync(REPORTS_DIR, { recursive: true });
   const file = join(REPORTS_DIR, `${date}${label}-portfolio-guided.md`);
-  writeFileSync(file, guidedReportMarkdown({ date, model, repeat, rows }));
+  writeFileSync(file, guidedReportMarkdown({ date, model, repeat, rows, draftPrompt, styleRetry }));
   console.log(`Report: ${file}`);
 }
 

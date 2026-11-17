@@ -2,13 +2,17 @@ import { describe, expect, it } from "vitest";
 import { C1, C2, LU, sampleDossier } from "./fixtures";
 import {
   appendSection,
+  buildFollowUpMessage,
+  canFollowUp,
   checkSectionDraft,
   buildQuestionsMessage,
   buildSectionDraftMessage,
+  parseFollowUps,
   parseQuestions,
   parseSectionDraft,
   retryDraftMessage,
   withAnswers,
+  withFollowUps,
   writingSections,
 } from "~/lib/portfolio/guided";
 import { addEvidence } from "~/lib/portfolio/edit";
@@ -243,6 +247,27 @@ describe("checkSectionDraft and the retry message", () => {
       "[to add: source in your reference list]",
     );
   });
+  it("refuses generic phrasing on a first try only, so a second try can rewrite it", () => {
+    const text = "Kortom, deze aanpak was cruciaal.";
+    expect(checkSectionDraft(text, [], { style: true })).toEqual({
+      ok: false,
+      unknown: [],
+      generic: ["Kortom", "cruciaal"],
+    });
+    expect(checkSectionDraft(text, [])).toEqual({ ok: true, text });
+    expect(
+      checkSectionDraft("Ik [aanvullen: waarom dit cruciaal was].", [], { style: true }).ok,
+    ).toBe(true);
+  });
+
+  it("names the generic phrases in the retry message, with what to write instead", () => {
+    const nl = retryDraftMessage("BERICHT", [], "nl", ["cruciaal", "Kortom"]);
+    expect(nl).toContain("<correction>");
+    expect(nl).toContain("cruciaal, Kortom");
+    expect(nl).not.toContain("bronnen");
+    expect(retryDraftMessage("M", [], "en", ["crucial"])).toContain("crucial");
+    expect(retryDraftMessage("M", [], "nl")).toBe("M");
+  });
 });
 
 describe("appendSection", () => {
@@ -294,12 +319,11 @@ describe("DossierDataSchema — guided writing", () => {
     expect(DossierDataSchema.safeParse(d).success).toBe(true);
   });
 
-  it("rejects too many questions or an over-long answer", () => {
+  it("rejects too many questions (four plus two follow-ups) or an over-long answer", () => {
+    const questions = Array.from({ length: GUIDED_LIMITS.total + 1 }, (_, i) => `q${i}`);
     const many: DossierData = {
       ...withOutline(),
-      guided: {
-        [LU]: { s1: { questions: ["a", "b", "c", "d", "e"], answers: [], at: 1, model: "m" } },
-      },
+      guided: { [LU]: { s1: { questions, answers: [], at: 1, model: "m" } } },
     };
     expect(DossierDataSchema.safeParse(many).success).toBe(false);
     const long: DossierData = {
@@ -316,5 +340,70 @@ describe("DossierDataSchema — guided writing", () => {
       },
     };
     expect(DossierDataSchema.safeParse(long).success).toBe(false);
+  });
+});
+
+describe("following up on vague answers", () => {
+  const answered = (draftedAt?: number): DossierData => ({
+    ...withOutline(),
+    guided: {
+      [LU]: {
+        s1: {
+          questions: ["Welke groep had je?", "Hoe reageerden ze?"],
+          answers: ["Tweedejaars.", "Ze vonden het leuk."],
+          at: 1,
+          model: "m",
+          ...(draftedAt ? { draftedAt } : {}),
+        },
+      },
+    },
+  });
+
+  it("sends the section with the questions and the teacher's answers", () => {
+    const m = buildFollowUpMessage(answered(), LU, "s1", "nl");
+    expect(m).toContain("Titel: Beginsituatie");
+    expect(m).toContain("<answers>");
+    expect(m).toContain("Vraag: Hoe reageerden ze?\nAntwoord van de docent: Ze vonden het leuk.");
+  });
+
+  it("takes zero to two new questions, never one already asked", () => {
+    const asked = ["Welke groep had je?", "Hoe reageerden ze?"];
+    expect(
+      parseFollowUps(
+        JSON.stringify({ questions: ["Wat zei een student precies?", "Hoe reageerden ze?"] }),
+        [],
+        asked,
+      ),
+    ).toEqual(["Wat zei een student precies?"]);
+    expect(parseFollowUps('{"questions": []}', [], asked)).toEqual([]);
+    expect(parseFollowUps("geen json", [], asked)).toBeNull();
+    expect(
+      parseFollowUps(JSON.stringify({ questions: ["A?", "B?", "C?"] }), [], asked),
+    ).toHaveLength(2);
+  });
+
+  it("leaves no more room than the section holds", () => {
+    const full = Array.from({ length: GUIDED_LIMITS.total - 1 }, (_, i) => `Vraag ${i}?`);
+    expect(parseFollowUps(JSON.stringify({ questions: ["A?", "B?"] }), [], full)).toEqual(["A?"]);
+  });
+
+  it("adds the follow-ups with empty answers and lets the part be written again", () => {
+    const d = withFollowUps(answered(5), LU, "s1", ["Wat zei een student precies?"]);
+    const s = d.guided?.[LU]?.s1;
+    expect(s?.questions).toEqual([
+      "Welke groep had je?",
+      "Hoe reageerden ze?",
+      "Wat zei een student precies?",
+    ]);
+    expect(s?.answers).toEqual(["Tweedejaars.", "Ze vonden het leuk.", ""]);
+    expect(s?.draftedAt).toBeUndefined();
+    expect(DossierDataSchema.safeParse(d).success).toBe(true);
+  });
+
+  it("offers a follow-up once something is answered and there is room", () => {
+    expect(canFollowUp({ questions: ["A?"], answers: [""] })).toBe(false);
+    expect(canFollowUp({ questions: ["A?"], answers: ["Ja, goed."] })).toBe(true);
+    const full = Array.from({ length: GUIDED_LIMITS.total }, () => "x");
+    expect(canFollowUp({ questions: full, answers: full })).toBe(false);
   });
 });

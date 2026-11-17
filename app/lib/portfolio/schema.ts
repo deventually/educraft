@@ -66,13 +66,17 @@ const CoachReviewSchema = z.object({
 export const GUIDED_LIMITS = {
   minQuestions: 2,
   questions: 4,
+  /** Follow-up questions per round, on vague or missing answers. */
+  followUps: 2,
+  /** Questions a section holds: the first round plus follow-ups. */
+  total: 6,
   question: 300,
   answer: 3_000,
 } as const;
 
 const GuidedSectionSchema = z.object({
-  questions: z.array(z.string().min(1).max(GUIDED_LIMITS.question)).max(GUIDED_LIMITS.questions),
-  answers: z.array(z.string().max(GUIDED_LIMITS.answer)).max(GUIDED_LIMITS.questions),
+  questions: z.array(z.string().min(1).max(GUIDED_LIMITS.question)).max(GUIDED_LIMITS.total),
+  answers: z.array(z.string().max(GUIDED_LIMITS.answer)).max(GUIDED_LIMITS.total),
   at: z.number().int().nonnegative(),
   model: z.string().max(200),
   /** When a paragraph was last drafted from these answers; new questions clear it. */

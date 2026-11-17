@@ -6,6 +6,7 @@ import {
   type GuidedCase,
   guidedReportMarkdown,
   scoreDraft,
+  scoreFollowUps,
   scoreQuestions,
 } from "../../scripts/eval-guided-helpers";
 import {
@@ -124,6 +125,16 @@ describe("scoreDraft", () => {
     expect(scoreDraft(withFacts, "Ik gaf een les.").facts).toBeLessThan(1);
     expect(scoreDraft(c, null)).toMatchObject({ parse: false, pass: false });
   });
+
+  it("fails generic, AI-like phrasing, but not inside an open spot", () => {
+    const c = first!;
+    const base = c.expect.goodParagraph;
+    expect(scoreDraft(c, `${base} Kortom, deze aanpak was cruciaal.`)).toMatchObject({
+      natural: false,
+      pass: false,
+    });
+    expect(scoreDraft(c, `${base} [aanvullen: waarom dit cruciaal was]`).natural).toBe(true);
+  });
 });
 
 describe("scoreDraft — open spots", () => {
@@ -181,8 +192,66 @@ describe("guidedReportMarkdown", () => {
     });
     expect(md).toContain("# Eval geleid schrijven — 2026-11-11");
     expect(md).toContain("portfolio-questions@v2");
-    expect(md).toContain("portfolio-draft@v3");
+    expect(md).toContain("portfolio-draft@v4");
     expect(md).toContain(`| ${c.id} |`);
     expect(md).toContain("Geslaagd: 1 van 1.");
+    expect(md).toContain("Geen AI-wendingen");
+    expect(md).toContain("met tweede poging bij algemene wendingen");
+  });
+
+  it("names the old prompt and the missing retry in a before-measurement", () => {
+    const md = guidedReportMarkdown({
+      date: "2026-11-16",
+      model: "m",
+      repeat: 3,
+      rows: [],
+      draftPrompt: "portfolio-draft@v3",
+      styleRetry: false,
+    });
+    expect(md).toContain("portfolio-draft@v3 (alinea), zonder tweede poging");
+  });
+});
+
+describe("scoreFollowUps", () => {
+  const vague = cases.filter((c) => c.expect.followUpAbout);
+
+  it("has cases with a vague or missing answer to follow up on", () => {
+    expect(vague.map((c) => c.id)).toEqual(
+      expect.arrayContaining(["nl-evaluatie-gaten", "nl-gedicteerd"]),
+    );
+  });
+
+  it("passes the case's own good follow-ups, and zero follow-ups where none are needed", () => {
+    for (const c of vague)
+      expect(scoreFollowUps(c, c.expect.goodFollowUps ?? []), c.id).toMatchObject({ pass: true });
+    const concrete = cases.find((c) => !c.expect.followUpAbout)!;
+    expect(scoreFollowUps(concrete, [])).toMatchObject({ pass: true });
+  });
+
+  it("fails no follow-up on a vague answer, a yes/no question, too many and an unusable answer", () => {
+    const c = vague[0]!;
+    expect(scoreFollowUps(c, [])).toMatchObject({ topic: false, pass: false });
+    expect(scoreFollowUps(c, ["Was het leuk?"])).toMatchObject({ open: false, pass: false });
+    expect(scoreFollowUps(c, ["A?", "B?", "C?"])).toMatchObject({ count: false });
+    expect(scoreFollowUps(c, null)).toMatchObject({ parse: false, pass: false });
+  });
+
+  it("puts the follow-ups in the report when they were measured", () => {
+    const c = vague[0]!;
+    const md = guidedReportMarkdown({
+      date: "2026-11-17",
+      model: "m",
+      repeat: 1,
+      rows: [
+        {
+          caseId: c.id,
+          questions: scoreQuestions(c, c.expect.goodQuestions),
+          draft: scoreDraft(c, c.expect.goodParagraph),
+          followUps: scoreFollowUps(c, c.expect.goodFollowUps ?? []),
+        },
+      ],
+    });
+    expect(md).toContain("## Doorvragen");
+    expect(md).toContain("portfolio-followup@v1");
   });
 });

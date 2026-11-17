@@ -12,12 +12,15 @@
 import { z } from "zod";
 import { extractJson } from "~/lib/ai/structuredAnswer";
 import type { Locale } from "~/lib/i18n";
+import { aiPatternsIn } from "./aiPatterns";
 import { citesUnknownSource, criteriaMaterial, unknownCitations } from "./coach";
+import { splitOnMarkers } from "./openSpots";
 import { GUIDED_LIMITS } from "./schema";
 import type { DossierData, Outcome } from "./types";
 
 export const QUESTIONS_PROMPT_ID = "portfolio-questions@v2";
-export const DRAFT_PROMPT_ID = "portfolio-draft@v3";
+export const DRAFT_PROMPT_ID = "portfolio-draft@v4";
+export const FOLLOW_UP_PROMPT_ID = "portfolio-followup@v1";
 
 /** One part of a chapter to write. */
 export interface WritingSection {
@@ -152,6 +155,94 @@ export function parseQuestions(raw: string, references: string[]): string[] | nu
   return out.length >= GUIDED_LIMITS.minQuestions ? out.slice(0, GUIDED_LIMITS.questions) : null;
 }
 
+type AnswerPair = { q: string; a: string };
+
+function answerPairs(d: DossierData, outcomeId: string, sectionId: string): AnswerPair[] {
+  const saved = d.guided?.[outcomeId]?.[sectionId];
+  return (saved?.questions ?? []).map((q, i) => ({ q, a: saved?.answers[i]?.trim() ?? "" }));
+}
+
+/** The coach's questions with the teacher's answers, as `<answers>`. */
+function answersBlock(pairs: AnswerPair[], locale: Locale): string {
+  const l = LABELS[locale];
+  const body = pairs.length
+    ? pairs
+        .map(
+          (p, i) =>
+            `<qa n="${i + 1}">\n${l.question}: ${p.q}\n${l.answer}: ${p.a || l.noAnswer}\n</qa>`,
+        )
+        .join("\n")
+    : l.noAnswer;
+  return `<answers>\n${body}\n</answers>`;
+}
+
+/**
+ * The user message for following up on one section: what the questions message holds, plus
+ * the questions asked so far with the teacher's answers.
+ */
+export function buildFollowUpMessage(
+  d: DossierData,
+  outcomeId: string,
+  sectionId: string,
+  locale: Locale,
+  course = "",
+): string {
+  const asked = buildQuestionsMessage(d, outcomeId, sectionId, locale, course);
+  return `${asked}\n\n${answersBlock(answerPairs(d, outcomeId, sectionId), locale)}`;
+}
+
+/**
+ * Zero to two new follow-up questions, clipped, none already asked and no more than the
+ * section has room for; `null` when the answer is unusable. An empty list is a good answer:
+ * the answers are concrete enough.
+ */
+export function parseFollowUps(
+  raw: string,
+  references: string[],
+  asked: string[],
+): string[] | null {
+  const parsed = RawQuestions.safeParse(extractJson(raw));
+  if (!parsed.success) return null;
+  const seen = new Set(asked.map((q) => q.toLowerCase()));
+  const out: string[] = [];
+  for (const q of parsed.data.questions) {
+    if (typeof q !== "string") continue;
+    const text = q.replace(/\s+/g, " ").trim().slice(0, GUIDED_LIMITS.question);
+    const key = text.toLowerCase();
+    if (!text || seen.has(key) || citesUnknownSource(text, references)) continue;
+    seen.add(key);
+    out.push(text);
+  }
+  const room = Math.max(0, GUIDED_LIMITS.total - asked.length);
+  return out.slice(0, Math.min(GUIDED_LIMITS.followUps, room));
+}
+
+/** The section with the follow-ups added, each with an empty answer; it may be written again. */
+export function withFollowUps(
+  d: DossierData,
+  outcomeId: string,
+  sectionId: string,
+  followUps: string[],
+): DossierData {
+  const s = d.guided?.[outcomeId]?.[sectionId];
+  if (!s || followUps.length === 0) return d;
+  const { draftedAt: _, ...rest } = s;
+  const next = {
+    ...rest,
+    questions: [...s.questions, ...followUps],
+    answers: [...s.questions.map((_, i) => s.answers[i] ?? ""), ...followUps.map(() => "")],
+  };
+  return {
+    ...d,
+    guided: { ...d.guided, [outcomeId]: { ...d.guided?.[outcomeId], [sectionId]: next } },
+  };
+}
+
+/** Following up makes sense once something is answered and the section has room left. */
+export function canFollowUp(s: { questions: string[]; answers: string[] }): boolean {
+  return s.questions.length < GUIDED_LIMITS.total && s.answers.some((a) => a.trim() !== "");
+}
+
 /**
  * The user message for one section's paragraph: the questions with the teacher's answers,
  * the course's facts, the section's evidence, the chapter so far and the references. `null`
@@ -166,25 +257,15 @@ export function buildSectionDraftMessage(
   course = "",
 ): string | null {
   const s = sectionOf(d, outcomeId, sectionId);
-  const l = LABELS[locale];
   const m = criteriaMaterial(d, outcomeId, s.criterionIds, chapter, locale);
-  const saved = d.guided?.[outcomeId]?.[sectionId];
-  const pairs = (saved?.questions ?? []).map((q, i) => ({ q, a: saved?.answers[i]?.trim() ?? "" }));
+  const pairs = answerPairs(d, outcomeId, sectionId);
   if (!m.hasEvidence && !course && !pairs.some((p) => p.a)) return null;
-  const answers = pairs.length
-    ? pairs
-        .map(
-          (p, i) =>
-            `<qa n="${i + 1}">\n${l.question}: ${p.q}\n${l.answer}: ${p.a || l.noAnswer}\n</qa>`,
-        )
-        .join("\n")
-    : l.noAnswer;
   return [
     m.outcome,
     course,
     sectionBlock(s, locale),
     m.criteria,
-    `<answers>\n${answers}\n</answers>`,
+    answersBlock(pairs, locale),
     m.evidence,
     m.chapter,
     m.references,
@@ -194,10 +275,20 @@ export function buildSectionDraftMessage(
 }
 
 /** The paragraph without fences or a heading; `null` when empty or citing an unknown source. */
-export type SectionDraftCheck = { ok: true; text: string } | { ok: false; unknown: string[] };
+export type SectionDraftCheck =
+  | { ok: true; text: string }
+  | { ok: false; unknown: string[]; generic?: string[] };
 
-/** The paragraph, cleaned, or why it is refused: empty, or naming sources the teacher lacks. */
-export function checkSectionDraft(raw: string, references: string[]): SectionDraftCheck {
+/**
+ * The paragraph, cleaned, or why it is refused: empty, or naming sources the teacher lacks.
+ * With `style` (a first try) also refused for generic, AI-like phrasing outside an open spot
+ * (`aiPatternsIn`), so a second try can rewrite it; a second try is never refused for style.
+ */
+export function checkSectionDraft(
+  raw: string,
+  references: string[],
+  opts: { style?: boolean } = {},
+): SectionDraftCheck {
   const fenced = /```[a-z]*\s*([\s\S]*?)```/i.exec(raw)?.[1];
   const text = (fenced ?? raw)
     .split("\n")
@@ -207,7 +298,16 @@ export function checkSectionDraft(raw: string, references: string[]): SectionDra
     .slice(0, 5_000);
   if (!text) return { ok: false, unknown: [] };
   const unknown = unknownCitations(text, references);
-  return unknown.length ? { ok: false, unknown } : { ok: true, text };
+  if (unknown.length) return { ok: false, unknown };
+  if (opts.style) {
+    const prose = splitOnMarkers(text)
+      .filter((p) => !p.marker)
+      .map((p) => p.text)
+      .join(" ");
+    const generic = [...new Set(aiPatternsIn(prose).map((p) => p.text))];
+    if (generic.length) return { ok: false, unknown: [], generic };
+  }
+  return { ok: true, text };
 }
 
 export function parseSectionDraft(raw: string, references: string[]): string | null {
@@ -217,14 +317,30 @@ export function parseSectionDraft(raw: string, references: string[]): string | n
 
 const CORRECTION: Record<Locale, (list: string) => string> = {
   nl: (list) =>
-    `<correction>\nJe vorige tekst noemde bronnen die niet in <references> staan: ${list}. Noem ze niet. Zet op die plek [aanvullen: bron in je literatuurlijst] en schrijf de alinea opnieuw.\n</correction>`,
+    `Je vorige tekst noemde bronnen die niet in <references> staan: ${list}. Noem ze niet. Zet op die plek [aanvullen: bron in je literatuurlijst] en schrijf de alinea opnieuw.`,
   en: (list) =>
-    `<correction>\nYour previous text named sources that are not in <references>: ${list}. Do not name them. Put [to add: source in your reference list] in their place and write the paragraph again.\n</correction>`,
+    `Your previous text named sources that are not in <references>: ${list}. Do not name them. Put [to add: source in your reference list] in their place and write the paragraph again.`,
 };
 
-/** The draft message for a second try, told which sources to leave out. */
-export function retryDraftMessage(message: string, unknown: string[], locale: Locale): string {
-  return unknown.length ? `${message}\n\n${CORRECTION[locale](unknown.join(", "))}` : message;
+const STYLE: Record<Locale, (list: string) => string> = {
+  nl: (list) =>
+    `Je vorige tekst had algemene wendingen: ${list}. Schrijf de alinea opnieuw zonder deze woorden en zonder gedachtestreepjes of samenvattende slotzin. Zeg in plaats daarvan concreet wat de docent deed, zag of hoorde, met de woorden van de docent.`,
+  en: (list) =>
+    `Your previous text had generic phrasing: ${list}. Write the paragraph again without these words and without dashes or a summarising closing sentence. Say instead, concretely, what the teacher did, saw or heard, in the teacher's words.`,
+};
+
+/** The draft message for a second try, told which sources to leave out and which phrases to drop. */
+export function retryDraftMessage(
+  message: string,
+  unknown: string[],
+  locale: Locale,
+  generic: string[] = [],
+): string {
+  const notes = [
+    ...(unknown.length ? [CORRECTION[locale](unknown.join(", "))] : []),
+    ...(generic.length ? [STYLE[locale](generic.join(", "))] : []),
+  ];
+  return notes.length ? `${message}\n\n<correction>\n${notes.join("\n")}\n</correction>` : message;
 }
 
 /** The chapter with the paragraph appended; an outline section's title goes above it, once. */

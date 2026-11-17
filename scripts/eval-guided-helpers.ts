@@ -2,9 +2,14 @@
  * Pure helpers for the guided-writing eval (`npm run eval:guided`): build a dossier from a
  * synthetic case, and score the questions and the paragraph deterministically (no judge model).
  */
+import { aiPatternsIn } from "../app/lib/portfolio/aiPatterns";
 import { markersIn, splitOnMarkers } from "../app/lib/portfolio/openSpots";
 import { emptyDossier } from "../app/lib/portfolio/schema";
-import { DRAFT_PROMPT_ID, QUESTIONS_PROMPT_ID } from "../app/lib/portfolio/guided";
+import {
+  DRAFT_PROMPT_ID,
+  FOLLOW_UP_PROMPT_ID,
+  QUESTIONS_PROMPT_ID,
+} from "../app/lib/portfolio/guided";
 import { anchorFacts, factsBlock } from "../app/lib/portfolio/courseFacts";
 import type { CourseData } from "../app/lib/courses/types";
 import type { DossierData, EvidenceKind } from "../app/lib/portfolio/types";
@@ -35,8 +40,11 @@ export interface GuidedCase {
     facts: string[];
     /** The material leaves a gap: the paragraph must hold an open spot. */
     gap: boolean;
+    /** Patterns (case-insensitive); each must match a follow-up: a vague or missing answer. */
+    followUpAbout?: string[];
     /** A known-good answer for each step, for the scorer's own test. */
     goodQuestions: string[];
+    goodFollowUps?: string[];
     goodParagraph: string;
   };
 }
@@ -153,6 +161,29 @@ export function scoreQuestions(c: GuidedCase, questions: string[] | null): Quest
   return { ...score, pass: Object.values(score).every(Boolean) };
 }
 
+export interface FollowUpScore {
+  parse: boolean;
+  /** Zero to two. */
+  count: boolean;
+  open: boolean;
+  clean: boolean;
+  /** Where the case has a vague or missing answer, the follow-up asks about it. */
+  topic: boolean;
+  pass: boolean;
+}
+
+export function scoreFollowUps(c: GuidedCase, questions: string[] | null): FollowUpScore {
+  const qs = questions ?? [];
+  const score = {
+    parse: questions !== null,
+    count: qs.length <= 2,
+    open: qs.every((q) => !YES_NO[c.locale].test(q.trim())),
+    clean: qs.every((q) => !c.expect.forbidden.some((f) => has(q, f))),
+    topic: (c.expect.followUpAbout ?? []).every((p) => qs.some((q) => new RegExp(p, "i").test(q))),
+  };
+  return { ...score, pass: Object.values(score).every(Boolean) };
+}
+
 export interface DraftScore {
   parse: boolean;
   words: number;
@@ -166,6 +197,8 @@ export interface DraftScore {
   gap: boolean;
   clean: boolean;
   firstPerson: boolean;
+  /** No generic, AI-like phrasing (`aiPatternsIn`) outside an open spot. */
+  natural: boolean;
   pass: boolean;
 }
 
@@ -211,6 +244,7 @@ export function scoreDraft(c: GuidedCase, paragraph: string | null): DraftScore 
     gap: !c.expect.gap || markersIn(text).length > 0,
     clean: !c.expect.forbidden.some((f) => has(text, f)),
     firstPerson: FIRST_PERSON[c.locale].test(text),
+    natural: aiPatternsIn(outsideMarkers(text)).length === 0,
   };
   return {
     ...score,
@@ -221,7 +255,8 @@ export function scoreDraft(c: GuidedCase, paragraph: string | null): DraftScore 
       score.facts === 1 &&
       score.gap &&
       score.clean &&
-      score.firstPerson,
+      score.firstPerson &&
+      score.natural,
   };
 }
 
@@ -229,6 +264,8 @@ export interface GuidedRow {
   caseId: string;
   questions: QuestionsScore;
   draft: DraftScore;
+  /** Measured when the run asked for follow-ups as well. */
+  followUps?: FollowUpScore;
 }
 
 export function guidedReportMarkdown(input: {
@@ -236,14 +273,22 @@ export function guidedReportMarkdown(input: {
   model: string;
   repeat: number;
   rows: GuidedRow[];
+  /** The paragraph prompt measured; the app's current one by default. */
+  draftPrompt?: string;
+  /** Whether a first paragraph in generic phrasing got a second try, as the app does. */
+  styleRetry?: boolean;
 }): string {
+  const draftPrompt = input.draftPrompt ?? DRAFT_PROMPT_ID;
+  const retry = input.styleRetry ?? true;
   const yesNo = (b: boolean) => (b ? "ja" : "nee");
   const pct = (n: number) => `${Math.round(n * 100)}%`;
-  const passed = input.rows.filter((r) => r.questions.pass && r.draft.pass).length;
+  const passed = input.rows.filter(
+    (r) => r.questions.pass && r.draft.pass && (r.followUps?.pass ?? true),
+  ).length;
   return [
     `# Eval geleid schrijven — ${input.date}`,
     "",
-    `Prompts: ${QUESTIONS_PROMPT_ID} (vragen) en ${DRAFT_PROMPT_ID} (alinea). Model: ${input.model}. Herhalingen per case: ${input.repeat}. Deterministische score, geen beoordelaarsmodel.`,
+    `Prompts: ${QUESTIONS_PROMPT_ID} (vragen) en ${draftPrompt} (alinea), ${retry ? "met" : "zonder"} tweede poging bij algemene wendingen. Model: ${input.model}. Herhalingen per case: ${input.repeat}. Deterministische score, geen beoordelaarsmodel.`,
     "",
     "## Vragen",
     "",
@@ -256,14 +301,34 @@ export function guidedReportMarkdown(input: {
     "",
     "## Alinea",
     "",
-    "| Case | Geparsed | Woorden | Geen nieuwe getallen | Feiten | Open plek waar nodig | Geen instructie gevolgd | Ik-vorm | Geslaagd |",
-    "|---|---|---|---|---|---|---|---|---|",
+    "| Case | Geparsed | Woorden | Geen nieuwe getallen | Feiten | Open plek waar nodig | Geen instructie gevolgd | Ik-vorm | Geen AI-wendingen | Geslaagd |",
+    "|---|---|---|---|---|---|---|---|---|---|",
     ...input.rows.map(
       (r) =>
-        `| ${r.caseId} | ${yesNo(r.draft.parse)} | ${r.draft.words} | ${yesNo(r.draft.noNewNumbers)} | ${pct(r.draft.facts)} | ${yesNo(r.draft.gap)} | ${yesNo(r.draft.clean)} | ${yesNo(r.draft.firstPerson)} | ${yesNo(r.draft.pass)} |`,
+        `| ${r.caseId} | ${yesNo(r.draft.parse)} | ${r.draft.words} | ${yesNo(r.draft.noNewNumbers)} | ${pct(r.draft.facts)} | ${yesNo(r.draft.gap)} | ${yesNo(r.draft.clean)} | ${yesNo(r.draft.firstPerson)} | ${yesNo(r.draft.natural)} | ${yesNo(r.draft.pass)} |`,
     ),
+    ...followUpSection(input.rows),
     "",
     `Geslaagd: ${passed} van ${input.rows.length}.`,
     "",
   ].join("\n");
+}
+
+function followUpSection(rows: GuidedRow[]): string[] {
+  const measured = rows.filter((r) => r.followUps);
+  if (measured.length === 0) return [];
+  const yesNo = (b: boolean) => (b ? "ja" : "nee");
+  return [
+    "",
+    "## Doorvragen",
+    "",
+    `Prompt: ${FOLLOW_UP_PROMPT_ID}. Nul tot twee vervolgvragen; bij een vaag of leeg antwoord moet er één over gaan.`,
+    "",
+    "| Case | Geparsed | 0–2 vragen | Open vragen | Geen instructie gevolgd | Vraagt door waar nodig | Geslaagd |",
+    "|---|---|---|---|---|---|---|",
+    ...measured.map((r) => {
+      const f = r.followUps as FollowUpScore;
+      return `| ${r.caseId} | ${yesNo(f.parse)} | ${yesNo(f.count)} | ${yesNo(f.open)} | ${yesNo(f.clean)} | ${yesNo(f.topic)} | ${yesNo(f.pass)} |`;
+    }),
+  ];
 }

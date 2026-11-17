@@ -32,11 +32,23 @@ export const portfolioGuided = {
     quota:
       "AI limit reached: your allowance for this month is used up, or you used a lot of AI today (then it works again tomorrow). The Usage page shows your month.",
   },
+  followUp: "Follow up",
+  followUpDone: "The coach follows up: {n} new questions are below your answers.",
+  followUpDoneOne: "The coach follows up: 1 new question is below your answers.",
+  followUpLabel: "Follow up on {title}",
+  followUpNone: "Your answers are concrete enough. You can have this part drafted.",
+  grill: "Grill me",
+  grillDone: "The coach asked {n} new questions. Answer them, then press Grill me again.",
+  grillHint:
+    "The coach goes through every part: asks the questions still open and follows up where your answer is vague. Press it again after answering, until the coach asks nothing more.",
+  grillNone: "Your answers are concrete enough. Draft the chapter.",
   intro:
     "For each part the coach asks two to four questions about your own practice. Ask them all at once or part by part, and answer them briefly; your answers are saved with your chapter.",
   partlyFailed: "For {n} of the parts it did not work; use the button at that part.",
   pendingChapter: "Writing the chapter, part by part…",
   pendingDraft: "Writing the text…",
+  pendingFollowUp: "The coach is reading your answers…",
+  pendingGrill: "The coach is going through your whole chapter…",
   pendingQuestions: "Thinking of questions…",
   pendingQuestionsAll: "Thinking of questions for every part…",
   questions: "The questions are at the part. Answer them in your own words.",

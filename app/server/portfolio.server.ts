@@ -12,7 +12,7 @@ import { applyIntent } from "~/lib/portfolio/intents";
 import { LIMITS } from "~/lib/portfolio/schema";
 import { proofreadOutcome, reviewDossier, reviewOutcome } from "./portfolioCoach.server";
 import { extractFramework } from "./portfolioExtract.server";
-import { answersFromForm, type GuidedIntent, runGuidedIntent } from "./portfolioGuided.server";
+import { answersFromForm, type GuidedIntent, runGuidedIntent } from "./portfolioGuidedRun.server";
 import { withAnswers } from "~/lib/portfolio/guided";
 import { getMessages } from "~/lib/i18n";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -135,13 +135,15 @@ export type PortfolioActionResult =
       /** guideDraftAll: sections written; with guideQuestionsAll, `failed` counts sections. */
       drafted?: number;
       failed?: number;
+      /** guideFollowUp, guideGrill: new questions (0: the answers are concrete enough). */
+      followUps?: number;
     }
   | { ok: false; error: string };
 
 /**
  * Applies the posted intent to the dossier and stores it. Nine intents call a
  * model (`extract` on the framework page; `review`, `guideQuestions:<sectionId>`,
- * `guideDraft:<sectionId>`, `guideQuestionsAll`, `guideDraftAll` and
+ * `guideDraft:<sectionId>`, `guideFollowUp:<sectionId>`, `guideQuestionsAll`, `guideDraftAll` and
  * `proofread` for one chapter; `reviewAll` for the whole dossier; `proposeEvidence`
  * for evidence in one go, which stores nothing); every other one is a pure edit.
  */
@@ -191,17 +193,21 @@ async function runIntent(
     return { ok: true, intent };
   }
 
-  // One section (`guideDraft:<sectionId>`) or the whole chapter (`guideDraftAll`).
-  const guided = /^(guideQuestions|guideDraft)(?:All$|:(.+)$)/.exec(intent);
+  // One section (`guideDraft:<sectionId>`) or the whole chapter (`guideDraftAll`, `guideGrill`).
+  // Following up is per section only: there is no `guideFollowUpAll`.
+  const guided =
+    /^(?:(guideQuestionsAll|guideDraftAll|guideGrill)|(guideQuestions|guideDraft|guideFollowUp):(.+))$/.exec(
+      intent,
+    );
   if (guided) {
-    const step = (guided[2] === undefined ? `${guided[1]}All` : guided[1]) as GuidedIntent;
+    const step = (guided[1] ?? guided[2]) as GuidedIntent;
     const outcomeId = String(fd.get("outcomeId") ?? "");
     const result = await runGuidedIntent(
       user,
       dossier.data,
       step,
       outcomeId,
-      guided[2] ?? "",
+      guided[3] ?? "",
       fd,
       locale,
     ).catch(() => ({ ok: false as const, error: "failed" as const }));
@@ -215,7 +221,13 @@ async function runIntent(
       };
     const saved = await updateDossier(user.id, dossier.id, { data: result.data }).catch(() => null);
     if (!saved) return { ok: false, error: m.portfolio.errorInvalid };
-    return { ok: true, intent: step, drafted: result.drafted, failed: result.failed };
+    return {
+      ok: true,
+      intent: step,
+      drafted: result.drafted,
+      failed: result.failed,
+      followUps: result.followUps,
+    };
   }
 
   if (intent === "proofread") {

@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { render as rtlRender, screen, within } from "@testing-library/react";
 import { createRoutesStub } from "react-router";
 import { axe } from "vitest-axe";
-import { GuidedWriting } from "~/components/portfolio/GuidedWriting";
+import { GuidedWriting, guidedDone, guidedPending } from "~/components/portfolio/GuidedWriting";
+import { nl } from "~/lib/i18n/messages/nl";
 import type { GuidedSectionView } from "~/lib/portfolio/guided";
 import { C1, C2 } from "../portfolio/fixtures";
 
@@ -131,5 +132,45 @@ describe("GuidedWriting", () => {
     render(<GuidedWriting sections={written} draftMode />);
     expect(screen.queryByRole("button", { name: "Stel het hoofdstuk op" })).toBeNull();
     expect(screen.getAllByText("Staat in je hoofdstuk.")).toHaveLength(2);
+  });
+});
+
+describe("GuidedWriting: following up", () => {
+  it("offers to follow up on a section with an answer", () => {
+    render(<GuidedWriting sections={sections} draftMode={true} />);
+    const more = screen.getByRole("button", { name: "Vraag door over Beginsituatie" });
+    expect(more).toHaveAttribute("value", "guideFollowUp:s1");
+    expect(screen.queryByRole("button", { name: "Vraag door over Opbouw van de les" })).toBeNull();
+  });
+
+  it("says how the follow-up went", () => {
+    const t = nl.portfolioGuided;
+    expect(guidedPending("guideFollowUp:s1", t)).toBe(t.pendingFollowUp);
+    expect(guidedDone({ intent: "guideFollowUp", followUps: 2 }, t)).toBe(
+      "De coach vraagt door: 2 nieuwe vragen staan onder je antwoorden.",
+    );
+    expect(guidedDone({ intent: "guideFollowUp", followUps: 1 }, t)).toBe(
+      "De coach vraagt door: 1 nieuwe vraag staat onder je antwoorden.",
+    );
+    expect(guidedDone({ intent: "guideFollowUp", followUps: 0 }, t)).toBe(t.followUpNone);
+  });
+});
+
+describe("GuidedWriting: grill me", () => {
+  it("offers one button that goes through every part of the chapter", async () => {
+    const { container } = render(<GuidedWriting sections={sections} draftMode={true} />);
+    const grill = screen.getByRole("button", { name: "Grill me" });
+    expect(grill).toHaveAttribute("value", "guideGrill");
+    expect(grill).toHaveAccessibleDescription(/vraagt door waar je antwoord vaag is/);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("says how the round went", () => {
+    const t = nl.portfolioGuided;
+    expect(guidedPending("guideGrill", t)).toBe(t.pendingGrill);
+    expect(guidedDone({ intent: "guideGrill", followUps: 5 }, t)).toBe(
+      "De coach stelde 5 nieuwe vragen. Beantwoord ze en druk dan weer op Grill me.",
+    );
+    expect(guidedDone({ intent: "guideGrill", followUps: 0 }, t)).toBe(t.grillNone);
   });
 });
