@@ -47,6 +47,8 @@ did not check is not ticked.
 - [ ] The latest runs on `main` of **CI** (gate, e2e, audit) and **CodeQL** are green (GitHub
       MCP: list the workflow runs for `main`).
 - [ ] `npm audit --omit=dev --audit-level=moderate` is clean.
+- [ ] Every exception in `config/audit-exceptions.json` is still needed (`node scripts/audit.ts`
+      names one that is not) and named in the release notes.
 - [ ] The latest nightly **Mutation testing** run is green (Stryker breaks below 70%). Note its
       score.
 - [ ] `/security-review` over everything since the last tag (`git diff $RANGE`). Note what it

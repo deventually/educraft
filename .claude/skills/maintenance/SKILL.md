@@ -21,7 +21,9 @@ money.
 
 - Open PRs by `dependabot[bot]` (GitHub MCP, `list_pull_requests`), with their CI state.
 - Open PRs by other workers: does one already touch the same package? Then leave it.
-- `npm audit --omit=dev --audit-level=moderate` and `npm audit --audit-level=high`.
+- `npm audit --omit=dev --audit-level=moderate` and `node scripts/audit.ts` (the whole tree from
+  high, with the dated exceptions in `config/audit-exceptions.json`). An exception the script calls
+  no longer needed, or one whose fix is out: remove it in your PR.
 - The latest nightly **Mutation testing** run on `main`: green, and its score.
 
 ## 2. Per Dependabot PR

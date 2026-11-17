@@ -747,7 +747,10 @@ is on; a wrapper that renders a native control (`Select`, `StandSelect`) is list
 **Security scanning** runs on GitHub itself (`tests/security-scan.test.ts`). The CI job `audit`
 runs `npm audit`: production dependencies must be clean from *moderate* up, the whole tree (dev
 tools such as Stryker too) blocks only from *high*, so a moderate finding deep in dev tooling
-doesn't need an `overrides` workaround. `.github/workflows/codeql.yml` runs CodeQL
+doesn't need an `overrides` workaround. The whole-tree step is `scripts/audit.ts`: a high advisory
+in a dev tool that has no fix yet may be let through by a dated exception in
+`config/audit-exceptions.json` (advisory id, package, reason, at most three months); after its
+`until` date the check is red again (BESLUIT-2026-11-17-7). Production has no exceptions. `.github/workflows/codeql.yml` runs CodeQL
 (`security-extended`) on every pull request, on `main` and weekly; findings appear under
 *Security › Code scanning*. `.github/dependabot.yml` opens weekly update PRs for npm and GitHub
 Actions: minor and patch bundled in one PR per ecosystem, each major version apart.
