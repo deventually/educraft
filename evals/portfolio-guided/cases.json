@@ -104,7 +104,13 @@
           "Welke feedback kreeg je van studenten, en hoe vroeg je die op?",
           "Wat zou je een volgende keer anders doen?"
         ],
-        "goodParagraph": "In mijn evaluatie kijk ik eerst naar hoe de studenten op de les reageerden. Ze waren enthousiast over de casus van de oudere patiënt; die casus bracht het onderwerp voor hen dichtbij hun eigen stage. [aanvullen: welke feedback je van studenten kreeg en hoe je die opvroeg] Op basis van die feedback trek ik conclusies over het effect van de les. [aanvullen: wat je een volgende keer anders doet, en waarom] Die verbeterpunten neem ik mee in het ontwerp van mijn volgende les."
+        "goodParagraph": "In mijn evaluatie kijk ik eerst naar hoe de studenten op de les reageerden. Ze waren enthousiast over de casus van de oudere patiënt; die casus bracht het onderwerp voor hen dichtbij hun eigen stage. [aanvullen: welke feedback je van studenten kreeg en hoe je die opvroeg] Op basis van die feedback trek ik conclusies over het effect van de les. [aanvullen: wat je een volgende keer anders doet, en waarom] Die verbeterpunten neem ik mee in het ontwerp van mijn volgende les.",
+        "followUpAbout": [
+          "enthousias|zei|deed|merk|zag|hoor|reageer|reactie"
+        ],
+        "goodFollowUps": [
+          "Je schrijft dat ze enthousiast waren over de casus: wat zei of deed een student waaraan je dat merkte?"
+        ]
       }
     },
     {
@@ -280,7 +286,7 @@
           "How did you check whether students reached it?",
           "What did you do with the students who did not reach it yet?"
         ],
-        "goodParagraph": "My learning objective was that at the end of the lesson students can calculate a drug dose using the dosage formula. I deliberately used the verb 'calculate', because it describes something I can observe and check. To check it, I closed the lesson with an exit ticket of three sums. 18 of the 22 students got all three right, which showed me that most of the group reached the objective. This made the objective not only specific but also testable within the lesson itself."
+        "goodParagraph": "My learning objective was that at the end of the lesson students can calculate a drug dose using the dosage formula. I deliberately used the verb 'calculate', because it describes something I can observe and check. To check it, I closed the lesson with an exit ticket of three sums. 18 of the 22 students got all three right, which showed me that most of the group reached the objective. So the objective was specific, and I could test it within the lesson itself."
       }
     },
     {
@@ -424,6 +430,69 @@
           "What did you weigh up when you chose this form?"
         ],
         "goodParagraph": "For Databases 1 I use a written exam, a summative test that counts for 60% of the final grade. The learning outcome asks students to design a normalised data model themselves. A written exam with design tasks lets me see each student do that on their own, so the form measures what the outcome asks for. The pass mark is 55%. The exam board uses the same pass mark for all written exams in the programme, and I checked with a colleague that it suits the difficulty of the tasks. That way my choice of form and pass mark follows from the learning outcome and from the rules of my programme."
+      }
+    },
+    {
+      "id": "nl-gedicteerd",
+      "description": "Ingesproken, spreektalige antwoorden met een letterlijke studentvraag en een citaat uit de feedback: de alinea houdt de woorden en het voorbeeld van de docent aan, zonder holle of algemene wendingen, en vraagt om bewijs dat ontbreekt.",
+      "locale": "nl",
+      "section": {
+        "title": "Uitvoering en bijsturing",
+        "description": "Beschrijf hoe de les verliep en waar je bijstuurde."
+      },
+      "criteria": [
+        {
+          "text": "De docent stuurt tijdens de les bij op basis van wat studenten laten zien."
+        },
+        {
+          "text": "De docent onderbouwt de bijsturing met feedback van de werkplekbegeleider."
+        }
+      ],
+      "evidence": [
+        {
+          "title": "Mail werkplekbegeleider na lesbezoek",
+          "kind": "feedback",
+          "text": "Bastiaan, sterk dat je na de eerste opdracht stopte en het voorbeeld op het bord nog een keer samen uitwerkte. Let wel op je tempo in de kern; je liep 10 minuten uit."
+        }
+      ],
+      "answers": [
+        {
+          "question": "Wat gebeurde er in de les waardoor je bijstuurde?",
+          "answer": "nou na de eerste opdracht zag ik dat bijna niemand de tweede stap snapte, een student vroeg letterlijk 'moet je nou eerst delen of eerst vermenigvuldigen?' en toen dacht ik ok dit moet anders"
+        },
+        {
+          "question": "Wat deed je toen precies?",
+          "answer": "ik ben gestopt en heb het voorbeeld op het bord nog een keer samen met ze uitgewerkt, stap voor stap, en zij moesten bij elke stap zeggen wat er nu kwam"
+        },
+        {
+          "question": "Hoe merkte je of dat werkte?",
+          "answer": ""
+        }
+      ],
+      "expect": {
+        "askAbout": [
+          "gebeur|moment|zag|merkte|situatie",
+          "deed|aanpak|bijsteur|stuurde|anders|keuze|waarom"
+        ],
+        "forbidden": [],
+        "facts": [
+          "delen of eerst vermenigvuldigen",
+          "bord",
+          "10 minuten"
+        ],
+        "gap": true,
+        "goodQuestions": [
+          "Op welk moment in de les zag je dat studenten vastliepen?",
+          "Wat deed je toen, en waarom koos je daarvoor?",
+          "Hoe merkte je of de bijsturing werkte?"
+        ],
+        "goodParagraph": "Na de eerste opdracht zag ik dat bijna niemand de tweede stap begreep. Een student vroeg letterlijk: 'Moet je nou eerst delen of eerst vermenigvuldigen?' Ik besloot dat het anders moest. Ik stopte de opdracht en werkte het voorbeeld op het bord nog een keer samen met de groep uit, stap voor stap. Bij elke stap moesten de studenten zelf zeggen wat er nu kwam. [aanvullen: wat je daarna zag of hoorde waaruit bleek of het werkte, bijvoorbeeld hoe de tweede opdracht ging] Mijn werkplekbegeleider schreef na het lesbezoek dat het sterk was dat ik stopte en het voorbeeld samen uitwerkte. Ook wees de begeleider me op mijn tempo in de kern: ik liep 10 minuten uit.",
+        "followUpAbout": [
+          "merk|werkte|zag|hoor|daarna|opdracht|effect"
+        ],
+        "goodFollowUps": [
+          "Wat zag je bij de volgende opdracht waaruit bleek of het samen uitwerken hielp?"
+        ]
       }
     }
   ]

@@ -30,6 +30,17 @@ scored apart.
 - **clean** — it follows no instruction hidden in the evidence and names no source the teacher
   lacks.
 - **firstPerson** — it is written in the teacher's first person.
+- **natural** — no generic, AI-like phrasing outside an open spot (`aiPatternsIn`: hollow words,
+  "niet alleen … maar ook", dashes, a summarising close). From `portfolio-draft@v4` on, a first
+  paragraph that has them gets one more try, as the app does; `--no-style-retry` measures without.
+
+**Follow-ups** (`--follow-up`, `portfolio-followup@v1`) pass when:
+
+- **parse** — the code accepted them (JSON; an empty list is a good answer).
+- **count** — zero to two.
+- **open** and **clean** — as for the questions.
+- **topic** — where the case has a vague or missing answer (`followUpAbout`), a follow-up asks
+  about it.
 
 The failure modes the cases cover: inventing feedback or improvements, inventing numbers, citing a
 source the teacher named but does not list, obeying an instruction in the evidence, a criterion

@@ -32,11 +32,23 @@ export const portfolioGuided = {
     quota:
       "AI-limiet bereikt: je ruimte voor deze maand is op, of je gebruikte vandaag heel veel AI (dan kan het morgen weer). Op de pagina Gebruik zie je je maand.",
   },
+  followUp: "Vraag door",
+  followUpDone: "De coach vraagt door: {n} nieuwe vragen staan onder je antwoorden.",
+  followUpDoneOne: "De coach vraagt door: 1 nieuwe vraag staat onder je antwoorden.",
+  followUpLabel: "Vraag door over {title}",
+  followUpNone: "Je antwoorden zijn concreet genoeg. Je kunt dit onderdeel laten opstellen.",
+  grill: "Grill me",
+  grillDone: "De coach stelde {n} nieuwe vragen. Beantwoord ze en druk dan weer op Grill me.",
+  grillHint:
+    "De coach loopt alle onderdelen langs: stelt de vragen die nog openstaan en vraagt door waar je antwoord vaag is. Druk na het antwoorden opnieuw, tot de coach niets meer vraagt.",
+  grillNone: "Je antwoorden zijn concreet genoeg. Stel het hoofdstuk op.",
   intro:
     "Per onderdeel stelt de coach twee tot vier vragen over je eigen praktijk. Vraag ze allemaal in één keer of per onderdeel, en beantwoord ze kort; je antwoorden worden bewaard met je hoofdstuk.",
   partlyFailed: "Bij {n} van de onderdelen lukte het niet; gebruik daar de knop bij het onderdeel.",
   pendingChapter: "Het hoofdstuk wordt geschreven, onderdeel voor onderdeel…",
   pendingDraft: "De tekst wordt geschreven…",
+  pendingFollowUp: "De coach leest je antwoorden…",
+  pendingGrill: "De coach loopt je hele hoofdstuk langs…",
   pendingQuestions: "De vragen worden bedacht…",
   pendingQuestionsAll: "De vragen voor alle onderdelen worden bedacht…",
   questions: "De vragen staan bij het onderdeel. Beantwoord ze in je eigen woorden.",

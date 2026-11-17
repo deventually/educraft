@@ -3,7 +3,6 @@
  * the checks from `guided.ts`, usage accounting and the `aiLog` line. Returns the next dossier
  * data; the caller stores it. Never sets a status.
  */
-import { z } from "zod";
 import {
   appendSection,
   buildQuestionsMessage,
@@ -13,17 +12,14 @@ import {
   checkSectionDraft,
   retryDraftMessage,
   QUESTIONS_PROMPT_ID,
-  withAnswers,
   writingSections,
   type WritingSection,
 } from "~/lib/portfolio/guided";
-import { factsBlock } from "~/lib/portfolio/courseFacts";
 import { writeChapter } from "~/lib/portfolio/edit";
-import { GUIDED_LIMITS, LIMITS } from "~/lib/portfolio/schema";
+import { LIMITS } from "~/lib/portfolio/schema";
 import type { AiLogEntry, DossierData } from "~/lib/portfolio/types";
 import type { Locale } from "~/lib/i18n";
 import type { User } from "./auth.server";
-import { anchorCourseFacts } from "./dossierAnchors.server";
 import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
 import { log } from "./log.server";
 
@@ -35,21 +31,21 @@ export type GuidedError =
   | "quota"
   | "failed";
 /** `drafted`/`failed`: how many sections the whole-chapter intents wrote or could not. */
-type GuidedResult =
-  | { ok: true; data: DossierData; drafted?: number; failed?: number }
+export type GuidedResult =
+  | { ok: true; data: DossierData; drafted?: number; failed?: number; followUps?: number }
   | { ok: false; error: GuidedError };
 
-function withLog(d: DossierData, entry: AiLogEntry): DossierData {
+export function withLog(d: DossierData, entry: AiLogEntry): DossierData {
   return { ...d, aiLog: [...d.aiLog, entry].slice(-LIMITS.aiLog) };
 }
 
-const references = (d: DossierData) => d.references.map((r) => r.apa);
+export const references = (d: DossierData) => d.references.map((r) => r.apa);
 
 /** How many sections ask for questions at the same time (`askAllQuestions`). */
-const PARALLEL = 4;
+export const PARALLEL = 4;
 
 /** Two to four checked questions about one section, with the model; `null` when none came. */
-async function questionsFor(
+export async function questionsFor(
   user: User,
   d: DossierData,
   outcomeId: string,
@@ -70,7 +66,7 @@ async function questionsFor(
 }
 
 /** The dossier with one section's new questions (earlier answers and draft mark go). */
-function withQuestions(
+export function withQuestions(
   d: DossierData,
   outcomeId: string,
   sectionId: string,
@@ -109,7 +105,7 @@ export async function askQuestions(
   return { ok: true, data: withQuestions(d, outcomeId, sectionId, asked, now) };
 }
 
-function sectionsOf(d: DossierData, outcomeId: string): WritingSection[] {
+export function sectionsOf(d: DossierData, outcomeId: string): WritingSection[] {
   const outcome = d.framework.outcomes.find((o) => o.id === outcomeId);
   if (!outcome) throw new Error(`Unknown outcome: ${outcomeId}`);
   return writingSections(outcome);
@@ -169,7 +165,7 @@ async function draftOne(
   for (let attempt = 0; attempt < 2; attempt++) {
     const answer = await callPortfolioModel(user, DRAFT_PROMPT_ID, message, locale, 1_500);
     if (!answer) break;
-    const checked = checkSectionDraft(answer.text, references(d));
+    const checked = checkSectionDraft(answer.text, references(d), { style: attempt === 0 });
     if (checked.ok) {
       const text = appendSection(currentText, section, checked.text);
       const saved = d.guided?.[outcomeId]?.[section.id];
@@ -191,7 +187,7 @@ async function draftOne(
       return { ok: true, data, text };
     }
     log("portfolio-guided", { outcome: "rejected", step: "draft", attempt });
-    message = retryDraftMessage(message, checked.unknown, locale);
+    message = retryDraftMessage(message, checked.unknown, locale, checked.generic);
   }
   return { ok: false, error: "failed" };
 }
@@ -273,55 +269,4 @@ export async function draftChapter(
   }
   if (drafted === 0) return { ok: false, error: "failed" };
   return { ok: true, data, drafted, failed };
-}
-
-const SectionId = z.string().min(1).max(LIMITS.id);
-const AnswerList = z.array(z.string().max(GUIDED_LIMITS.answer)).max(GUIDED_LIMITS.questions);
-
-/** The answers typed beside the chapter: `answer:<sectionId>`, one field per question. */
-export function answersFromForm(fd: FormData): Record<string, string[]> {
-  const out: Record<string, string[]> = {};
-  for (const key of new Set(fd.keys())) {
-    if (!key.startsWith("answer:")) continue;
-    const id = SectionId.safeParse(key.slice("answer:".length));
-    const list = AnswerList.safeParse(fd.getAll(key).filter((v) => typeof v === "string"));
-    if (id.success && list.success) out[id.data] = list.data;
-  }
-  return out;
-}
-
-export type GuidedIntent = "guideQuestions" | "guideDraft" | "guideQuestionsAll" | "guideDraftAll";
-
-/**
- * One guided-writing button: `guideQuestions:<sectionId>` or `guideDraft:<sectionId>` for one
- * section, `guideQuestionsAll` or `guideDraftAll` for the whole chapter (`sectionId` ""). The
- * chapter text and the answers typed beside it are kept first, so nothing typed is lost.
- */
-export async function runGuidedIntent(
-  user: User,
-  d: DossierData,
-  intent: GuidedIntent,
-  outcomeId: string,
-  sectionId: string,
-  fd: FormData,
-  locale: Locale,
-): Promise<GuidedResult | { ok: false; error: "not-found" }> {
-  const outcome = d.framework.outcomes.find((o) => o.id === outcomeId);
-  const whole = intent === "guideQuestionsAll" || intent === "guideDraftAll";
-  if (!outcome || (!whole && !writingSections(outcome).some((s) => s.id === sectionId)))
-    return { ok: false, error: "not-found" };
-  const text = String(fd.get("text") ?? "").slice(0, LIMITS.documentText);
-  const typed = withAnswers(d, outcomeId, answersFromForm(fd));
-  const facts = await anchorCourseFacts(user.id, d.anchors?.[outcomeId], locale);
-  const course = factsBlock(facts?.facts ?? [], locale);
-  const now = Date.now();
-  if (intent === "guideDraftAll")
-    return draftChapter(user, typed, outcomeId, text, locale, now, course);
-  if (intent === "guideDraft")
-    return draftSection(user, typed, outcomeId, sectionId, text, locale, now, course);
-  // Asking keeps what the teacher typed in the chapter, as saving would.
-  const kept = writeChapter(typed, outcomeId, text);
-  if (intent === "guideQuestionsAll")
-    return askAllQuestions(user, kept, outcomeId, locale, now, course);
-  return askQuestions(user, kept, outcomeId, sectionId, locale, now, course);
 }
