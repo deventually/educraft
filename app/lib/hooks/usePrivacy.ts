@@ -73,9 +73,11 @@ export function usePrivacy(page: PrivacyPage | undefined) {
   const [approved, setApproved] = useState<string[]>([]);
   const [ask, setAsk] = useState<PrivacyAsk | null>(null);
 
+  // The words the institution keeps (PR 5): fixed for the page; the gate reads them itself.
+  const [shared] = useState<string[]>(page?.shared ?? []);
   const choices: LiveChoices = useMemo(
-    () => ({ named, keep: [...pageKeep, ...never], approved }),
-    [named, pageKeep, never, approved],
+    () => ({ named, keep: [...pageKeep, ...never], shared, approved }),
+    [named, pageKeep, never, shared, approved],
   );
   // The choices as they are after the last action, before React re-renders.
   const latest = useRef(choices);

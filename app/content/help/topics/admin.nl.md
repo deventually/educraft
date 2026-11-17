@@ -38,6 +38,10 @@ Wat uit staat, verdwijnt echt: een docent kan zo'n tool ook niet via een link op
 
 Zet het reviewteam aan of uit, en elk lid apart. Het reviewteam geeft docenten advies bij hun cursus; het verandert nooit iets aan een cursus.
 
+## Anonimiseren
+
+Voordat er iets naar een AI gaat, vervangt de anonimiseerpoort namen en gegevens door codes. Docenten zetten woorden die geen naam zijn op hun **nooit-lijst**, bijvoorbeeld een onderzoeker die toevallig zo heet als een collega. Op deze pagina zie je welke woorden dat zijn en hoeveel docenten elk woord kozen, nooit wie. Met **Voor iedereen laten staan** vervangt de poort dat woord bij niemand meer; met **Weghalen** zet je het terug. Een volledige naam van een gebruiker kan niet op de lijst.
+
 ## Onderwijscontext instelling
 
 Kies welke onderwijssectoren (vo, mbo, hbo, wo) en domeinen docenten in hun onderwijscontext kunnen kiezen.
@@ -56,4 +60,4 @@ Het logboek laat zien wie wat veranderde aan rollen, wachtwoorden, accounts, uit
 
 ## Gezondheid
 
-Bovenaan elke beheerpagina staat de stand van de server: de laatste back-up, de grootte van de database en de vrije schijfruimte. Is de laatste back-up ouder dan 36 uur, dan zie je een waarschuwing. De superbeheerder ziet ook **Recente fouten**.
+Bovenaan elke beheerpagina staat de stand van de server: de laatste back-up, de grootte van de database en de vrije schijfruimte. Is de laatste back-up ouder dan 36 uur, dan zie je een waarschuwing. Daaronder staat hoe vaak de anonimiseerpoort de afgelopen week iets vond, per soort (collega's, e-mailadressen, telefoonnummers …) en naast de week ervoor: alleen aantallen, nooit welke woorden. Gaat één soort ineens veel vaker af, dan zie je ook daarvan een waarschuwing. De superbeheerder ziet ook **Recente fouten**.

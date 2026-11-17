@@ -1,5 +1,7 @@
 import { AlertTriangle } from "lucide-react";
 import type { AdminHealth } from "~/lib/health";
+import type { GateHealth } from "~/lib/privacy/gateHealth";
+import { GateCounts } from "./GateCounts";
 import type { Locale } from "~/lib/i18n";
 import { fmt } from "~/lib/i18n/format";
 import { useLocale, useT } from "~/lib/i18n/useT";
@@ -17,9 +19,10 @@ export function formatBytes(bytes: number, locale: Locale): string {
 /**
  * The admin's health overview (P1): the age of the newest backup, the database size, the free
  * disk space and the running version, with a warning when the backup is older than 36 hours or missing. Rendered once per
- * page load, so the warning is plain text, not a live region.
+ * page load, so the warning is plain text, not a live region. Below it the anonymiseerpoort's
+ * counters (PR 5).
  */
-export function HealthPanel({ health }: { health: AdminHealth }) {
+export function HealthPanel({ health, gate }: { health: AdminHealth; gate?: GateHealth }) {
   const t = useT();
   const locale = useLocale();
   const h = t.admin.health;
@@ -70,6 +73,7 @@ export function HealthPanel({ health }: { health: AdminHealth }) {
           {h.staleWarning}
         </p>
       )}
+      {gate && <GateCounts gate={gate} />}
     </section>
   );
 }

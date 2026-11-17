@@ -31,6 +31,7 @@ describe("tool loader — the live preview's names", () => {
     expect(data.privacy).toEqual({
       known: { teacher: "Mark de Groot", colleagues: ["Anna Visser"] },
       never: ["Kolb"],
+      shared: [],
     });
   });
 });

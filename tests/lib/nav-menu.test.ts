@@ -94,7 +94,7 @@ describe("Beheer", () => {
       // Teams live under Onderwijs (plan step 5); Beheer links there too.
       ["/admin/users", "/teams"],
       ["/admin/organisation", "/admin/context"],
-      ["/admin/tools", "/admin/agents", "/usage"],
+      ["/admin/tools", "/admin/agents", "/admin/privacy", "/usage"],
       ["/admin/announcements", "/admin/usage", "/admin/audit"],
     ]);
   });

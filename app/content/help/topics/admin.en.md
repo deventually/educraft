@@ -38,6 +38,10 @@ What is off really disappears: a teacher can't open such a tool through a link e
 
 Switch the review team on or off, and each member separately. The review team advises teachers on their course; it never changes a course.
 
+## Anonymising
+
+Before anything goes to an AI, the anonymiser gate replaces names and personal data with codes. Teachers put words that are not a name on their **never-list**, for example a researcher who happens to share a colleague's name. On this page you see which words those are and how many teachers chose each, never who. With **Keep for everyone** the gate replaces that word for nobody any more; **Remove** undoes it. A user's full name cannot go on the list.
+
 ## Institution teaching context
 
 Choose which sectors (secondary, vocational, higher education, university) and domains teachers can pick in their teaching context.
@@ -56,4 +60,4 @@ The audit log shows who changed what about roles, passwords, accounts, invites a
 
 ## Health
 
-At the top of every admin page is the state of the server: the last backup, the size of the database and the free disk space. If the last backup is older than 36 hours, you see a warning. The owner also sees **Recent errors**.
+At the top of every admin page is the state of the server: the last backup, the size of the database and the free disk space. If the last backup is older than 36 hours, you see a warning. Below it is how often the anonymiser gate found something in the past week, per kind (colleagues, email addresses, phone numbers …) and next to the week before: counts only, never which words. If one kind suddenly goes off far more often, you see a warning about that too. The owner also sees **Recent errors**.

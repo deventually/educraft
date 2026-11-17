@@ -2,6 +2,7 @@ import { NavLink, Outlet } from "react-router";
 import type { Route } from "./+types/admin";
 import { isOwner, requireRole } from "~/server/auth.server";
 import { adminHealth } from "~/server/health.server";
+import { gateHealth } from "~/server/repositories/gateCounts.server";
 import { HealthPanel } from "~/components/admin/HealthPanel";
 import { DEFAULT_LOCALE, getMessages, type Locale } from "~/lib/i18n";
 import { useT } from "~/lib/i18n/useT";
@@ -19,12 +20,13 @@ export function meta({ matches }: Route.MetaArgs) {
  * Admin console layout (Phase 4). Gates the whole section on `requireRole("admin")`
  * — and every child loader/action repeats the check, because loaders run in
  * parallel and a nested loader must not trust the layout ran first. It also carries the
- * health overview (P1), so a stale backup shows on whichever admin page is open, and
+ * health overview (P1) with the anonymiseerpoort's counters (PR 5), so a stale backup or a
+ * sudden jump shows on whichever admin page is open, and
  * whether the viewer is the owner (only the owner sees "Recente fouten").
  */
 export async function loader({ request }: Route.LoaderArgs) {
   const admin = await requireRole(request, "admin");
-  return { health: adminHealth(), isOwner: await isOwner(admin) };
+  return { health: adminHealth(), gate: await gateHealth(), isOwner: await isOwner(admin) };
 }
 
 export default function AdminLayout({ loaderData }: Route.ComponentProps) {
@@ -89,7 +91,7 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
         </nav>
 
         <div className="min-w-0">
-          <HealthPanel health={loaderData.health} />
+          <HealthPanel health={loaderData.health} gate={loaderData.gate} />
           <Outlet />
         </div>
       </div>

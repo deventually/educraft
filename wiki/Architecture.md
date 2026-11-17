@@ -336,6 +336,16 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   reads itself. `studentNumberExample` is only the shape (`s0000000`). When the gate still sends
   nothing (`event: privacy`), `streamPost` calls `onPrivacy` and the page shows `PrivacyAskCard`
   (per word Replace or Do not replace, then Send), which sends again with the answer.
+- **The institution's never-words and the gate's counters (anonymiseerpoort PR 5,
+  BESLUIT-2026-11-17-8).** `/admin/privacy` (`sharedKeepWords.server.ts`) lists the words on
+  teachers' never-lists with how many teachers chose each, never who, leaving out a user's full
+  name and what `pack/keep.ts` already keeps; one click puts a word on
+  `privacy_shared_keep_words`. The gate (`policyFor`, every mode) and the live preview
+  (`PrivacyPage.shared` → `LiveChoices.shared`, passed to the engine like the pack's keep list)
+  never replace those words. Every gated call adds to `privacy_gate_counts` (per UTC day: per
+  kind, plus `call` and `stopped`; counts only, kept 60 days, `gateCounts.server.ts`); the admin
+  layout shows the last 7 days against the 7 before in `HealthPanel` (`GateCounts`), with a
+  warning when a kind jumps (`isSpike`, `app/lib/privacy/gateHealth.ts`).
 - **Figures from the document** (`app/lib/documents/figures.ts`,
   `app/components/documents/DocumentFigurePicker.tsx`). An image field with `imagesFrom: "<document
   field>"` offers the figures of the files uploaded there: Word images the model can read (icons

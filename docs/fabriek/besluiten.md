@@ -797,3 +797,18 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   alleen woorden, nooit iets met een cijfer of `@`; de poort leest die lijst zelf ook. Bastiaan,
   2026-11-17 (ontwerp "Eén anonimiseerpoort", stap 3; principe "niets gaat weg zonder dat de
   docent het zag").
+- **BESLUIT-2026-11-17-8:** **Een beheerder neemt woorden van de nooit-lijsten over voor de hele
+  instelling, en de poort telt per soort op het gezondheidsscherm.** Op *Beheer → Anonimiseren*
+  (`/admin/privacy`) ziet een beheerder welke woorden docenten op hun nooit-lijst zetten, met
+  hoeveel docenten elk woord kozen, **nooit wie**. Een volledige naam van een gebruiker en wat de
+  vaste lijst (`pack/keep.ts`) al bewaart, staan er niet tussen en kunnen er niet op; een los deel
+  van een naam ("Visser") wel, want dat is waar een nooit-lijst voor is. Met één klik blijft een
+  woord voor iedereen staan (`privacy_shared_keep_words`): de poort vervangt het bij niemand, ook
+  als ze alleen telt, en het live voorbeeld markeert het niet (net als de vaste lijst). Elke
+  aanroep door de poort telt per dag en per soort mee in `privacy_gate_counts`, plus het aantal
+  aanroepen en hoe vaak ze eerst aan de docent voorlegde: alleen aantallen, nooit een woord, 60
+  dagen bewaard. Het gezondheidsscherm toont de afgelopen 7 dagen naast de 7 ervoor en waarschuwt
+  als één soort minstens 20 keer en drie keer zo vaak afging als de week ervoor (niet in een
+  eerste week). Geen regel in het logboek: het is een instelling zoals het reviewteam. Bastiaan,
+  2026-11-17 (ontwerp "Eén anonimiseerpoort", stap 5); de drempels (20 keer, drie keer zo vaak,
+  60 dagen) zijn een voorstel van de werker in PR 5.
