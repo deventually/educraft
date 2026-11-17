@@ -10,6 +10,7 @@
 import { z } from "zod";
 import { extractJson } from "~/lib/ai/structuredAnswer";
 import type { Locale } from "~/lib/i18n";
+import { redactOptions } from "~/lib/privacy/pack";
 import { applyRedactions, findRedactions } from "~/lib/privacy/redact";
 import * as edit from "./edit";
 import { LIMITS } from "./schema";
@@ -184,7 +185,7 @@ export function checkNames(
   names: readonly string[],
 ): { text: string; found: { code: string; original: string }[] } {
   const entries = names.map((value) => ({ kind: "student" as const, value }));
-  const spans = findRedactions(text, entries);
+  const spans = findRedactions(text, entries, [], redactOptions());
   const seen = new Set<string>();
   const found = spans.flatMap((s) => {
     const id = `${s.code}\u0000${s.original.toLowerCase()}`;

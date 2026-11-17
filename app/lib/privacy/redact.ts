@@ -38,6 +38,19 @@ export interface RedactSpan {
 /** Code → the value it stands for (the canonical spelling). */
 export type CodeTable = Record<string, string>;
 
+/**
+ * Data that keeps the engine from removing too much (anonymiseerpoort, PR 1). The engine itself
+ * is locale-neutral: the lists and the format come from the privacy pack (`./pack`).
+ */
+export interface RedactOptions {
+  /** Words never replaced on their own (researchers, models: "Bloom"); a full name still goes. */
+  keep?: readonly string[];
+  /** Ordinary words ("roos", "bas"): as a lone name part only with a capital mid-sentence. */
+  commonWords?: readonly string[];
+  /** The student number format (a regex source, from the teacher); without it any run of 6–8 digits. */
+  studentNumber?: string;
+}
+
 const CODE_BASE: Record<RedactKind, string> = {
   student: "STUDENT",
   studentNumber: "STUDENTNUMMER",
@@ -77,20 +90,64 @@ const NOT_WORD_AFTER = "(?![\\p{L}\\p{N}])";
 const POSSESSIVE = "(?:['’]s|s)?";
 
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-/** Whitespace inside a name may be any run of whitespace in the text. */
-const flexible = (s: string) => s.trim().split(/\s+/).map(escapeRe).join("\\s+");
+/** Whitespace inside a name may be any run of whitespace or underscores (file names). */
+const flexible = (s: string) => s.trim().split(/\s+/).map(escapeRe).join("[\\s_]+");
+
+/**
+ * How a spelling of a name is matched: the full name in any case; a surname with its particles
+ * ("de Wit") only with a capital surname; one part of a longer name only when it really is a
+ * name (`isLoneName`); the parts written together ("MarkGroen", file names) only exactly so.
+ */
+type VariantKind = "full" | "surname" | "lone" | "joined";
+
+interface NameVariant {
+  text: string;
+  kind: VariantKind;
+}
 
 /** The spellings of a person's name that are replaced: full, surname with particles, each part. */
-function nameVariants(value: string): string[] {
+function nameVariants(value: string): NameVariant[] {
   const parts = value.trim().split(/\s+/).filter(Boolean);
-  const variants = new Set<string>([parts.join(" ")]);
+  const variants = new Map<string, VariantKind>([[parts.join(" "), "full"]]);
+  const add = (text: string, kind: VariantKind) => {
+    if (!variants.has(text)) variants.set(text, kind);
+  };
   const firstParticle = parts.findIndex((p, i) => i > 0 && PARTICLES.has(p.toLowerCase()));
-  if (firstParticle > 0) variants.add(parts.slice(firstParticle).join(" "));
-  if (parts.length > 1) variants.add(parts.slice(1).join(" "));
+  if (firstParticle > 0) add(parts.slice(firstParticle).join(" "), "surname");
+  if (parts.length > 2) add(parts.slice(1).join(" "), "surname");
   for (const p of parts) {
-    if (p.length >= 2 && !PARTICLES.has(p.toLowerCase())) variants.add(p);
+    if (p.length >= 2 && !PARTICLES.has(p.toLowerCase())) add(p, "lone");
   }
-  return [...variants].sort((a, b) => b.length - a.length);
+  if (parts.length > 1) add(parts.map((p) => p[0]?.toUpperCase() + p.slice(1)).join(""), "joined");
+  return [...variants]
+    .map(([text, kind]) => ({ text, kind }))
+    .sort((a, b) => b.text.length - a.text.length);
+}
+
+/** Skipped when looking back for the start of a sentence: spaces, opening quotes, bullets. */
+const LEAD = /[ \t"'“‘„«([*•–—-]/;
+
+/** True when `at` starts a sentence or a line (where any word has a capital). */
+function startsSentence(text: string, at: number): boolean {
+  let i = at - 1;
+  while (i >= 0 && LEAD.test(text[i] ?? "")) i--;
+  return i < 0 || /[.!?\n\r]/.test(text[i] ?? "");
+}
+
+/**
+ * A lone part of a name goes only with a capital, never when it is on the keep list, and when
+ * it is also an ordinary word only in the middle of a sentence (BESLUIT-2026-11-17-…).
+ */
+function isLoneName(
+  text: string,
+  at: number,
+  found: string,
+  keep: ReadonlySet<string>,
+  common: ReadonlySet<string>,
+): boolean {
+  const word = found.toLowerCase();
+  if (!/^\p{Lu}/u.test(found) || keep.has(word)) return false;
+  return !common.has(word) || !startsSentence(text, at);
 }
 
 type Candidate = RedactSpan;
@@ -108,10 +165,17 @@ const PATTERNS: Array<{ base: string; re: string; flags: string }> = [
     flags: "",
   },
   { base: "TELEFOON", re: "(?<![\\d+])(?:\\+31|0031|0)(?:[\\s-]?\\d){9}(?!\\d)", flags: "" },
-  { base: "POSTCODE", re: "\\b[1-9]\\d{3}\\s?[A-Z]{2}\\b", flags: "" },
+  // SA, SD and SS are never issued; "1200 EC" is study credits far more often than a postcode.
+  { base: "POSTCODE", re: "\\b[1-9]\\d{3}\\s?(?!SA|SD|SS|EC)[A-Z]{2}\\b", flags: "" },
 ];
 /** Lowest priority: a run of 6–8 digits that is not part of a larger number. */
 const NUMBER = { base: "NUMMER", re: "(?<![\\d.,])\\b\\d{6,8}\\b(?![.,]\\d)", flags: "" };
+/** The teacher's format, not inside a word or a longer number (file names too). */
+const studentNumber = (format: string) => ({
+  base: "NUMMER",
+  re: `(?<![\\p{L}\\p{N}])(?:${format})(?![\\p{L}\\p{N}])`,
+  flags: "iu",
+});
 
 /**
  * Every replacement for `text`, in reading order, without overlaps. Strong
@@ -122,7 +186,10 @@ export function findRedactions(
   text: string,
   entries: RedactEntry[],
   extra: string[] = [],
+  options: RedactOptions = {},
 ): RedactSpan[] {
+  const keep = new Set(options.keep?.map((w) => w.toLowerCase()));
+  const common = new Set(options.commonWords?.map((w) => w.toLowerCase()));
   const chosen: Candidate[] = [];
   const overlaps = (c: Candidate) => chosen.some((s) => c.start < s.end && s.start < c.end);
   const take = (cands: Candidate[]) => {
@@ -160,12 +227,16 @@ export function findRedactions(
     list.forEach((entry, i) => {
       const code = list.length > 1 ? `${CODE_BASE[kind]}-${i + 1}` : CODE_BASE[kind];
       const isPerson = kind === "student" || kind === "supervisor";
-      const variants = isPerson ? nameVariants(entry.value) : [entry.value.trim()];
+      const variants = isPerson
+        ? nameVariants(entry.value)
+        : [{ text: entry.value.trim(), kind: "full" as const }];
       for (const v of variants) {
-        const re = `${NOT_WORD_BEFORE}(${flexible(v)})${isPerson ? POSSESSIVE : ""}${NOT_WORD_AFTER}`;
-        for (const m of text.matchAll(new RegExp(re, "giu"))) {
+        const re = `${NOT_WORD_BEFORE}(${flexible(v.text)})${isPerson ? POSSESSIVE : ""}${NOT_WORD_AFTER}`;
+        for (const m of text.matchAll(new RegExp(re, v.kind === "joined" ? "gu" : "giu"))) {
           const start = m.index ?? 0;
           const original = m[1] ?? "";
+          if (v.kind === "lone" && !isLoneName(text, start, original, keep, common)) continue;
+          if (v.kind === "surname" && !/(?:^|[\s_])\p{Lu}[^\s_]*$/u.test(original)) continue;
           entryCands.push({
             start,
             end: start + original.length,
@@ -196,7 +267,7 @@ export function findRedactions(
       }
     });
   take(entryCands);
-  take(patternCands(NUMBER));
+  take(patternCands(options.studentNumber ? studentNumber(options.studentNumber) : NUMBER));
 
   return chosen.sort((a, b) => a.start - b.start);
 }

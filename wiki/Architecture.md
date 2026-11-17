@@ -295,7 +295,14 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   The original is never uploaded or stored.
 - **Anonymise before sending (P24.0b)** (`app/components/privacy/`, `app/lib/privacy/redact.ts`).
   A field with `redact: true` shows `RedactReview` before `streamPost`; names, e-mail, phone,
-  postcode, IBAN and 6–8-digit numbers become codes. The code → name table lives only in component
+  postcode, IBAN and student numbers become codes. Not removing too much (BESLUIT-2026-11-17-3):
+  a full name goes in any case; a lone part of it only with a capital, and when it is an ordinary
+  word (`app/lib/privacy/pack/commonWords.ts`) only mid-sentence; researchers on the keep list
+  (`pack/keep.ts`, "Bloom") never alone. The student number format is learnt from the number the
+  teacher typed (`pack/studentNumber.ts`), else any run of 6–8 digits. The engine stays neutral:
+  the lists come in through `redactOptions()` (`app/lib/privacy/pack/`). The leak set
+  (`evals/privacy-leakset/`, `npm run eval:leakset`) measures it without a model: an HTML report
+  with the wrongly replaced words on top. The code → name table lives only in component
   memory; `restoreNames` restores them for the teacher, `generations` keeps the coded version.
 - **Figures from the document** (`app/lib/documents/figures.ts`,
   `app/components/documents/DocumentFigurePicker.tsx`). An image field with `imagesFrom: "<document
