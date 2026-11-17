@@ -86,3 +86,28 @@ npm run eval:evaluation-jev -- --dry-run   # de Jev-verzoeken van de eerste antw
 
 Het rapport komt in `evals/reports/<datum><label>-evaluation-jev.md`. Het ruwe bestand bewaart elk
 exact Jev-verzoek met het antwoord, en elk antwoord van de LLM. Dit is nooit onderdeel van CI.
+
+## Uitslag (2026-11-17)
+
+Rapport: [`2026-11-17a-evaluation-jev.md`](../reports/2026-11-17a-evaluation-jev.md), met Sonnet
+via Claude Code en Jev 1.14, 3 runs per case.
+
+| Wie telt | Precies goed | Gemiddeld ernaast |
+| --- | --- | --- |
+| LLM (Sonnet) | 78 van 81 | 0,04 |
+| Jev, code telt | 32 van 81 | 1,05 |
+
+Per antwoord, op de echte thema's: precisie 100%, gevonden 80%, twijfel 2%.
+
+**Besluit volgens het meetplan: nee, op beide punten.** Jev telt niet beter dan Sonnet, en de
+vindkans van 80% haalt de 90% niet. Jev zegt nooit ten onrechte ja, maar mist een op de vijf
+antwoorden die het thema echt maken. Op de thema's van de LLM mist Jev nog meer. Die thema's zijn
+vaak samengesteld ("te snel en te weinig oefening"), en Jev leest letterlijk: hij zegt nee als een
+antwoord maar één deel noemt. Dat staat als zwakte op TypeSafe's jaggedness-pagina.
+
+**Wat het zegt over de aanname.** Tellen leek een zwakte van de LLM, maar Sonnet telde bij deze
+enquêtes (tot 46 antwoorden) bijna foutloos. Bij honderden antwoorden kan dat anders zijn. Dat is
+niet gemeten, en het is ook geen reden om verder te zoeken. Jev zou hier bovendien geen aanroep
+vervangen, want de LLM is nodig voor de thema's. Er valt dus niets te besparen.
+
+De vragen en drempels zijn na de meting niet bijgesteld.
