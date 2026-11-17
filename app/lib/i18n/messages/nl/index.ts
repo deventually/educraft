@@ -32,6 +32,7 @@ import { feedback } from "./feedback";
 import { footer } from "./footer";
 import { help } from "./help";
 import { home } from "./home";
+import { jev } from "./jev";
 import { language } from "./language";
 import { menu } from "./menu";
 import { meta } from "./meta";
@@ -122,6 +123,7 @@ export const nl = {
   footer,
   help,
   home,
+  jev,
   language,
   menu,
   meta,

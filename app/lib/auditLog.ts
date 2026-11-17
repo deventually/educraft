@@ -12,6 +12,8 @@ export const AUDIT_ACTIONS = [
   "instanceModelsChanged",
   "inviteCreated",
   "inviteRevoked",
+  "jevSwitchedOff",
+  "jevSwitchedOn",
   "logCleaned",
   "modelPriceChanged",
   "passwordSet",
