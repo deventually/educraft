@@ -1,4 +1,4 @@
-import { useDeferredValue, useId, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useId, useRef, useState } from "react";
 import { ShieldCheck, X } from "lucide-react";
 import { Button, Input, Label, Textarea } from "~/components/ui";
 import { useToast } from "~/components/Toast";
@@ -87,13 +87,15 @@ export function PrivacyPreview({ privacy, fields, studentWork = false, compact =
                   {fmt(t.preview, { field: f.label })}
                 </h3>
                 <ScrollText className="max-h-64">
-                  <Marked text={f.text} spans={f.spans} onToggle={toggle} />
+                  <Marked text={f.text} spans={f.spans} onToggle={toggle} hintId={`${uid}-hint`} />
                 </ScrollText>
               </section>
             ))}
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs text-slate-600">{t.alsoReplaceHint}</p>
+            <p id={`${uid}-hint`} className="text-xs text-slate-600">
+              {t.alsoReplaceHint}
+            </p>
             <Button type="button" size="sm" variant="secondary" onClick={alsoReplace}>
               {t.alsoReplace}
             </Button>
@@ -197,10 +199,13 @@ function Marked({
   text,
   spans,
   onToggle,
+  hintId,
 }: {
   text: string;
   spans: LiveSpan[];
   onToggle: (s: LiveSpan) => void;
+  /** What a click does; the name itself says the state, so no `aria-pressed` on top. */
+  hintId: string;
 }) {
   const t = useT().privacy;
   const parts: React.ReactNode[] = [];
@@ -213,8 +218,8 @@ function Marked({
       <button
         key={`${s.start}:${s.end}`}
         type="button"
-        aria-pressed={on}
         aria-label={fmt(on ? t.replaced : t.kept, { original: s.original, code })}
+        aria-describedby={hintId}
         onClick={() => onToggle(s)}
         className={
           on
@@ -256,6 +261,16 @@ export function PrivacyAskCard({
   const [choice, setChoice] = useState<Record<string, "replace" | "keep">>(() =>
     Object.fromEntries(items.map((i) => [i.value, "replace" as const])),
   );
+  // The card appears instead of the result: focus moves to it, so it is announced, and goes
+  // back to where the teacher was (the Generate or Send button) when it closes.
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    const before = document.activeElement as HTMLElement | null;
+    headingRef.current?.focus();
+    return () => {
+      if (before?.isConnected) before.focus();
+    };
+  }, []);
   return (
     <section
       aria-labelledby={`${uid}-title`}
@@ -264,7 +279,12 @@ export function PrivacyAskCard({
       <div className="flex items-start gap-2">
         <ShieldCheck className="mt-0.5 size-5 shrink-0 text-amber-700" aria-hidden />
         <div>
-          <h2 id={`${uid}-title`} className="font-medium text-slate-900">
+          <h2
+            id={`${uid}-title`}
+            ref={headingRef}
+            tabIndex={-1}
+            className="font-medium text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600"
+          >
             {t.askTitle}
           </h2>
           <p className="text-sm text-slate-600">{t.askIntro}</p>

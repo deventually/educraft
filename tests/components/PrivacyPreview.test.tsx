@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { useState } from "react";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
@@ -70,10 +71,10 @@ describe("PrivacyPreview", () => {
     const onSend = vi.fn();
     render(<Harness text="Volgens Visser werkt het." onSend={onSend} />);
     await user.click(screen.getByRole("button", { name: "Visser becomes [COLLEGA-1]" }));
-    expect(screen.getByRole("button", { name: "Visser is kept" })).toHaveAttribute(
-      "aria-pressed",
-      "false",
-    );
+    // The name says the state; no aria-pressed on top that would contradict it (a11y review).
+    const kept = screen.getByRole("button", { name: "Visser is kept" });
+    expect(kept).not.toHaveAttribute("aria-pressed");
+    expect(kept).toHaveAccessibleDescription(/Click a replacement to keep the word/);
     expect(fetch).toHaveBeenCalledWith(
       "/api/privacy/keep",
       expect.objectContaining({ body: JSON.stringify({ intent: "add", word: "Visser" }) }),
@@ -131,5 +132,33 @@ describe("PrivacyAskCard: the gate found something the teacher did not see", () 
     expect((await axe(container, axeOpts)).violations).toEqual([]);
     await user.click(screen.getByRole("button", { name: "Send" }));
     expect(onAnswer).toHaveBeenCalledWith({ "Piet Klaassen": "replace", Hattie: "keep" });
+  });
+});
+
+describe("PrivacyAskCard: focus (a11y review)", () => {
+  it("takes focus when it appears and gives it back when it goes", async () => {
+    const user = userEvent.setup();
+    function Host() {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(true)}>
+            Generate
+          </button>
+          {open && (
+            <PrivacyAskCard
+              items={[{ value: "Piet Klaassen", code: "COLLEGA-1", kind: "colleague", count: 1 }]}
+              onAnswer={() => setOpen(false)}
+              onCancel={() => setOpen(false)}
+            />
+          )}
+        </>
+      );
+    }
+    render(<Host />);
+    await user.click(screen.getByRole("button", { name: "Generate" }));
+    expect(screen.getByRole("heading", { name: "Look first" })).toHaveFocus();
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByRole("button", { name: "Generate" })).toHaveFocus();
   });
 });
