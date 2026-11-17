@@ -77,6 +77,50 @@ export async function setFeatureStand(id: FeatureId, stand: InstanceStand): Prom
     .run();
 }
 
+const JEV_CONSENT_KEY = "jevConsent";
+
+/**
+ * Jev's switch (BESLUIT-2026-11-17-1): on is the institution's consent to sending to TypeSafe's
+ * Jev via OpenRouter. `by` and `at` say who last set it and when; a fresh instance has neither.
+ */
+export interface JevConsent {
+  on: boolean;
+  by?: string;
+  at?: string;
+}
+
+/** The switch as last set; never set = off. */
+export async function getJevConsent(): Promise<JevConsent> {
+  const row = getDb()
+    .select()
+    .from(instanceSettings)
+    .where(eq(instanceSettings.key, JEV_CONSENT_KEY))
+    .get();
+  try {
+    const v = row ? (JSON.parse(row.valueJson) as Partial<JevConsent>) : null;
+    if (v?.on === true || v?.on === false) {
+      return {
+        on: v.on,
+        ...(typeof v.by === "string" ? { by: v.by } : {}),
+        ...(typeof v.at === "string" ? { at: v.at } : {}),
+      };
+    }
+  } catch {
+    // An unreadable value counts as never set: off.
+  }
+  return { on: false };
+}
+
+/** Switch Jev on or off, recording who did it (an admin's id) and now as when. */
+export async function setJevConsent(on: boolean, byUserId: string): Promise<void> {
+  const valueJson = JSON.stringify({ on, by: byUserId, at: new Date().toISOString() });
+  getDb()
+    .insert(instanceSettings)
+    .values({ key: JEV_CONSENT_KEY, valueJson, updatedAt: new Date() })
+    .onConflictDoUpdate({ target: instanceSettings.key, set: { valueJson, updatedAt: new Date() } })
+    .run();
+}
+
 const AGENT_STAND_PREFIX = "agentStand:";
 
 /** Each role agent's stand an admin has set; absent = on. Retired hats are left out. */

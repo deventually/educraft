@@ -82,12 +82,13 @@ once; the totals that were already rolled up know no person.
   production process). EU hosting: Fly.io `ams` or Hetzner both fit.
 - **Retention & deletion** — documented above; deletion is implemented.
 - **Sub-processors** — the model provider(s) in use (Anthropic, OpenAI, or a
-  local Ollama/LM Studio endpoint with no third party). With the feature `bloomJev` on (default
-  Off), the learning outcomes of an imported course document also go to OpenRouter and TypeSafe
-  (Jev, the Bloom proposal); the rest of the document does not. With the feature `evidenceJev` on
-  (default Off), the name and the start of each file in "Bewijs in één keer" go to OpenRouter and
-  TypeSafe instead of the LLM provider (the same excerpt, student names already replaced by codes
-  in the browser).
+  local Ollama/LM Studio endpoint with no third party). With Jev's one switch on (Beheer → Tools,
+  default Off; switching it on is the institution's consent, kept with who and when,
+  BESLUIT-2026-11-17-1), parts of course documents (learning outcomes, and in later uses test
+  titles with the text around them) go to OpenRouter and TypeSafe, and in "Bewijs in één keer" the
+  file name and the start of each file (student names the teacher lists, and patterns such as
+  e-mail addresses, replaced by codes in the browser; file names are not checked, so this is
+  pseudonymised, not anonymous).
 
 ## Deferred to first sale / real deployment
 

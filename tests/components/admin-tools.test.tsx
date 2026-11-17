@@ -26,6 +26,7 @@ const loaderData = {
     },
     { id: "courses", name: { nl: "Cursussen", en: "Courses" }, stand: "on" },
   ],
+  jev: { on: false, keySet: true },
   providers: [],
   models: [],
   local: { enabled: true, agents: [], servers: [] },
@@ -160,6 +161,21 @@ describe("Admin tools", () => {
     await waitFor(() => expect(body?.get("intent")).toBe("feature"));
     expect(body?.get("id")).toBe("portfolio");
     expect(body?.get("stand")).toBe("on");
+  });
+
+  it("has Jev's one switch under the features, and autosaves it (BESLUIT-2026-11-17-1)", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    expect(screen.getByRole("heading", { level: 2, name: "TypeSafe Jev" })).toBeInTheDocument();
+    const box = screen.getByRole("checkbox", { name: /jev gebruiken/i });
+    expect(box).not.toBeChecked();
+    await user.click(box);
+    await waitFor(() => expect(body?.get("intent")).toBe("jev"));
+    expect(body?.get("on")).toBe("on");
   });
 
   it("renders a labelled checkbox per selectable model, pre-checked from settings", () => {
