@@ -13,6 +13,7 @@ import {
 import { anchorFacts, factsBlock } from "../app/lib/portfolio/courseFacts";
 import type { CourseData } from "../app/lib/courses/types";
 import type { DossierData, EvidenceKind } from "../app/lib/portfolio/types";
+import { type VoiceRow, voiceSection } from "./eval-guided-voice";
 
 export interface GuidedCase {
   id: string;
@@ -53,7 +54,7 @@ const OUTCOME = "eval-outcome";
 const SECTION = "eval-section";
 
 /** The `<course>` block the app would send for the case's anchor; "" without one. */
-function caseCourse(c: GuidedCase): string {
+export function caseCourse(c: GuidedCase): string {
   if (!c.course) return "";
   const data: CourseData = { outcomes: [], activities: [], assessments: [], ...c.course.data };
   const ref = { courseId: "eval-course", ...(c.course.itemId ? { itemId: c.course.itemId } : {}) };
@@ -260,8 +261,7 @@ export function scoreDraft(c: GuidedCase, paragraph: string | null): DraftScore 
   };
 }
 
-export interface GuidedRow {
-  caseId: string;
+export interface GuidedRow extends VoiceRow {
   questions: QuestionsScore;
   draft: DraftScore;
   /** Measured when the run asked for follow-ups as well. */
@@ -277,6 +277,8 @@ export function guidedReportMarkdown(input: {
   draftPrompt?: string;
   /** Whether a first paragraph in generic phrasing got a second try, as the app does. */
   styleRetry?: boolean;
+  /** The voice judge, when the run asked for it (`--voice`). */
+  judgeModel?: string;
 }): string {
   const draftPrompt = input.draftPrompt ?? DRAFT_PROMPT_ID;
   const retry = input.styleRetry ?? true;
@@ -288,7 +290,7 @@ export function guidedReportMarkdown(input: {
   return [
     `# Eval geleid schrijven — ${input.date}`,
     "",
-    `Prompts: ${QUESTIONS_PROMPT_ID} (vragen) en ${draftPrompt} (alinea), ${retry ? "met" : "zonder"} tweede poging bij algemene wendingen. Model: ${input.model}. Herhalingen per case: ${input.repeat}. Deterministische score, geen beoordelaarsmodel.`,
+    `Prompts: ${QUESTIONS_PROMPT_ID} (vragen) en ${draftPrompt} (alinea), ${retry ? "met" : "zonder"} tweede poging bij algemene wendingen. Model: ${input.model}. Herhalingen per case: ${input.repeat}. ${input.judgeModel ? "Deterministische score, en een beoordelaarsmodel voor de stem." : "Deterministische score, geen beoordelaarsmodel."}`,
     "",
     "## Vragen",
     "",
@@ -308,6 +310,7 @@ export function guidedReportMarkdown(input: {
         `| ${r.caseId} | ${yesNo(r.draft.parse)} | ${r.draft.words} | ${yesNo(r.draft.noNewNumbers)} | ${pct(r.draft.facts)} | ${yesNo(r.draft.gap)} | ${yesNo(r.draft.clean)} | ${yesNo(r.draft.firstPerson)} | ${yesNo(r.draft.natural)} | ${yesNo(r.draft.pass)} |`,
     ),
     ...followUpSection(input.rows),
+    ...voiceSection(input.rows, input.judgeModel ?? ""),
     "",
     `Geslaagd: ${passed} van ${input.rows.length}.`,
     "",
