@@ -73,7 +73,7 @@ did not check is not ticked.
 - [ ] `docker-compose.yml` and `deploy/docker-compose.yml` name no floating image tag of ours.
 - [ ] Is this release meant for an institution that will switch Jev on? Then the coverage check of
       the course import must first have been measured on real, public study guides that Bastiaan
-      labelled (BESLUIT-2026-11-17-2). If that has not happened, say so; do not run it yourself.
+      labelled (BESLUIT-2026-11-17-4). If that has not happened, say so; do not run it yourself.
 
 **For Bastiaan** (leave these open in the PR; they are his)
 - [ ] Read the release notes: is what changes for a teacher right?

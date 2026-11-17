@@ -735,7 +735,7 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   instelling" in BESLUIT-2026-11-13-1. Bastiaan, 2026-11-17 ("Ik wil dat er 1 optie komt om jev
   aan of uit te zetten in het beheerscherm. Als het ok is om te gebruiken, dan is dat de
   toezegging").
-- **BESLUIT-2026-11-17-2:** **Vóór een instelling Jev aanzet, eerst een toets op echte studiegidsen.**
+- **BESLUIT-2026-11-17-4:** **Vóór een instelling Jev aanzet, eerst een toets op echte studiegidsen.**
   De dekkingscheck bij de import (#367) is gemeten op 8 documenten die we zelf schreven
   (`evals/coverage-jev/README.md`): alle fouten van de LLM gevangen, 6% vals alarm. Dat volstaat
   voor Bastiaans eigen gebruik. Voordat een instelling de Jev-schakelaar aanzet, wordt de check
