@@ -172,7 +172,7 @@ export function voiceSection(rows: VoiceRow[], judgeModel: string): string[] {
     ...measured.map((r) => {
       const v = r.voice?.verdict;
       const reuse = r.voice?.reuse;
-      const worst = v ? v.worst.replace(/\|/g, "\\|").replace(/\s+/g, " ").trim() : "niet beoordeeld";
+      const worst = v ? v.worst.replace(/[\\|]/g, "\\$&").replace(/\s+/g, " ").trim() : "niet beoordeeld";
       return `| ${r.caseId} | ${cell(v?.scores.ownWords)} | ${cell(v?.scores.onlyAnswers)} | ${cell(v?.scores.plainFirstPerson)} | ${reuse == null ? "–" : pct(reuse)} | ${worst} |`;
     }),
     "",

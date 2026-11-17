@@ -210,6 +210,25 @@ describe("guidedReportMarkdown — voice", () => {
     expect(md).not.toContain("geen beoordelaarsmodel");
   });
 
+  it("escapes a backslash before the pipe, so a cell cannot break out of the table", () => {
+    const md = guidedReportMarkdown({
+      date: "2026-11-17",
+      model: "m",
+      judgeModel: "j",
+      repeat: 1,
+      rows: [
+        row({
+          verdict: {
+            scores: { ownWords: 4, onlyAnswers: 5, plainFirstPerson: 3 },
+            worst: "a\\| b",
+          },
+          reuse: null,
+        }),
+      ],
+    });
+    expect(md).toContain("| a\\\\\\| b |");
+  });
+
   it("leaves the voice section out when it was not measured", () => {
     const md = guidedReportMarkdown({ date: "2026-11-17", model: "m", repeat: 1, rows: [row()] });
     expect(md).not.toContain("## Stem");
