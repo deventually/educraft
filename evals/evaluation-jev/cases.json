@@ -1,0 +1,243 @@
+{
+  "about": "The truth per answer for the theme counts of the course evaluation (evals/evaluation-jev/README.md). Written once, before any measurement, from the text of the answers alone. `lines` follows the non-empty lines of the survey: per answer, the themes it makes. `from` reuses a case of evals/course-evaluation/cases.json; the other cases are complete here.",
+  "cases": [
+    {
+      "from": "eval-hbo-name-nl",
+      "themes": {
+        "joins-pace": { "polarity": "negative", "label": "Te weinig tijd en oefening bij joins" },
+        "teacher-person": { "polarity": "negative", "label": "Opmerkingen over de docent als persoon" },
+        "case-clear": { "polarity": "positive", "label": "De casus van de webwinkel was duidelijk" },
+        "report-unclear": { "polarity": "negative", "label": "De opdracht voor het adviesrapport was laat duidelijk" },
+        "normalise-clear": { "polarity": "positive", "label": "Normaliseren was goed uitgelegd" }
+      },
+      "lines": [
+        ["joins-pace"],
+        ["joins-pace"],
+        ["joins-pace"],
+        ["joins-pace"],
+        ["teacher-person"],
+        ["teacher-person"],
+        ["case-clear"],
+        ["case-clear"],
+        ["report-unclear"],
+        ["report-unclear"],
+        [],
+        ["normalise-clear"],
+        ["normalise-clear"]
+      ]
+    },
+    {
+      "from": "eval-mbo-outlier-nl",
+      "themes": {
+        "skillslab": { "polarity": "positive", "label": "Oefenen in het skillslab hielp" },
+        "client-talk": { "polarity": "negative", "label": "Het gesprek met de cliënt was lastig en kreeg te weinig oefening" },
+        "practice-test": { "polarity": "positive", "label": "De oefentoets hielp om te weten waar je stond" }
+      },
+      "lines": [
+        ["skillslab"],
+        ["skillslab"],
+        ["skillslab"],
+        ["client-talk"],
+        ["client-talk"],
+        ["client-talk"],
+        ["practice-test"],
+        ["practice-test"],
+        [],
+        [],
+        []
+      ]
+    },
+    {
+      "from": "eval-hbo-test-analysis-nl",
+      "themes": {
+        "question-unclear": { "polarity": "negative", "label": "Eén tentamenvraag was onduidelijk" },
+        "exam-fair": { "polarity": "positive", "label": "Het tentamen was eerlijk en goed te doen" },
+        "workshops": { "polarity": "positive", "label": "De SQL-werkcolleges waren nuttig" },
+        "report-time": { "polarity": "negative", "label": "Te weinig tijd voor het adviesrapport" }
+      },
+      "lines": [
+        ["question-unclear"],
+        ["question-unclear"],
+        ["exam-fair"],
+        ["question-unclear", "exam-fair"],
+        ["workshops"],
+        ["workshops"],
+        ["report-time"],
+        ["report-time"],
+        [],
+        []
+      ]
+    },
+    {
+      "from": "eval-wo-small-en",
+      "themes": {
+        "r-pace": { "polarity": "negative", "label": "The R sessions went too fast" },
+        "proposal-feedback": { "polarity": "positive", "label": "The feedback on the proposal was useful" }
+      },
+      "lines": [["r-pace"], ["r-pace"], ["proposal-feedback"], ["proposal-feedback"], [], []]
+    },
+    {
+      "from": "eval-hbo-injection-nl",
+      "themes": {
+        "week-too-full": { "polarity": "negative", "label": "De week over GROUP BY en aggregaties was te vol" },
+        "feedback-late": { "polarity": "negative", "label": "De feedback op het adviesrapport kwam te laat" },
+        "case-fun": { "polarity": "positive", "label": "De webwinkel werkte goed als casus" }
+      },
+      "lines": [
+        ["week-too-full"],
+        ["week-too-full"],
+        ["week-too-full"],
+        ["feedback-late"],
+        ["feedback-late"],
+        ["feedback-late"],
+        [],
+        [],
+        [],
+        ["case-fun"],
+        ["case-fun"]
+      ]
+    },
+    {
+      "id": "eval-hbo-count-nl",
+      "locale": "nl",
+      "about": "hbo, 52 respondenten, 46 antwoorden: een grotere enquête om te tellen. Antwoorden met twee thema's, antwoorden met het tegenovergestelde oordeel over hetzelfde onderwerp, een ontkenning en een antwoord in het Engels.",
+      "name": "Marketingcommunicatie",
+      "respondents": 52,
+      "context": "Onderwijscontext (hbo):\n- Opleiding: Commerciële Economie (bachelor)\n- EQF-niveau: EQF 6",
+      "outcomes": [
+        "De student analyseert een doelgroep met een segmentatiemodel.",
+        "De student schrijft een onderbouwd campagneplan voor een opdrachtgever.",
+        "De student werkt in een projectgroep en reflecteert op zijn eigen bijdrage."
+      ],
+      "activities": [
+        { "title": "Doelgroepen en segmentatie", "week": 2 },
+        { "title": "Gastcollege uit het werkveld", "week": 3 },
+        { "title": "Campagnestrategie", "week": 4 },
+        { "title": "Projectgroep: concept voor de opdrachtgever", "week": 5 }
+      ],
+      "assessments": [
+        { "title": "Schriftelijke toets marketingtheorie", "week": 8, "kind": "summative" },
+        { "title": "Campagneplan (groep)", "week": 10, "kind": "summative" }
+      ],
+      "evaluation": "De feedback op de eerste opdracht kwam pas na vier weken.\nFeedback kwam te laat, ik kon er niks meer mee voor de volgende opdracht.\nDe gastcolleges waren het leukste van het blok.\nIk had het gevoel dat ik in mijn groep al het werk deed.\nTwee mensen in ons groepje deden helemaal niks en kregen hetzelfde cijfer.\nHet rooster veranderde bijna elke week, heel onrustig.\nDe docent kan goed uitleggen.\nGastspreker van het reclamebureau was super inspirerend, maar de feedback op ons concept liet lang op zich wachten.\nVeel te veel artikelen om te lezen per week.\nDe reader is veel te dik.\nHet campagneplan voelde als een echte opdracht van een klant.\nLeuke eindopdracht.\nFeedback kreeg ik juist snel, daar was ik blij mee.\nGroepswerk ging bij ons prima, iedereen deed zijn deel.\nLokaal wisselde steeds, ik heb twee keer in het verkeerde lokaal gezeten.\nUitleg in de colleges was helder.\nIk vond de gastcolleges niet zo nuttig, te veel reclame voor hun eigen bedrijf.\nPrima.\nTe veel lezen en te weinig tijd om het te verwerken.\nSommige groepsgenoten lieten alles aan mij over.\nThe guest lectures were the best part for me.\nIk zou graag eerder feedback krijgen.\nHet campagneplan was veel werk, maar wel heel leerzaam en realistisch.\nDe docent legt het goed uit, maar het rooster was een chaos.\nDe toets in week 8 was pittig.\nWaarom moet ik zoveel lezen als de toets er maar een klein deel van vraagt?\nMeelifters in de projectgroep, en de docent deed er niets mee.\nIk kwam erachter dat ik marketing echt leuk vind.\nGoed blok.\nOp de feedback van week 3 moest ik wachten tot week 7.\nIk snapte de uitleg over doelgroepsegmentatie niet zo.\nDe gastcolleges gaven een goed beeld van het werkveld.\nGeen klachten over het rooster.\nHet was niet zo dat de docent slecht uitlegde, integendeel.\nDe eindopdracht sloot mooi aan op de praktijk.\nIk had graag minder leesstof gehad, dan had ik meer aan de opdracht kunnen doen.\nWekelijks een ander lokaal, dat werkt niet.\nIk heb niet gemerkt dat de feedback laat was.\nDe presentaties aan het eind waren gezellig.\nNuttige gastsprekers, vooral die van de gemeente.\nOns groepje werkte goed samen.\nFeedback via Brightspace kwam vaak pas na de deadline van de volgende opdracht.\nDuidelijke uitleg en goede voorbeelden.\nHet campagneplan was saai, ik had liever iets anders gedaan.\nDocent was altijd bereikbaar.\nn.v.t.",
+      "forbid": [],
+      "expectPlaces": [],
+      "themes": {
+        "feedback-late": { "polarity": "negative", "label": "Feedback op opdrachten kwam te laat" },
+        "guest-lectures": { "polarity": "positive", "label": "De gastcolleges uit het werkveld waren nuttig" },
+        "free-riders": { "polarity": "negative", "label": "Oneerlijke werkverdeling in de projectgroep" },
+        "schedule": { "polarity": "negative", "label": "Het rooster en de lokalen veranderden te vaak" },
+        "explains-well": { "polarity": "positive", "label": "De docent legt duidelijk uit" },
+        "reading-load": { "polarity": "negative", "label": "Te veel leesstof" },
+        "campaign-plan": { "polarity": "positive", "label": "Het campagneplan was een realistische en leuke eindopdracht" }
+      },
+      "lines": [
+        ["feedback-late"],
+        ["feedback-late"],
+        ["guest-lectures"],
+        ["free-riders"],
+        ["free-riders"],
+        ["schedule"],
+        ["explains-well"],
+        ["guest-lectures", "feedback-late"],
+        ["reading-load"],
+        ["reading-load"],
+        ["campaign-plan"],
+        ["campaign-plan"],
+        [],
+        [],
+        ["schedule"],
+        ["explains-well"],
+        [],
+        [],
+        ["reading-load"],
+        ["free-riders"],
+        ["guest-lectures"],
+        ["feedback-late"],
+        ["campaign-plan"],
+        ["explains-well", "schedule"],
+        [],
+        ["reading-load"],
+        ["free-riders"],
+        [],
+        [],
+        ["feedback-late"],
+        [],
+        ["guest-lectures"],
+        [],
+        ["explains-well"],
+        ["campaign-plan"],
+        ["reading-load"],
+        ["schedule"],
+        [],
+        [],
+        ["guest-lectures"],
+        [],
+        ["feedback-late"],
+        ["explains-well"],
+        [],
+        [],
+        []
+      ]
+    },
+    {
+      "id": "eval-hbo-count-en",
+      "locale": "en",
+      "about": "hbo, English, 30 respondents, 25 answers: a larger survey to count. Answers with two themes, answers with the opposite view on the same subject, and one answer in Dutch.",
+      "name": "Software Engineering",
+      "respondents": 30,
+      "context": "Teaching context (hbo, university of applied sciences):\n- Programme: HBO-ICT (bachelor)\n- EQF level: EQF 6",
+      "outcomes": [
+        "The student builds a web application in a team with version control.",
+        "The student writes automated tests for their own code.",
+        "The student explains their design choices in a technical report."
+      ],
+      "activities": [
+        { "title": "Lab: version control with Git", "week": 1 },
+        { "title": "Lab: unit testing", "week": 3 },
+        { "title": "Lab: continuous integration", "week": 5 },
+        { "title": "Team project sprint", "week": 6 }
+      ],
+      "assessments": [
+        { "title": "Sprint review", "week": 6, "kind": "formative" },
+        { "title": "Final project and technical report", "week": 10, "kind": "summative" }
+      ],
+      "evaluation": "The lab sessions were really useful.\nLabs helped me understand the theory.\nWeek 6 had three deadlines at once, way too much.\nAll the deadlines fell in the same week.\nNobody explained how to use Git properly.\nI still don't really get branching in Git.\nThe TAs were always willing to help.\nTA support in the labs was great, but the deadline pile-up in week 6 was stressful.\nGood course overall.\nI didn't find the labs very useful, they repeated the lecture.\nGit was explained clearly in week 1.\nDeadlines were spread out nicely.\nThe labs were the best part.\nCould you please spread the deadlines more?\nGit merge conflicts were a nightmare and there was no help on it.\nThe assistants answered my questions quickly.\nLectures were a bit long.\nMore practice labs please, they were very helpful.\nNot a single TA showed up to my lab session, twice.\nI liked the final project.\nIk vond de practica heel nuttig.\nThe TAs were helpful and patient.\nOur deadlines clashed with those of another course in the same week.\nFine.\nThe Git workflow was never explained, we just had to figure it out.",
+      "forbid": [],
+      "expectPlaces": [],
+      "themes": {
+        "labs-useful": { "polarity": "positive", "label": "The lab sessions were useful" },
+        "deadlines-bunched": { "polarity": "negative", "label": "Too many deadlines in the same week" },
+        "git-unexplained": { "polarity": "negative", "label": "Git was not explained well enough" },
+        "ta-help": { "polarity": "positive", "label": "The teaching assistants were helpful" }
+      },
+      "lines": [
+        ["labs-useful"],
+        ["labs-useful"],
+        ["deadlines-bunched"],
+        ["deadlines-bunched"],
+        ["git-unexplained"],
+        ["git-unexplained"],
+        ["ta-help"],
+        ["ta-help", "deadlines-bunched"],
+        [],
+        [],
+        [],
+        [],
+        ["labs-useful"],
+        ["deadlines-bunched"],
+        ["git-unexplained"],
+        ["ta-help"],
+        [],
+        ["labs-useful"],
+        [],
+        [],
+        ["labs-useful"],
+        ["ta-help"],
+        ["deadlines-bunched"],
+        [],
+        ["git-unexplained"]
+      ]
+    }
+  ]
+}

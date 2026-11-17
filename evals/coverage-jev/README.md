@@ -60,3 +60,19 @@ npm run eval:coverage-jev -- --dry-run     # de Jev-verzoeken voor de labels, zo
 ```
 
 Nooit onderdeel van CI.
+
+## Uitslag (2026-11-17)
+
+Rapport: [`2026-11-17c1-coverage-jev.md`](../reports/2026-11-17c1-coverage-jev.md), met Sonnet
+via Claude Code en Jev 1.14, 3 runs per case. De vragen en drempels zijn niet bijgesteld.
+
+- **Dekking:** Jev markeerde alle 10 fouten van de LLM, en zette bij 10 van de 176 goede antwoorden
+  ten onrechte "Controleer" (6%). Eerlijk: 9 van die 10 fouten zijn dezelfde 3 vinkjes in 3 runs,
+  in één document waar de dekking alleen in lopende tekst staat (zonder codes). Het gaat dus om
+  4 verschillende fouten, en die zijn alle 4 gevangen.
+- **Soort:** de LLM liet bij 27 van de 57 toetsen de soort open. Jev vulde ze alle 27 goed in, en
+  waar de LLM een soort gaf, was Jev het daar steeds mee eens. Er was geen vals alarm.
+- **Kosten:** 57 verzoeken, mediaan 351 ms, samen $0,0025.
+
+Dit is een kleine set die we zelf hebben geschreven. Een set met echte, openbare studiegidsen die
+Bastiaan labelt, blijft de betere toets voordat dit bij een instelling aan gaat.
