@@ -2,6 +2,16 @@ import type { Messages } from "../nl";
 
 export const privacy: Messages["privacy"] = {
   addSelection: "Remove the selected text",
+  alsoReplace: "Also replace",
+  alsoReplaceHint:
+    "Select a word in the preview and choose Also replace. Click a replacement to keep the word.",
+  askIntro:
+    "The privacy gate found words you have not seen yet, for example in your context, your course or an earlier step. Nothing has been sent. Choose per word, then send.",
+  askKeep: "Do not replace",
+  askReplace: "Replace",
+  askSend: "Send",
+  askTitle: "Look first",
+  askWord: "{value} ({n}×)",
   back: "Back",
   company: "Company or institution",
   companyDescription: "Description of the company (placed after the code)",
@@ -13,6 +23,17 @@ export const privacy: Messages["privacy"] = {
   kept: "{original} is kept",
   limits:
     "Note: figures and photos are not anonymised, and a misspelt name or a very recognisable description can slip through. So check the text; you remain responsible.",
+  liveCount: "{n} replaced",
+  liveIntro:
+    "Names and details go to the AI as codes; the result shows them again. What you see here is what goes.",
+  liveNone: "Nothing is replaced.",
+  liveTitle: "What goes to the AI",
+  message: "Your message",
+  namedIntro: "Student names and these details stay in your browser; the server only sees codes.",
+  namedTitle: "Names that must go",
+  neverRemove: "Replace {word} again",
+  neverSaved: "{word} is on your never-list.",
+  neverTitle: "Never replace",
   preview: "What the AI receives: {field}",
   replaced: "{original} becomes {code}",
   restoredNote:

@@ -12,11 +12,22 @@ describe("help: anonymising before sending", () => {
   });
 });
 
-/** Anonymiseerpoort PR 2: the help says the server counts, and does not replace yet. */
+/** Anonymiseerpoort PR 2 and 3: the server checks too, and asks before sending what you did not see. */
 describe("help: the gate on the server", () => {
   it.each([
-    ["nl", /op de server/i, /telt/i, /collega/i, /nog niets vervangen/i],
-    ["en", /on the server/i, /counts/i, /colleague/i, /nothing is replaced yet/i],
+    ["nl", /op de server/i, /collega/i, /Eerst even kijken/, /stuurt ze niets/i],
+    ["en", /on the server/i, /colleague/i, /Look first/, /sends nothing/i],
+  ] as const)("in %s", (locale, ...patterns) => {
+    const topic = getTopic("using-tools", locale);
+    for (const p of patterns) expect(topic).toMatch(p);
+  });
+});
+
+/** Anonymiseerpoort PR 3: the live preview in every tool, and the never-list. */
+describe("help: what goes to the AI", () => {
+  it.each([
+    ["nl", /Dit gaat naar de AI/, /Namen die eruit moeten/, /Nooit vervangen/, /Ook vervangen/],
+    ["en", /What goes to the AI/, /Names that must go/, /Never replace/, /Also replace/],
   ] as const)("in %s", (locale, ...patterns) => {
     const topic = getTopic("using-tools", locale);
     for (const p of patterns) expect(topic).toMatch(p);

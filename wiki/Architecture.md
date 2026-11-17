@@ -294,8 +294,8 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   allow-listed `SafeNode` tree (`docxHtml.ts`); `locate.ts` finds quotes for "Toon in document".
   The original is never uploaded or stored.
 - **Anonymise before sending (P24.0b)** (`app/components/privacy/`, `app/lib/privacy/redact.ts`).
-  A field with `redact: true` shows `RedactReview` before `streamPost`; names, e-mail, phone,
-  postcode, IBAN and student numbers become codes. Not removing too much (BESLUIT-2026-11-17-3):
+  A field with `redact: true` is anonymised in the browser (the live preview below, PR 3); names,
+  e-mail, phone, postcode, IBAN and student numbers become codes. Not removing too much (BESLUIT-2026-11-17-3):
   a full name goes in any case; a lone part of it only with a capital, and when it is an ordinary
   word (`app/lib/privacy/pack/commonWords.ts`) only mid-sentence; researchers on the keep list
   (`pack/keep.ts`, "Bloom") never alone. The student number format is learnt from the number the
@@ -319,6 +319,23 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   stream chunk by chunk (`restoreStream` holds only an open `[`). The code table
   lives for one call. Evals: `npm run eval -- --privacy-gate` and `npm run eval:coach --
   --privacy-gate` send the generation through the same gate.
+- **The live preview (anonymiseerpoort PR 3, BESLUIT-2026-11-17-6)** (`app/lib/privacy/live.ts`,
+  `app/lib/hooks/usePrivacy.ts`, `app/components/privacy/PrivacyPreview.tsx`). Every tool that
+  streams (`GeneratorView`, `StageStepper`, `ChatView`) shows "Dit gaat naar de AI" under its
+  form: the text fields (`privacyFields`) run through the same engine and the same known names
+  (`privacyPageFor`, in the tool and rehearsal loaders) after each pause in typing. Two layers in
+  one function, `prepareSend`: what the teacher names (student, number, company, supervisors,
+  "Ook vervangen") is replaced in the browser and its code table stays in component memory;
+  known names and patterns go as typed with `privacy.approved`, so the gate replaces and restores
+  them and `generations` keeps the real names. A `redact: true` field is replaced entirely in the
+  browser (the original never leaves it); the separate `RedactReview` step is gone from the tool
+  page (the course evaluation still uses it until step 4). The conversation and earlier steps are
+  coded the same way and their known names approved. `privacy.keep` carries the words the teacher
+  clicked off; a known name clicked off goes on the never-list (`privacy_keep_words`,
+  `keepWords.server.ts`, `/api/privacy/keep`; words only, no digit or `@`), which the gate also
+  reads itself. `studentNumberExample` is only the shape (`s0000000`). When the gate still sends
+  nothing (`event: privacy`), `streamPost` calls `onPrivacy` and the page shows `PrivacyAskCard`
+  (per word Replace or Do not replace, then Send), which sends again with the answer.
 - **Figures from the document** (`app/lib/documents/figures.ts`,
   `app/components/documents/DocumentFigurePicker.tsx`). An image field with `imagesFrom: "<document
   field>"` offers the figures of the files uploaded there: Word images the model can read (icons

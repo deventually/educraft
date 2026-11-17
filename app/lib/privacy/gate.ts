@@ -71,7 +71,8 @@ const SEPARATOR = "\n\u0000\n";
 const norm = (s: string) => s.trim().replace(/\s+/g, " ").toLowerCase();
 const baseOf = (code: string) => code.replace(/-\d+$/, "");
 
-function entriesFor(known: KnownPeople): RedactEntry[] {
+/** The names the app knows, as engine entries; the browser preview uses the same ones. */
+export function knownEntries(known: KnownPeople): RedactEntry[] {
   const usable = (name: string | undefined): name is string =>
     !!name && name.trim().length >= 2 && !name.includes("@");
   const teacher = usable(known.teacher) ? known.teacher.trim() : undefined;
@@ -152,7 +153,7 @@ export function gateTexts(texts: readonly string[], policy: GatePolicy): GateRes
   const joined = texts.join(SEPARATOR);
   const keep = new Set((policy.keep ?? []).map(norm));
   const options = redactOptions({ studentNumberExample: policy.studentNumberExample });
-  const found = findRedactions(joined, entriesFor(policy.known), [], {
+  const found = findRedactions(joined, knownEntries(policy.known), [], {
     ...options,
     keep: [...(options.keep ?? []), ...(policy.keep ?? [])],
   }).filter((s) => !keep.has(norm(s.value)) && !keep.has(norm(s.original)));

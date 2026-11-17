@@ -19,36 +19,40 @@ vi.mock("~/lib/i18n/localized", () => ({
   },
 }));
 
-vi.mock("~/lib/i18n/useT", () => ({
-  useLocale: () => "en",
-  useT: () => ({
-    aiLeave: {
-      abort: "Stop",
-      body: "Keep it running or stop it.",
-      keep: "Keep running",
-      stay: "Stay on this page",
-      title: "The AI is still working",
-    },
-    exportResult: { download: "Download as {format}" },
-    tool: {
-      contextProfile: "Context",
-      noProfile: "No profile",
-      outputLanguage: "Output language",
-      dutch: "Dutch",
-      english: "English",
-      model: "Model",
-      advanced: "Advanced",
-      generate: "Generate",
-      stop: "Stop",
-      required: "Required",
-      emptyResult: "Nothing yet",
-      fileComingSoon: "File upload coming soon",
-      course: "Course",
-      noCourse: "No course",
-      courseHint: "Fills in its learning outcomes and links the result to it.",
-    },
-  }),
-}));
+vi.mock("~/lib/i18n/useT", async () => {
+  const { messages } = await import("~/lib/i18n");
+  return {
+    useLocale: () => "en",
+    useT: () => ({
+      privacy: messages.en.privacy,
+      aiLeave: {
+        abort: "Stop",
+        body: "Keep it running or stop it.",
+        keep: "Keep running",
+        stay: "Stay on this page",
+        title: "The AI is still working",
+      },
+      exportResult: { download: "Download as {format}" },
+      tool: {
+        contextProfile: "Context",
+        noProfile: "No profile",
+        outputLanguage: "Output language",
+        dutch: "Dutch",
+        english: "English",
+        model: "Model",
+        advanced: "Advanced",
+        generate: "Generate",
+        stop: "Stop",
+        required: "Required",
+        emptyResult: "Nothing yet",
+        fileComingSoon: "File upload coming soon",
+        course: "Course",
+        noCourse: "No course",
+        courseHint: "Fills in its learning outcomes and links the result to it.",
+      },
+    }),
+  };
+});
 
 const profiles: ContextProfile[] = [
   { id: "p2", name: "SE year 2", studyYear: 2 },

@@ -29,12 +29,9 @@ import { FormResultLayout } from "~/components/FormResultLayout";
 import { DocumentViewer } from "./documents/DocumentViewer";
 import { extractQuotes } from "~/lib/documents/locate";
 import { restoreNames, type CodeTable } from "~/lib/privacy/redact";
-import {
-  RedactReview,
-  emptyRedactDraft,
-  type RedactDraft,
-  type RedactResult,
-} from "./privacy/RedactReview";
+import { privacyFields, usePrivacy } from "~/lib/hooks/usePrivacy";
+import type { PrivacyPage } from "~/lib/privacy/live";
+import { PrivacyAskCard, PrivacyPreview } from "./privacy/PrivacyPreview";
 
 interface Props {
   tool: Tool;
@@ -54,6 +51,8 @@ interface Props {
   assessmentModels?: ModelChoice[];
   /** This history entry: Back and Forward bring its form and result back. */
   memoryKey?: string;
+  /** The names the anonymiseerpoort knows and the teacher's never-list (PR 3). */
+  privacy?: PrivacyPage;
 }
 
 export function GeneratorView({
@@ -68,6 +67,7 @@ export function GeneratorView({
   resultContext,
   assessmentModels = [],
   memoryKey,
+  privacy: privacyPage,
 }: Props) {
   const t = useT();
   const locale = useLocale();
@@ -108,18 +108,16 @@ export function GeneratorView({
   const [originals, setOriginals] = useState<Record<string, File[]>>({});
   const docField = tool.inputs.find((f) => f.kind === "document" && originals[f.name]?.length);
   const docFiles = docField ? originals[docField.name] : undefined;
-  // Anonymise step (24.0b) for fields marked `redact: true`. The code → name
-  // table stays in this component's memory; the server only ever sees codes.
-  const [reviewing, setReviewing] = useState(false);
-  const [redactDraft, setRedactDraft] = useState<RedactDraft>(emptyRedactDraft);
+  // The live preview (anonymiseerpoort PR 3): what goes, seen while typing. The code → name
+  // table for the names the teacher gave stays in this component's memory.
+  const privacy = usePrivacy(privacyPage);
+  const liveFields = privacyFields(tool.inputs, values, locale);
+  const reviewing = Boolean(privacy.ask);
   const [codes, setCodes] = useState<CodeTable | null>(null);
   // What was last sent for each anonymised field, next to the form text it came from,
   // so "What the AI receives" shows the codes until the teacher edits that text.
   const [sentRedacted, setSentRedacted] = useState<Record<string, { from: string; to: string }>>(
     {},
-  );
-  const redactFields = tool.inputs.filter(
-    (f) => f.redact && String(values[f.name] ?? "").trim() !== "",
   );
   // A result that is still streaming is not kept: coming back shows the form without it.
   useEntryMemory(
@@ -179,30 +177,20 @@ export function GeneratorView({
       return;
     }
     setError(null);
-    if (redactFields.length > 0) {
-      setReviewing(true);
-      return;
-    }
-    setCodes(null);
-    setSentRedacted({});
-    void send({});
+    void send();
   }
 
-  function sendRedacted(result: RedactResult) {
-    setReviewing(false);
-    setCodes(result.codes);
+  async function send() {
+    // What the preview showed: the teacher's names as codes, the rest approved for the gate.
+    const prepared = privacy.prepare({ fields: liveFields });
+    setCodes(Object.keys(prepared.codes).length > 0 ? prepared.codes : null);
     setSentRedacted(
       Object.fromEntries(
-        Object.entries(result.values).map(([name, to]) => [
-          name,
-          { from: String(values[name] ?? ""), to },
-        ]),
+        liveFields
+          .filter((f) => f.redact)
+          .map((f) => [f.name, { from: f.text, to: prepared.values[f.name] ?? f.text }]),
       ),
     );
-    void send(result.values);
-  }
-
-  async function send(overrides: Record<string, string>) {
     setOutput("");
     setGenerationId(null);
     setStreaming(true);
@@ -210,7 +198,7 @@ export function GeneratorView({
 
     const images = imagesOf(tool.inputs, values);
     // Image fields are sent separately (above); drop them from the prompt values.
-    const valuesToSend = { ...toTemplateValues(values), ...overrides };
+    const valuesToSend = { ...toTemplateValues(values), ...prepared.values };
 
     await streamPost(
       "/api/stream",
@@ -224,9 +212,15 @@ export function GeneratorView({
         images: images.length > 0 ? images : undefined,
         courseId: courseId || undefined,
         itemId: (courseId && itemId) || undefined,
+        privacy: prepared.approval,
       },
       {
         onToken: (text) => setOutput((prev) => prev + text),
+        // The gate found something the teacher did not see: nothing went yet.
+        onPrivacy: (items) => {
+          setStreaming(false);
+          privacy.askFirst(items, () => void send());
+        },
         onDone: (meta) => {
           setGenerationId(meta?.generationId ?? null);
           setStreaming(false);
@@ -268,6 +262,11 @@ export function GeneratorView({
             onChange={setValue}
             onDocumentFiles={(name, files) => setOriginals((prev) => ({ ...prev, [name]: files }))}
             beforeField={beforeField}
+          />
+          <PrivacyPreview
+            privacy={privacy}
+            fields={liveFields}
+            studentWork={tool.inputs.some((f) => f.redact)}
           />
           <ToolControls
             usesContextProfile={tool.usesContextProfile}
@@ -340,18 +339,12 @@ export function GeneratorView({
                 />
               </div>
             )}
-            {reviewing ? (
+            {privacy.ask ? (
               <div className="h-full min-h-0 overflow-y-auto">
-                <RedactReview
-                  fields={redactFields.map((f) => ({
-                    name: f.name,
-                    label: loc(f.label, locale),
-                    text: String(values[f.name] ?? ""),
-                  }))}
-                  draft={redactDraft}
-                  onDraft={setRedactDraft}
-                  onConfirm={sendRedacted}
-                  onCancel={() => setReviewing(false)}
+                <PrivacyAskCard
+                  items={privacy.ask.items}
+                  onAnswer={privacy.answer}
+                  onCancel={privacy.cancelAsk}
                 />
               </div>
             ) : output || streaming ? (

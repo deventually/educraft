@@ -9,7 +9,15 @@
  * `code` — the caller (which holds `useT`) maps a code to `m.error.unknown`. The
  * client never invents human-readable copy (Phase 5.3).
  */
-export type StreamErrorCode = "network" | "http" | "parse";
+export type StreamErrorCode = "network" | "http" | "parse" | "privacy";
+
+/** One word the anonymiseerpoort found that the teacher did not see yet (`ReviewItem`). */
+export interface PrivacyReviewItem {
+  value: string;
+  code: string;
+  kind: string;
+  count: number;
+}
 
 export interface StreamError {
   /** Localized message from the server's error frame, when present. */
@@ -29,6 +37,11 @@ export interface StreamHandlers {
   onToken: (text: string) => void;
   onDone?: (meta: StreamDoneMeta) => void;
   onError?: (error: StreamError) => void;
+  /**
+   * The anonymiseerpoort sent nothing yet (PR 3): the words to lay before the teacher. Without
+   * this handler the stream ends as an error with code `"privacy"`.
+   */
+  onPrivacy?: (review: PrivacyReviewItem[]) => void;
 }
 
 export async function streamPost(
@@ -92,6 +105,12 @@ export async function streamPost(
           handlers.onError?.(message ? { message } : { code: "parse" });
           return;
         }
+        if (event === "privacy") {
+          const review = parseReview(data);
+          if (handlers.onPrivacy) handlers.onPrivacy(review);
+          else handlers.onError?.({ code: "privacy" });
+          return;
+        }
         if (event === "done") {
           handlers.onDone?.(parseDoneMeta(data));
           return;
@@ -117,5 +136,22 @@ function parseDoneMeta(data: string): StreamDoneMeta {
     return typeof parsed.generationId === "string" ? { generationId: parsed.generationId } : {};
   } catch {
     return {};
+  }
+}
+
+function parseReview(data: string): PrivacyReviewItem[] {
+  try {
+    const parsed = JSON.parse(data) as { review?: unknown };
+    if (!Array.isArray(parsed.review)) return [];
+    return parsed.review.filter(
+      (r): r is PrivacyReviewItem =>
+        !!r &&
+        typeof r.value === "string" &&
+        typeof r.code === "string" &&
+        typeof r.kind === "string" &&
+        typeof r.count === "number",
+    );
+  } catch {
+    return [];
   }
 }

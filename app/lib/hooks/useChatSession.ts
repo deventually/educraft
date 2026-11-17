@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { ChatMessage } from "~/lib/registry/types";
-import { streamPost } from "~/lib/streamClient";
+import { type PrivacyReviewItem, streamPost } from "~/lib/streamClient";
 import { useStreamAborts } from "~/lib/hooks/useStreamAborts";
 import { appendTokenToLastTurn, markLastTurnInterrupted, type Turn } from "~/lib/chat/turns";
 
@@ -21,13 +21,28 @@ interface ChatSessionOptions {
    */
   body: Record<string, unknown>;
   onGenerationStart?: () => void;
+  /**
+   * The live preview (anonymiseerpoort PR 3): what actually leaves, with the teacher's names as
+   * codes and the approval for the gate. Without it, `body` and the turns go as they are.
+   */
+  outgoing?: (messages: ChatMessage[]) => {
+    body: Record<string, unknown>;
+    messages: ChatMessage[];
+  };
+  /** The gate sent nothing yet; `retry` sends the same message again once the teacher chose. */
+  onPrivacy?: (items: PrivacyReviewItem[], retry: () => void) => void;
 }
 
 /**
  * One chat conversation: its turns, the stream into the last one, stop and regenerate.
  * Every turn shares one session id, so each reply updates the same saved project.
  */
-export function useChatSession({ body, onGenerationStart }: ChatSessionOptions) {
+export function useChatSession({
+  body,
+  onGenerationStart,
+  outgoing,
+  onPrivacy,
+}: ChatSessionOptions) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const streams = useStreamAborts(isStreaming);
@@ -59,11 +74,20 @@ export function useChatSession({ body, onGenerationStart }: ChatSessionOptions) 
       messageHistory.push({ role: "user", content: message });
 
       const signal = streams.start();
+      const out = outgoing ? outgoing(messageHistory) : { body, messages: messageHistory };
 
       await streamPost(
         "/api/stream",
-        { ...body, messages: messageHistory, sessionId: sessionIdRef.current },
+        { ...out.body, messages: out.messages, sessionId: sessionIdRef.current },
         {
+          // Nothing went: the question leaves the thread until the teacher chose.
+          onPrivacy: onPrivacy
+            ? (items) => {
+                setTurns((prev) => prev.slice(0, -2));
+                setIsStreaming(false);
+                onPrivacy(items, () => void send(message));
+              }
+            : undefined,
           onToken: (token: string) => {
             setTurns((prev) => appendTokenToLastTurn(prev, token));
           },

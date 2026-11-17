@@ -781,3 +781,19 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   zonder (binnen de spreiding, `evals/reports/2026-11-17poort-*.md`); de BDB-coach op de enige
   case met een collega 2 van 3 geslaagd met én zonder poort (`2026-11-17poort-*-portfolio-coach.md`).
   Bastiaan, 2026-11-17 (ontwerp "Eén anonimiseerpoort", PR 2; keuze "Eerst alleen tellen").
+- **BESLUIT-2026-11-17-6:** **De docent ziet bij elke tool wat er naar de AI gaat, en de poort
+  vervangt vanaf nu.** Onder het formulier van elke tool die streamt (generator, meerstaps, chat,
+  ook de proefassessment) staat "Dit gaat naar de AI": dezelfde motor met dezelfde bekende namen
+  als de poort, live tijdens het typen. Dat vervangt de losse stap "Eerst anonimiseren" op de
+  toolpagina. **Twee lagen:** wat alleen de docent kent (student, studentnummer, bedrijf,
+  begeleiders, "Ook vervangen") wordt in de browser vervangen en blijft in het geheugen van de
+  pagina (BESLUIT-2026-11-04-20); bekende namen en patronen gaan zoals getypt mee met de keuzes
+  van de docent, en de poort vervangt en zet terug, zodat *Eerder gemaakt* de echte namen houdt.
+  Bij studentwerk (`redact: true`) gaat er alleen de versie met codes uit de browser
+  (BESLUIT-2026-11-04-9). Van het studentnummer gaat alleen de vorm mee (`s0000000`). **Niets stil
+  vervangen:** vindt de poort iets wat de docent niet zag (in de context, de cursus, een eerdere
+  stap), dan stuurt ze niets en kiest de docent per woord Vervangen of Niet vervangen. Een klik
+  op een bekende naam zet het woord op de **nooit-lijst** van de docent (`privacy_keep_words`):
+  alleen woorden, nooit iets met een cijfer of `@`; de poort leest die lijst zelf ook. Bastiaan,
+  2026-11-17 (ontwerp "Eén anonimiseerpoort", stap 3; principe "niets gaat weg zonder dat de
+  docent het zag").

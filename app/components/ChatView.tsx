@@ -5,7 +5,11 @@ import type { Tool } from "~/lib/registry/types";
 import { useSandbox, type SandboxCourse } from "~/lib/hooks/useSandbox";
 import { useChatSession } from "~/lib/hooks/useChatSession";
 import { summarizeSandbox } from "~/lib/forms/summarize";
-import { useLocale } from "~/lib/i18n/useT";
+import { useLocale, useT } from "~/lib/i18n/useT";
+import { privacyFields, usePrivacy } from "~/lib/hooks/usePrivacy";
+import type { PrivacyPage } from "~/lib/privacy/live";
+import { restoreNames, type CodeTable } from "~/lib/privacy/redact";
+import { PrivacyAskCard, PrivacyPreview } from "./privacy/PrivacyPreview";
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
 import { initialPickerModel, pickableModels, type PickerModel } from "~/lib/ai/models";
 import { interpolateGreeting } from "~/lib/chat/greeting";
@@ -56,6 +60,8 @@ interface ChatViewProps {
   renderAssistant?: RenderAssistant;
   /** This history entry: Back and Forward bring its setup and conversation back. */
   memoryKey?: string;
+  /** The names the anonymiseerpoort knows and the teacher's never-list (PR 3). */
+  privacy?: PrivacyPage;
 }
 
 export function ChatView({
@@ -76,8 +82,10 @@ export function ChatView({
   streamExtras,
   renderAssistant,
   memoryKey,
+  privacy: privacyPage,
 }: ChatViewProps) {
   const locale = useLocale();
+  const t = useT();
   // Shared sandbox (see useSandbox). ChatView has no profile selector — the
   // context profile arrives as a prop — so it only uses the values.
   const sandbox = useSandbox({ inputs: tool.inputs, courses, initialCourseId, initialItemId });
@@ -106,21 +114,45 @@ export function ChatView({
     defaultOutputLanguage || locale,
   );
 
+  // The live preview (anonymiseerpoort PR 3): the setup and each message are seen before they
+  // go; the teacher's names leave as codes and come back in the answers.
+  const privacy = usePrivacy(privacyPage);
+  const setupFields = privacyFields(tool.inputs, sandboxValues, locale);
+  const [codes, setCodes] = useState<CodeTable>({});
+
+  const chatBody = {
+    slug: tool.slug,
+    stageId: tool.stages[0]?.id,
+    values: sandboxValues,
+    contextProfileId: contextProfile?.id || null,
+    outputLanguage,
+    model: selectedModel,
+    // Only govern reasoning for models that support it; otherwise leave it to
+    // the model default (omit the flag).
+    thinking: selectedModelSupportsThinking ? thinking : undefined,
+    courseId: courseId || undefined,
+    itemId: (courseId && itemId) || undefined,
+    ...streamExtras,
+  };
+
   const chat = useChatSession({
-    body: {
-      slug: tool.slug,
-      stageId: tool.stages[0]?.id,
-      values: sandboxValues,
-      contextProfileId: contextProfile?.id || null,
-      outputLanguage,
-      model: selectedModel,
-      // Only govern reasoning for models that support it; otherwise leave it to
-      // the model default (omit the flag).
-      thinking: selectedModelSupportsThinking ? thinking : undefined,
-      courseId: courseId || undefined,
-      itemId: (courseId && itemId) || undefined,
-      ...streamExtras,
+    outgoing: (messages) => {
+      const prepared = privacy.prepare({
+        fields: setupFields,
+        others: messages.map((m) => m.content),
+      });
+      setCodes((prev) => ({ ...prev, ...prepared.codes }));
+      return {
+        body: {
+          ...chatBody,
+          values: { ...sandboxValues, ...prepared.values },
+          privacy: prepared.approval,
+        },
+        messages: messages.map((m, i) => ({ ...m, content: prepared.others[i] ?? m.content })),
+      };
     },
+    onPrivacy: privacy.askFirst,
+    body: chatBody,
     onGenerationStart,
   });
 
@@ -180,7 +212,14 @@ export function ChatView({
         values={sandboxValues}
         onChange={setSandboxValue}
         onSubmit={handleSandboxSubmit}
-      />
+      >
+        <PrivacyPreview
+          privacy={privacy}
+          fields={setupFields}
+          studentWork={tool.inputs.some((f) => f.redact)}
+          compact
+        />
+      </ChatSetupCard>
     );
   }
 
@@ -233,7 +272,11 @@ export function ChatView({
       <div className="flex flex-col md:min-h-0 md:flex-1">
         <ChatThread
           tool={tool}
-          turns={chat.turns}
+          turns={chat.turns.map((turn) =>
+            turn.role === "assistant"
+              ? { ...turn, content: restoreNames(turn.content, codes) }
+              : turn,
+          )}
           isStreaming={chat.isStreaming}
           greeting={greetingText}
           starters={inOutputLanguage(tool.chat?.starters)}
@@ -254,6 +297,13 @@ export function ChatView({
             )
           }
         />
+        {privacy.ask && (
+          <PrivacyAskCard
+            items={privacy.ask.items}
+            onAnswer={privacy.answer}
+            onCancel={privacy.cancelAsk}
+          />
+        )}
         <ChatComposer
           tool={tool}
           value={messageInput}
@@ -265,6 +315,11 @@ export function ChatView({
           hasTurns={chat.turns.length > 0}
           quickReplies={inOutputLanguage(tool.chat?.quickReplies)}
           outputLanguage={outputLanguage}
+        />
+        <PrivacyPreview
+          privacy={privacy}
+          fields={[{ name: "message", label: t.privacy.message, text: messageInput }]}
+          compact
         />
       </div>
     </div>

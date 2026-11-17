@@ -28,17 +28,17 @@ Bij veel tools kun je een **PDF of Word-bestand** uploaden. Je browser haalt de 
 
 Bij tools die studentwerk nakijken, zoals feedback of een beoordeling, zie je het origineel naast het resultaat. Met **Toon in document** spring je naar de plek waar een citaat staat.
 
-Gaat er werk van een student naar de AI, dan **anonimiseer je het eerst**:
+Onder het formulier staat bij elke tool **Dit gaat naar de AI**: de tekst zoals hij weggaat, met elke vervanging gemarkeerd en de code erbij (bijvoorbeeld *Jan de Vries* → `[COLLEGA-1]`). Dat werkt terwijl je typt; er wordt niets verstuurd voordat je zelf op de knop drukt.
 
-1. Vul de naam en het studentnummer van de student in, en eventueel begeleiders en het bedrijf.
-2. LimeOnIt vervangt die door codes. E-mailadressen, telefoonnummers, postcodes, IBAN's en nummers die op een studentnummer lijken, gaan er vanzelf uit. Aan het studentnummer dat je invult, ziet LimeOnIt hoe studentnummers eruitzien; andere nummers van die vorm gaan dan ook weg, andere getallen blijven staan.
-3. Controleer wat de AI krijgt en kies **Verstuur geanonimiseerd**.
+- LimeOnIt kent jouw naam en die van je collega's (je teams en de mensen in je cursussen) en herkent e-mailadressen, telefoonnummers, postcodes, IBAN's en nummers die op een studentnummer lijken.
+- Studentnamen kent LimeOnIt niet. Vul ze in onder **Namen die eruit moeten**, samen met het studentnummer, het bedrijf en begeleiders. Bij tools voor studentwerk staat dat al open. Aan het studentnummer dat je invult, ziet LimeOnIt hoe studentnummers eruitzien; andere nummers van die vorm gaan dan ook weg, andere getallen blijven staan.
+- Klik op een vervanging om het woord te laten staan. Is het een woord als een achternaam die ook een vakbegrip is, dan onthoudt LimeOnIt het op je lijst **Nooit vervangen**; daar haal je het ook weer af. Selecteer een woord in het voorbeeld en kies **Ook vervangen** om iets extra weg te halen.
 
 Een volledige naam gaat er altijd uit. Een los deel van een naam alleen als het met een hoofdletter staat, en als het ook een gewoon woord is (zoals Roos of Bas) alleen midden in een zin. Namen van onderzoekers en modellen, zoals Bloom, Vygotsky of Hattie, blijven staan.
 
-De echte namen blijven in je browser en komen terug in het resultaat. In *Eerder gemaakt* staat de versie met codes. Let op: figuren en foto's worden niet geanonimiseerd, en een spelfout in een naam kan erdoor glippen. Kijk de tekst dus na.
+Studentnamen en wat je onder *Namen die eruit moeten* invult, blijven in je browser: de server ziet alleen codes, en in het resultaat staan de namen weer goed. In *Eerder gemaakt* staat dan de versie met codes. Bij studentwerk gaat er zelfs niets anders dan de versie met codes uit je browser. De namen van jou en je collega's worden op de server vervangen en daar ook weer teruggezet, dus die staan gewoon in *Eerder gemaakt*. Let op: figuren en foto's worden niet geanonimiseerd, en een spelfout in een naam kan erdoor glippen. Kijk de tekst dus na.
 
-Alles wat naar de AI gaat, komt ook langs een controle **op de server**. Die kent jouw naam en die van je collega's (je teams en de mensen in je cursussen) en herkent e-mailadressen en nummers. Voor nu telt die controle alleen hoe vaak ze iets tegenkomt, nooit wat; er wordt op de server nog niets vervangen. Dat verandert zodra je vóór het versturen ziet wat er weggaat.
+Alles wat naar de AI gaat, komt ook langs een controle **op de server**. Vindt die iets wat je niet zag, bijvoorbeeld een collega in je context of in een eerdere stap, dan stuurt ze niets en zie je **Eerst even kijken**: per woord kies je *Vervangen* of *Niet vervangen*, en pas na **Versturen** gaat er iets weg. Er wordt nooit iets stil vervangen.
 
 ## Voorlezen en dicteren
 

@@ -122,9 +122,8 @@ describe("GeneratorView with a document field", () => {
 
     // The framework starts empty now: an assessment model or the teacher fills it in.
     await user.type(screen.getByRole("textbox", { name: /Assessment framework/i }), "C1");
+    // Student work is anonymised as it goes: the live preview, no separate step (PR 3).
     await user.click(screen.getByRole("button", { name: /generate/i }));
-    // Student work goes through the anonymise step first (24.0b).
-    await user.click(screen.getByRole("button", { name: "Send anonymised" }));
     await waitFor(() => expect(streamPost).toHaveBeenCalled());
 
     const original = screen.getByRole("region", { name: "Original" });
@@ -172,9 +171,8 @@ describe("GeneratorView with a document field", () => {
 
     // The framework starts empty now: an assessment model or the teacher fills it in.
     await user.type(screen.getByRole("textbox", { name: /Assessment framework/i }), "C1");
-    await user.click(screen.getByRole("button", { name: /generate/i }));
     await user.type(screen.getByLabelText("Student name"), "Jan de Vries");
-    await user.click(screen.getByRole("button", { name: "Send anonymised" }));
+    await user.click(screen.getByRole("button", { name: /generate/i }));
     await waitFor(() => expect(sent).not.toBe(""));
 
     // The panel shows exactly what went to the AI: codes, not the name.
@@ -214,7 +212,6 @@ describe("GeneratorView with a document field", () => {
     // The framework starts empty now: an assessment model or the teacher fills it in.
     await user.type(screen.getByRole("textbox", { name: /Assessment framework/i }), "C1");
     await user.click(screen.getByRole("button", { name: /generate/i }));
-    await user.click(screen.getByRole("button", { name: "Send anonymised" }));
     await waitFor(() => expect(streamPost).toHaveBeenCalled());
 
     const hide = await screen.findByRole("button", { name: "Hide the form" });

@@ -4,10 +4,10 @@
  * imports `providerForModel` or `postDecisions`.
  *
  * Every call goes through the same engine as the browser (`~/lib/privacy/gate`), with the names
- * the app knows (`listKnownPeople`). Until a screen lays the replacements before the teacher
- * (steps 3 and 4), a call carries no approval and the gate only counts. With an approval it
- * replaces what the teacher saw, sends nothing while anything is left they did not see, and puts
- * the names back in the answer. The code table lives only as long as the call; the log line
+ * the app knows (`listKnownPeople`) and the teacher's never-list. A call from a page with the live
+ * preview (PR 3: every tool that streams) carries the teacher's approval: the gate replaces what
+ * they saw, sends nothing while anything is left they did not see, and puts the names back in the
+ * answer. A call without one (the screens of step 4, until then) is only counted. The code table lives only as long as the call; the log line
  * holds counts per kind, never a word.
  */
 import { z } from "zod";
@@ -25,7 +25,9 @@ import {
   restoreStream,
 } from "~/lib/privacy/gate";
 import { restoreNames } from "~/lib/privacy/redact";
+import type { PrivacyPage } from "~/lib/privacy/live";
 import { log } from "./log.server";
+import { listKeepWords } from "./repositories/keepWords.server";
 import { listKnownPeople } from "./repositories/knownPeople.server";
 
 const Words = z.array(z.string().max(200)).max(500);
@@ -41,6 +43,14 @@ export const PrivacyApprovalSchema = z.object({
   studentNumberExample: z.string().max(30).optional(),
 });
 export type PrivacyApproval = z.infer<typeof PrivacyApprovalSchema>;
+
+/**
+ * What a page with a live preview gets (PR 3): the names the gate knows, so the preview shows
+ * exactly what the gate will do, and the teacher's never-list.
+ */
+export async function privacyPageFor(user: { id: string }): Promise<PrivacyPage> {
+  return { known: await listKnownPeople(user.id), never: await listKeepWords(user.id) };
+}
 
 export interface GateContext {
   /** Which door, for the count line: the tool stream, the structured call, or Jev. */
@@ -60,7 +70,8 @@ async function policyFor(user: { id: string }, ctx: GateContext): Promise<GatePo
     ...(ctx.approval
       ? {
           approved: ctx.approval.approved,
-          keep: ctx.approval.keep,
+          // The teacher's never-list holds even when the page did not send it (PR 3).
+          keep: [...ctx.approval.keep, ...(await listKeepWords(user.id))],
           ...(ctx.approval.studentNumberExample
             ? { studentNumberExample: ctx.approval.studentNumberExample }
             : {}),

@@ -10,6 +10,7 @@ import { getDefaultProfile } from "~/server/repositories/profiles.server";
 import { getSelectableModels } from "~/server/availability.server";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getMessages } from "~/lib/i18n";
+import { privacyPageFor } from "~/server/privacyGate.server";
 import { getToolBySlugOrThrow } from "~/lib/registry";
 import {
   REHEARSAL_LENGTHS,
@@ -49,6 +50,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     references: d.references,
     catalogModels: await getSelectableModels(user),
     contextProfile: profile ? { id: profile.id } : null,
+    // The live preview's names (anonymiseerpoort PR 3).
+    privacy: await privacyPageFor(user),
   };
 }
 
@@ -108,7 +111,8 @@ const looksLikeFeedback = (content: string) => /^\s*(```(json)?\s*)?\{/.test(con
 export default function PortfolioRehearsal({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const tr = t.portfolioRehearsal;
-  const { id, name, tool, framework, references, catalogModels, contextProfile } = loaderData;
+  const { id, name, tool, framework, references, catalogModels, contextProfile, privacy } =
+    loaderData;
   const [length, setLength] = useState<RehearsalLength>("short");
   const [chosen, setChosen] = useState<string[]>(framework.outcomes.map((o) => o.id));
   const [started, setStarted] = useState(false);
@@ -202,6 +206,7 @@ export default function PortfolioRehearsal({ loaderData }: Route.ComponentProps)
             tool={tool}
             contextProfile={contextProfile}
             catalogModels={catalogModels}
+            privacy={privacy}
             values={{ length, outcomeIds }}
             settingsSummary={[
               { name: "length", label: tr.length, value: tr.lengths[length] },

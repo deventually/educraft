@@ -8,3 +8,4 @@ export * from "./schemaProgrammes.server";
 export * from "./schemaSlideTemplates.server";
 export * from "./schemaTracks.server";
 export * from "./schemaOrganisation.server";
+export * from "./schemaPrivacy.server";
