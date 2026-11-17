@@ -137,7 +137,7 @@ export function themeCountReport(input: {
     "| --- | --- | --- | --- | --- |",
     ...input.themes.map(
       (r) =>
-        `| ${r.caseId} | ${r.label.replace(/\|/g, "\\|")} | ${r.goldCount ?? "—"} | ${r.llmCount} | ${r.jev.count}${r.jev.unsettled ? ` (+${r.jev.unsettled})` : ""}${r.jev.unanswered ? `, ${r.jev.unanswered} geen antwoord` : ""} |`,
+        `| ${r.caseId} | ${r.label.replace(/\\/g, "\\\\").replace(/\|/g, "\\|")} | ${r.goldCount ?? "—"} | ${r.llmCount} | ${r.jev.count}${r.jev.unsettled ? ` (+${r.jev.unsettled})` : ""}${r.jev.unanswered ? `, ${r.jev.unanswered} geen antwoord` : ""} |`,
     ),
     "",
     "## Jev per antwoord, op de echte thema's",

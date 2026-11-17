@@ -95,4 +95,27 @@ describe("the report", () => {
     expect(md).toContain("niet te vergelijken: 1");
     expect(md).toContain("300 ms");
   });
+
+  it("escapes a backslash and a pipe in a theme's label, so the table stays a table", () => {
+    const md = themeCountReport({
+      date: "d",
+      llmModel: "l",
+      jevModel: "j",
+      repeat: 1,
+      jevMs: [],
+      jevCostUsd: 0,
+      themes: [
+        {
+          caseId: "c",
+          label: "a\\|b",
+          gold: [],
+          goldCount: null,
+          llmCount: 2,
+          jev: { count: 0, unsettled: 0, unanswered: 0 },
+        },
+      ],
+      perAnswer: [],
+    });
+    expect(md).toContain("| c | a\\\\\\|b |");
+  });
 });
