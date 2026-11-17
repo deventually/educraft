@@ -10,6 +10,7 @@ import {
   type RedactEntry,
   type RedactSpan,
 } from "~/lib/privacy/redact";
+import { redactOptions } from "~/lib/privacy/pack";
 
 /** What the teacher typed; kept by the caller so it survives the next generation. */
 export interface RedactDraft {
@@ -78,9 +79,14 @@ export function RedactReview({ fields, draft, onDraft, onConfirm, onCancel }: Pr
 
   const entries = useMemo(() => draftEntries(draft), [draft]);
   const extra = useMemo(() => lines(draft.extra), [draft.extra]);
+  // The student number the teacher typed is also the format for other numbers like it.
+  const options = useMemo(
+    () => redactOptions({ studentNumberExample: draft.studentNumber }),
+    [draft.studentNumber],
+  );
   const found = useMemo(
-    () => fields.map((f) => ({ ...f, spans: findRedactions(f.text, entries, extra) })),
-    [fields, entries, extra],
+    () => fields.map((f) => ({ ...f, spans: findRedactions(f.text, entries, extra, options) })),
+    [fields, entries, extra, options],
   );
   const active = found.reduce(
     (n, f) => n + f.spans.filter((s) => !undone[f.name]?.has(spanKey(s))).length,

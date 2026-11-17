@@ -320,3 +320,13 @@ describe("addEvidenceBatch (only what the teacher ticked)", () => {
     expect(SORT_PROMPT_ID).toBe("portfolio-evidence-sort@v1");
   });
 });
+
+describe("checkNames uses the privacy pack", () => {
+  it("keeps a researcher and an ordinary word that a student's name shares", () => {
+    const r = checkNames("Lisa werkte met de taxonomie van Bloom; een roos.", [
+      "Lisa Bloom",
+      "Roos Kok",
+    ]);
+    expect(r.text).toBe("[STUDENT-1] werkte met de taxonomie van Bloom; een roos.");
+  });
+});
