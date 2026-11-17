@@ -12,7 +12,18 @@
  * a very recognisable description can slip through. The teacher checks.
  */
 
-export type RedactKind = "student" | "studentNumber" | "company" | "supervisor";
+/**
+ * `teacher` and `colleague` are the names the app itself knows (the server gate, PR 2): there a
+ * one-word name ("Bas") counts as a lone name part, so the ordinary word stays. A colleague's
+ * code is always numbered (`[COLLEGA-1]`), however many there are.
+ */
+export type RedactKind =
+  | "student"
+  | "studentNumber"
+  | "company"
+  | "supervisor"
+  | "teacher"
+  | "colleague";
 
 export interface RedactEntry {
   kind: RedactKind;
@@ -56,7 +67,17 @@ const CODE_BASE: Record<RedactKind, string> = {
   studentNumber: "STUDENTNUMMER",
   company: "BEDRIJF",
   supervisor: "BEGELEIDER",
+  teacher: "DOCENT",
+  colleague: "COLLEGA",
 };
+
+const PERSON_KINDS: ReadonlySet<RedactKind> = new Set([
+  "student",
+  "supervisor",
+  "teacher",
+  "colleague",
+]);
+const KNOWN_KINDS: ReadonlySet<RedactKind> = new Set(["teacher", "colleague"]);
 
 /** Name particles that are never replaced on their own ("de", "van", …). */
 const PARTICLES = new Set([
@@ -106,9 +127,10 @@ interface NameVariant {
 }
 
 /** The spellings of a person's name that are replaced: full, surname with particles, each part. */
-function nameVariants(value: string): NameVariant[] {
+function nameVariants(value: string, oneWordIsLone = false): NameVariant[] {
   const parts = value.trim().split(/\s+/).filter(Boolean);
-  const variants = new Map<string, VariantKind>([[parts.join(" "), "full"]]);
+  const whole: VariantKind = oneWordIsLone && parts.length === 1 ? "lone" : "full";
+  const variants = new Map<string, VariantKind>([[parts.join(" "), whole]]);
   const add = (text: string, kind: VariantKind) => {
     if (!variants.has(text)) variants.set(text, kind);
   };
@@ -225,10 +247,11 @@ export function findRedactions(
   const entryCands: Candidate[] = [];
   for (const [kind, list] of perKind) {
     list.forEach((entry, i) => {
-      const code = list.length > 1 ? `${CODE_BASE[kind]}-${i + 1}` : CODE_BASE[kind];
-      const isPerson = kind === "student" || kind === "supervisor";
+      const numbered = list.length > 1 || kind === "colleague";
+      const code = numbered ? `${CODE_BASE[kind]}-${i + 1}` : CODE_BASE[kind];
+      const isPerson = PERSON_KINDS.has(kind);
       const variants = isPerson
-        ? nameVariants(entry.value)
+        ? nameVariants(entry.value, KNOWN_KINDS.has(kind))
         : [{ text: entry.value.trim(), kind: "full" as const }];
       for (const v of variants) {
         const re = `${NOT_WORD_BEFORE}(${flexible(v.text)})${isPerson ? POSSESSIVE : ""}${NOT_WORD_AFTER}`;

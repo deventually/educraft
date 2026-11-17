@@ -994,3 +994,47 @@ describe("api.stream — measures AI use per tool and model (usage dashboard)", 
     expect((await aiUsage.listAiUsage("meter-abort", usage.utcDay()))[0]?.calls).toBe(1);
   });
 });
+
+describe("api.stream — the anonymiseerpoort (BESLUIT-2026-11-17-5)", () => {
+  const chat = (privacy?: unknown) =>
+    invoke(
+      {
+        slug: "socratic-partner",
+        values: { chapter: "Evolutie" },
+        messages: [{ role: "user", content: "Mail jan@school.nl even." }],
+        ...(privacy ? { privacy } : {}),
+      },
+      { userId: "privacy-gate" },
+    );
+
+  it("without what the teacher saw it only counts: the text goes as it is", async () => {
+    await (await chat()).text();
+    expect(streamChatSpy.mock.calls[0]![0].messages[0].content).toContain("jan@school.nl");
+  });
+
+  it("sends nothing while something was not seen, and lays it before the teacher", async () => {
+    const text = await (await chat({ approved: [], keep: [] })).text();
+    expect(streamChatSpy).not.toHaveBeenCalled();
+    const frame = /event: privacy\ndata: (.*)/.exec(text);
+    expect(JSON.parse(frame![1]!)).toEqual({
+      review: [{ value: "jan@school.nl", code: "E-MAIL-1", kind: "email", count: 1 }],
+    });
+  });
+
+  it("replaces what was seen and streams the answer with the value back", async () => {
+    streamChatSpy.mockImplementation(async function* () {
+      yield "Stuur [E-MA";
+      yield "IL-1] een bericht.";
+    });
+    const text = await (await chat({ approved: ["jan@school.nl"], keep: [] })).text();
+    const { messages, system } = streamChatSpy.mock.calls[0]![0];
+    expect(messages[0].content).toContain("Mail [E-MAIL-1] even.");
+    expect(system).toMatch(/\[E-MAIL-1\]/);
+    expect(sseTokens(text).join("")).toBe("Stuur jan@school.nl een bericht.");
+  });
+
+  it("refuses a malformed approval at the boundary", async () => {
+    const text = await (await chat({ approved: "alles" })).text();
+    expect(sseErrorMessage(text)).toBe(m.error.invalidRequest);
+  });
+});

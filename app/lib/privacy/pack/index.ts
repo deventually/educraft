@@ -15,3 +15,5 @@ export function redactOptions(given: { studentNumberExample?: string } = {}): Re
   const studentNumber = studentNumberFormat(given.studentNumberExample);
   return { keep: KEEP_WORDS, commonWords: COMMON, ...(studentNumber ? { studentNumber } : {}) };
 }
+
+export { CODE_NOTE } from "./codeNote";

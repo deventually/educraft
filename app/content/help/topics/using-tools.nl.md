@@ -38,6 +38,8 @@ Een volledige naam gaat er altijd uit. Een los deel van een naam alleen als het 
 
 De echte namen blijven in je browser en komen terug in het resultaat. In *Eerder gemaakt* staat de versie met codes. Let op: figuren en foto's worden niet geanonimiseerd, en een spelfout in een naam kan erdoor glippen. Kijk de tekst dus na.
 
+Alles wat naar de AI gaat, komt ook langs een controle **op de server**. Die kent jouw naam en die van je collega's (je teams en de mensen in je cursussen) en herkent e-mailadressen en nummers. Voor nu telt die controle alleen hoe vaak ze iets tegenkomt, nooit wat; er wordt op de server nog niets vervangen. Dat verandert zodra je vóór het versturen ziet wat er weggaat.
+
 ## Voorlezen en dicteren
 
 - **Voorlezen** leest een resultaat hardop voor met een stem op je eigen apparaat. Heeft je apparaat geen Nederlandse of Engelse stem, dan zie je de knop niet.

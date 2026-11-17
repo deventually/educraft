@@ -3,13 +3,13 @@
  * checks from `app/lib/courses/import.ts`, one retry. Returns a PROPOSAL and
  * stores nothing; the teacher picks, and `import-apply` adds what was picked.
  */
-import { postDecisions } from "~/lib/ai/decisions";
 import { usdInEuroMicros } from "~/lib/ai/models";
 import { buildBloomJevRequest, jevLevel, parseBloomJevAnswer } from "~/lib/courses/bloomJev";
 import { buildImportMessage, type ImportProposal, parseImport } from "~/lib/courses/import";
 import type { CourseData } from "~/lib/courses/types";
 import type { Locale } from "~/lib/i18n";
 import { currentAiSignal } from "./aiCalls.server";
+import { gatedDecisions } from "./privacyGate.server";
 import type { User } from "./auth.server";
 import { withJevCoverage } from "./coverageJev.server";
 import { jevAccess } from "./jev.server";
@@ -81,10 +81,19 @@ async function withJevBloom(
   const signal = currentAiSignal();
 
   const ask = async (outcome: ImportProposal["outcomes"][number]) => {
-    const answer = await postDecisions(url, buildBloomJevRequest(outcome.text, locale, model), {
-      apiKey,
-      ...(signal ? { signal } : {}),
-    }).then(parseBloomJevAnswer, () => null);
+    const answer = await gatedDecisions(
+      user,
+      url,
+      buildBloomJevRequest(outcome.text, locale, model),
+      {
+        apiKey,
+        ...(signal ? { signal } : {}),
+      },
+      { exit: "jev", locale },
+    ).then(
+      (r) => (r.ok ? parseBloomJevAnswer(r.value) : null),
+      () => null,
+    );
     const costMicros = answer?.costUsd === undefined ? undefined : usdInEuroMicros(answer.costUsd);
     await recordAiUsage(user.id, {
       source: EVENT,

@@ -94,15 +94,27 @@ export function sseStream(
   });
 }
 
-/** A one-shot SSE stream that just emits an error frame (for setup failures). */
-export function sseError(message: string): ReadableStream<Uint8Array> {
+function oneFrame(event: string, data: unknown): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
   return new ReadableStream<Uint8Array>({
     start(controller) {
-      controller.enqueue(encoder.encode(`event: error\ndata: ${JSON.stringify({ message })}\n\n`));
+      controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
       controller.close();
     },
   });
+}
+
+/** A one-shot SSE stream that just emits an error frame (for setup failures). */
+export function sseError(message: string): ReadableStream<Uint8Array> {
+  return oneFrame("error", { message });
+}
+
+/**
+ * The anonymiseerpoort sent nothing (BESLUIT-2026-11-17-5): an `event: privacy` frame with the
+ * words the teacher has not seen yet, for the page to lay before them.
+ */
+export function ssePrivacyReview(review: readonly unknown[]): ReadableStream<Uint8Array> {
+  return oneFrame("privacy", { review });
 }
 
 export const SSE_HEADERS: HeadersInit = {

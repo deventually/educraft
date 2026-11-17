@@ -304,6 +304,21 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   (`evals/privacy-leakset/`, `npm run eval:leakset`) measures it without a model: an HTML report
   with the wrongly replaced words on top. The code → name table lives only in component
   memory; `restoreNames` restores them for the teacher, `generations` keeps the coded version.
+- **The anonymiseerpoort on the server (BESLUIT-2026-11-17-5)** (`app/server/privacyGate.server.ts`,
+  pure core `app/lib/privacy/gate.ts`). The only door to a model or Jev: `gatedStream`
+  (`/api/stream`), `gatedGenerate` (`callPortfolioModel`) and `gatedDecisions` (every Jev call);
+  `tests/architecture.test.ts` fails when anything else imports `providerForModel` or
+  `postDecisions`. It runs the same engine with the names the server knows
+  (`listKnownPeople`: the teacher → `[DOCENT]`, team-mates and everyone on their courses →
+  `[COLLEGA-n]`) plus the patterns, and never reuses a code the browser already put in the text.
+  Modes: without a `privacy` approval in the request it only **counts** (log line
+  `privacy-gate`: counts per kind, never a word); with one (steps 3 and 4 send it) it replaces
+  what the teacher saw, sends nothing while anything is left they did not see (`event: privacy`
+  with the words), adds one sentence about codes (`pack/codeNote.ts`) and restores the names in
+  the answer (as written when every occurrence was spelt the same, else the full name), a
+  stream chunk by chunk (`restoreStream` holds only an open `[`). The code table
+  lives for one call. Evals: `npm run eval -- --privacy-gate` and `npm run eval:coach --
+  --privacy-gate` send the generation through the same gate.
 - **Figures from the document** (`app/lib/documents/figures.ts`,
   `app/components/documents/DocumentFigurePicker.tsx`). An image field with `imagesFrom: "<document
   field>"` offers the figures of the files uploaded there: Word images the model can read (icons

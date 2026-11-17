@@ -23,6 +23,35 @@
       }
     },
     {
+      "id": "internship-report-named-eqf6",
+      "description": "Named twin of internship-report-eqf6 for the anonymiseerpoort comparison (BESLUIT-2026-11-17-5): the teacher, a colleague and the company supervisor are named, with an e-mail address. Instructor grader on a short internship report. Checks evidence-quoting with location, 'niet aangetroffen' for missing evidence, applying the pass rule, and the teacher-decides framing / closing sentence.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "HBO-ICT — afstudeerfase, jaar 4",
+        "programme": "HBO-ICT",
+        "domain": "ICT",
+        "eqf": 6
+      },
+      "values": {
+        "documentType": "Stageverslag",
+        "track": "Software Engineering",
+        "studyYear": "3",
+        "durationWeeks": "20",
+        "submissionNotes": "Tweede beoordelaar is Fatima el Amrani; Mark de Groot is eerste beoordelaar. De eindpresentatie en het beroepsproduct worden apart beoordeeld; beoordeel nu alleen het verslag.",
+        "assessmentFramework": "Beoordeel op twee hbo-i beroepstaken. ANALYSEREN: de student brengt de probleemstelling en eisen gestructureerd in kaart en onderbouwt keuzes. REALISEREN: de student realiseert een werkende oplossing en verantwoordt de aanpak. Per taak: aantoonbaar met bewijs uit het verslag.",
+        "assessmentScale": "Schaal per beroepstaak: Onvoldoende (O) / Voldoende (V) / Goed (G). Slaagregel: één O op een beroepstaak = geheel onvoldoende (knock-out).",
+        "companyEvaluation": "",
+        "document": "STAGEVERSLAG (fragment)\n\n1. Inleiding\nTijdens mijn stage bij een softwarebedrijf heb ik gewerkt aan een dashboard voor logistieke data. De opdracht was om inzicht te geven in doorlooptijden. Mijn bedrijfsbegeleider was Pieter Bakker (p.bakker@logistiekdata.nl).\n\n2. Analyse\nIk heb gesprekken gevoerd met twee gebruikers en daaruit drie eisen gehaald: (a) realtime overzicht, (b) filteren op vestiging, (c) export naar Excel. Ik heb geen expliciete niet-functionele eisen opgesteld.\n\n3. Realisatie\nHet dashboard is gebouwd met React en een REST-API. De filters werken; de export was aan het eind van de stage nog niet af. Ik heb geen geautomatiseerde tests geschreven wegens tijdgebrek.\n\n4. Reflectie\nIk ben tevreden over het resultaat, maar had eerder met de gebruikers moeten valideren. In het tussengesprek wees Mark de Groot me daar al op, en Pieter gaf me dezelfde tip."
+      },
+      "privacyKnown": {
+        "teacher": "Mark de Groot",
+        "colleagues": [
+          "Fatima el Amrani",
+          "Pieter Bakker"
+        ]
+      }
+    },
+    {
       "id": "essay-eqf6-year1",
       "description": "Instructor grader on a first-year argumentative essay (no internship). Checks that it does NOT assume an internship or invent a company evaluation section, assesses against the teacher's own three-criterion rubric, quotes with location, and writes student feedback under Feed up / Feed back / Feed forward aimed at task and process (not the person), in a register a first-year student can use.",
       "outputLanguage": "nl",
@@ -42,6 +71,34 @@
         "assessmentScale": "Schaal per criterium: Onvoldoende (O) / Voldoende (V) / Goed (G). Slaagregel: het werk is voldoende als geen enkel criterium Onvoldoende is.",
         "companyEvaluation": "",
         "document": "ESSAY — Moeten supermarkten stoppen met bonuskaarten?\n\nInleiding\nIn dit essay betoog ik dat supermarkten moeten stoppen met persoonlijke bonuskaarten, omdat ze klanten meer laten uitgeven dan ze van plan waren.\n\nArgument 1\nPersoonlijke aanbiedingen zijn gebaseerd op koopgedrag. Volgens de Consumentenbond (2023) kopen klanten met een persoonlijke aanbieding vaker producten die niet op hun lijstje stonden.\n\nArgument 2\nDaarnaast geven klanten hun gegevens weg zonder goed te weten wat ermee gebeurt. Veel mensen lezen de voorwaarden niet.\n\nTegenargument\nSommigen zeggen dat klanten juist geld besparen met de korting. Dat klopt soms, maar de besparing weegt niet op tegen de extra aankopen.\n\nConclusie\nSupermarkten zouden moeten stoppen met bonuskaarten.\n\nLiteratuur\nConsumentenbond. (2023). Persoonlijke aanbiedingen in de supermarkt."
+      }
+    },
+    {
+      "id": "essay-named-eqf6-year1",
+      "description": "Named twin of essay-eqf6-year1 for the anonymiseerpoort comparison (BESLUIT-2026-11-17-5): the teacher and a colleague are named in the notes and the essay. Instructor grader on a first-year argumentative essay (no internship). Checks that it does NOT assume an internship or invent a company evaluation section, assesses against the teacher's own three-criterion rubric, quotes with location, and writes student feedback under Feed up / Feed back / Feed forward aimed at task and process (not the person), in a register a first-year student can use.",
+      "outputLanguage": "nl",
+      "profile": {
+        "name": "Bedrijfskunde — propedeuse",
+        "programme": "Bedrijfskunde",
+        "domain": "Economie",
+        "eqf": 6
+      },
+      "values": {
+        "documentType": "essay",
+        "track": "",
+        "studyYear": "1",
+        "durationWeeks": "",
+        "submissionNotes": "Ingeleverd na de feedbackronde met Bas Visser; Roos Jansen beoordeelt.",
+        "assessmentFramework": "Rubric betoog (jaar 1).\nC1 Stelling: het essay heeft één heldere, afgebakende stelling in de inleiding.\nC2 Argumentatie: minstens twee argumenten, elk onderbouwd met een bron; minstens één tegenargument wordt weerlegd.\nC3 Bronnen: bronnen worden in de tekst en in de literatuurlijst volgens APA 7 vermeld.",
+        "assessmentScale": "Schaal per criterium: Onvoldoende (O) / Voldoende (V) / Goed (G). Slaagregel: het werk is voldoende als geen enkel criterium Onvoldoende is.",
+        "companyEvaluation": "",
+        "document": "ESSAY — Moeten supermarkten stoppen met bonuskaarten?\n\nInleiding\nIn dit essay betoog ik dat supermarkten moeten stoppen met persoonlijke bonuskaarten, omdat ze klanten meer laten uitgeven dan ze van plan waren.\n\nArgument 1\nPersoonlijke aanbiedingen zijn gebaseerd op koopgedrag. Volgens de Consumentenbond (2023) kopen klanten met een persoonlijke aanbieding vaker producten die niet op hun lijstje stonden.\n\nArgument 2\nDaarnaast geven klanten hun gegevens weg zonder goed te weten wat ermee gebeurt. Veel mensen lezen de voorwaarden niet.\n\nTegenargument\nSommigen zeggen dat klanten juist geld besparen met de korting. Dat klopt soms, maar de besparing weegt niet op tegen de extra aankopen.\n\nConclusie\nSupermarkten zouden moeten stoppen met bonuskaarten. Met dank aan Bas voor de feedback op mijn eerste versie, en aan mevrouw Jansen voor de les over APA.\n\nLiteratuur\nConsumentenbond. (2023). Persoonlijke aanbiedingen in de supermarkt."
+      },
+      "privacyKnown": {
+        "teacher": "Roos Jansen",
+        "colleagues": [
+          "Bas Visser"
+        ]
       }
     },
     {

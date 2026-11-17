@@ -4,7 +4,6 @@
  * in one save. Pure checks live in `~/lib/portfolio/batch`; with Jev's switch on
  * (`jevAccess`), TypeSafe's Jev sorts a file first (`~/lib/portfolio/sortJev`).
  */
-import { postDecisions } from "~/lib/ai/decisions";
 import { usdInEuroMicros } from "~/lib/ai/models";
 import {
   addEvidenceBatch,
@@ -21,6 +20,7 @@ import type { DossierData } from "~/lib/portfolio/types";
 import { buildJevRequest, parseJevAnswer } from "~/lib/portfolio/sortJev";
 import { getMessages, type Locale } from "~/lib/i18n";
 import { currentAiSignal } from "./aiCalls.server";
+import { gatedDecisions } from "./privacyGate.server";
 import type { User } from "./auth.server";
 import { jevAccess } from "./jev.server";
 import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
@@ -45,11 +45,17 @@ async function jevSorter(user: User, d: DossierData, locale: Locale): Promise<So
   const { url, model, provider, apiKey } = jev;
   const signal = currentAiSignal();
   return async (f) => {
-    const answer = await postDecisions(url, buildJevRequest(d, f, locale, { model }), {
-      apiKey,
-      ...(signal ? { signal } : {}),
-    }).then(
-      (body) => parseJevAnswer(body, d, f),
+    const answer = await gatedDecisions(
+      user,
+      url,
+      buildJevRequest(d, f, locale, { model }),
+      {
+        apiKey,
+        ...(signal ? { signal } : {}),
+      },
+      { exit: "jev", locale },
+    ).then(
+      (r) => (r.ok ? parseJevAnswer(r.value, d, f) : null),
       () => null,
     );
     const costMicros = answer?.costUsd === undefined ? undefined : usdInEuroMicros(answer.costUsd);
