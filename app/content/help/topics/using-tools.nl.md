@@ -31,8 +31,10 @@ Bij tools die studentwerk nakijken, zoals feedback of een beoordeling, zie je he
 Gaat er werk van een student naar de AI, dan **anonimiseer je het eerst**:
 
 1. Vul de naam en het studentnummer van de student in, en eventueel begeleiders en het bedrijf.
-2. LimeOnIt vervangt die door codes. E-mailadressen, telefoonnummers, postcodes, IBAN's en nummers die op een studentnummer lijken, gaan er vanzelf uit.
+2. LimeOnIt vervangt die door codes. E-mailadressen, telefoonnummers, postcodes, IBAN's en nummers die op een studentnummer lijken, gaan er vanzelf uit. Aan het studentnummer dat je invult, ziet LimeOnIt hoe studentnummers eruitzien; andere nummers van die vorm gaan dan ook weg, andere getallen blijven staan.
 3. Controleer wat de AI krijgt en kies **Verstuur geanonimiseerd**.
+
+Een volledige naam gaat er altijd uit. Een los deel van een naam alleen als het met een hoofdletter staat, en als het ook een gewoon woord is (zoals Roos of Bas) alleen midden in een zin. Namen van onderzoekers en modellen, zoals Bloom, Vygotsky of Hattie, blijven staan.
 
 De echte namen blijven in je browser en komen terug in het resultaat. In *Eerder gemaakt* staat de versie met codes. Let op: figuren en foto's worden niet geanonimiseerd, en een spelfout in een naam kan erdoor glippen. Kijk de tekst dus na.
 

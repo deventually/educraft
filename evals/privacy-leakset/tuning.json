@@ -1,0 +1,145 @@
+{
+  "about": "Afstemset: fictieve teksten waarop de regels zijn afgesteld. Alle namen, nummers en adressen zijn verzonnen.",
+  "cases": [
+    {
+      "id": "t-werkplaats-01",
+      "kind": "werkplaats",
+      "text": "In mijn les over de taxonomie van Bloom liet ik de studenten eerst samenvatten. Mijn collega Roos Bakker keek mee. Roos gaf aan dat de vragen vooral op onthouden zaten. Daarna heb ik met Hattie en Timperley in mijn achterhoofd de feedback herschreven.",
+      "entries": [{ "kind": "supervisor", "value": "Roos Bakker" }],
+      "mustGo": ["Roos Bakker"],
+      "mustStay": ["Bloom", "Hattie", "Timperley"]
+    },
+    {
+      "id": "t-werkplaats-02",
+      "kind": "werkplaats",
+      "text": "Ik vroeg Bas om een lesbezoek. Na afloop zei Bas Visser dat de opbouw klopte, maar dat de instructie te lang duurde. De visser in mijn casus was een metafoor die niet aankwam. Volgens Kirschner, Sweller en Clark werkt directe instructie beter voor beginners.",
+      "entries": [{ "kind": "supervisor", "value": "Bas Visser" }],
+      "mustGo": ["Bas Visser", { "value": "Bas", "in": "vroeg Bas" }],
+      "mustStay": ["visser", "Kirschner", "Sweller"]
+    },
+    {
+      "id": "t-werkplaats-03",
+      "kind": "werkplaats",
+      "text": "Feedback van de werkplekbegeleider:\n- Mark de Groot: duidelijke leerdoelen.\n- Mark the key terms, zei hij in het Engels, groot gelijk.\nIk koppel dit aan de leercyclus van Kolb en aan het mindset-werk van Dweck.",
+      "entries": [{ "kind": "supervisor", "value": "Mark de Groot" }],
+      "mustGo": ["Mark de Groot"],
+      "mustStay": ["Mark", "groot", "Kolb", "Dweck"]
+    },
+    {
+      "id": "t-werkplaats-04",
+      "kind": "werkplaats",
+      "text": "Het vakdidactisch overleg met Petra Smeets ging over Vygotsky en de zone van naaste ontwikkeling. Ik heb het daarna met Smeets nog eens doorgenomen. Piaget kwam ook langs, net als Bruner.",
+      "entries": [{ "kind": "supervisor", "value": "Petra Smeets" }],
+      "mustGo": ["Petra Smeets", "Smeets"],
+      "mustStay": ["Vygotsky", "Piaget", "Bruner"]
+    },
+    {
+      "id": "t-werkplaats-05",
+      "kind": "werkplaats",
+      "text": "Rob Wolf observeerde mijn les. Een wolf in schaapskleren, grapte hij over mijn quizvraag. Rob noteerde dat ik Marzano goed toepaste. Mail hem gerust: r.wolf@hsl-voorbeeld.nl of bel 06-12345678.",
+      "entries": [{ "kind": "supervisor", "value": "Rob Wolf" }],
+      "mustGo": ["Rob Wolf", "r.wolf@hsl-voorbeeld.nl", "06-12345678"],
+      "mustStay": ["wolf", "Marzano"]
+    },
+    {
+      "id": "t-studentwerk-01",
+      "kind": "studentwerk",
+      "text": "Stageverslag van Noor Jansen (studentnummer s1234567). Ik liep stage bij Zorggroep Duinzicht in Katwijk. Mijn begeleider, Ahmed El Amrani, gaf wekelijks feedback. Noor is mijn roepnaam; mijn teamgenoot heeft nummer s7654321.",
+      "entries": [
+        { "kind": "student", "value": "Noor Jansen" },
+        { "kind": "studentNumber", "value": "s1234567" },
+        { "kind": "company", "value": "Zorggroep Duinzicht" },
+        { "kind": "supervisor", "value": "Ahmed El Amrani" }
+      ],
+      "studentNumberExample": "s1234567",
+      "mustGo": ["Noor Jansen", "s1234567", "Zorggroep Duinzicht", "Ahmed El Amrani", { "value": "Noor", "in": "Noor is" }, "s7654321"],
+      "mustStay": ["Katwijk"]
+    },
+    {
+      "id": "t-studentwerk-02",
+      "kind": "studentwerk",
+      "text": "In deze opdracht pas ik de taxonomie van Bloom toe op mijn eigen lesontwerp. Iris de Wit hielp me met de leerdoelen. De wit-gele kaarten werkten goed; Iris bedacht dat. Iris als bloem stond op de dia.",
+      "entries": [{ "kind": "student", "value": "Iris de Wit" }],
+      "mustGo": ["Iris de Wit", { "value": "Iris", "in": "Iris bedacht" }],
+      "mustStay": ["Bloom", "wit"]
+    },
+    {
+      "id": "t-studentwerk-03",
+      "kind": "studentwerk",
+      "text": "My internship at Brightlane Labs taught me a lot. My supervisor Will Turner said I will need more practice. Will was patient. Please email me at sam.okafor@student.voorbeeld.nl.",
+      "entries": [
+        { "kind": "student", "value": "Sam Okafor" },
+        { "kind": "company", "value": "Brightlane Labs" },
+        { "kind": "supervisor", "value": "Will Turner" }
+      ],
+      "mustGo": ["Brightlane Labs", "Will Turner", "sam.okafor@student.voorbeeld.nl"],
+      "mustStay": ["will"]
+    },
+    {
+      "id": "t-studentwerk-04",
+      "kind": "studentwerk",
+      "text": "Het hele programma telt 240 EC, de minor 30 EC. Ik woon op Rapenburg 70, 2311 EZ Leiden. Mijn IBAN voor de stagevergoeding: NL91 ABNA 0417 1643 00. Studiejaar 2025-2026.",
+      "entries": [],
+      "mustGo": ["2311 EZ", "NL91 ABNA 0417 1643 00"],
+      "mustStay": ["240", "EC", "2025"]
+    },
+    {
+      "id": "t-studentwerk-05",
+      "kind": "studentwerk",
+      "text": "Reflectie van Daan van der Berg. In de les van meneer Berg ging het over de berg aan werk. Van der Berg kwam te laat. Daan keek naar Montessori-onderwijs.",
+      "entries": [{ "kind": "student", "value": "Daan van der Berg" }],
+      "mustGo": ["Daan van der Berg", "Van der Berg", { "value": "Berg", "in": "Berg ging" }, { "value": "Daan", "in": "Daan keek" }],
+      "mustStay": ["berg", "Montessori"]
+    },
+    {
+      "id": "t-studentwerk-06",
+      "kind": "studentwerk",
+      "text": "Lisa Bloom schreef een verslag over de taxonomie van Bloom. Lisa vond het lastig. Ze citeerde Bloom (1956) en Anderson en Krathwohl (2001).",
+      "entries": [{ "kind": "student", "value": "Lisa Bloom" }],
+      "mustGo": ["Lisa Bloom", { "value": "Lisa", "in": "Lisa vond" }],
+      "mustStay": ["Bloom", "Krathwohl", "1956", "2001"]
+    },
+    {
+      "id": "t-bestanden-01",
+      "kind": "bestanden",
+      "text": "Jan_de_Vries_reflectie_LU1.docx\nJan de Vries - lesvoorbereiding week 3.pdf\nobservatie_les_Bloom.pdf\nfeedback Roos.docx",
+      "entries": [{ "kind": "student", "value": "Jan de Vries" }, { "kind": "supervisor", "value": "Roos Kok" }],
+      "mustGo": ["Jan_de_Vries", "Jan de Vries"],
+      "mustStay": ["Bloom"]
+    },
+    {
+      "id": "t-bestanden-02",
+      "kind": "bestanden",
+      "text": "s1234567_stageverslag.pdf\nS1234567-logboek.xlsx\nverslag_noor_jansen_def.docx\nrubric_LU2_v3.pdf",
+      "entries": [{ "kind": "student", "value": "Noor Jansen" }],
+      "studentNumberExample": "s1234567",
+      "mustGo": ["s1234567", "S1234567", "noor_jansen"],
+      "mustStay": ["LU2", "v3"]
+    },
+    {
+      "id": "t-bestanden-03",
+      "kind": "bestanden",
+      "text": "Lesplan_MarkGroen.docx\nLesplan Mark Groen 2026.docx\ngroen-licht-checklist.pdf",
+      "entries": [{ "kind": "supervisor", "value": "Mark Groen" }],
+      "mustGo": ["MarkGroen", "Mark Groen"],
+      "mustStay": ["groen"]
+    },
+    {
+      "id": "t-werkplaats-06",
+      "kind": "werkplaats",
+      "text": "Mijn leerteam bestond uit Fleur Kramer en Ben Koning. Ben gaf feedback op mijn toets. Ik ben blij met hun hulp. Fleur zat in de jury; de fleur was er wat af na de herkansing.",
+      "entries": [{ "kind": "supervisor", "value": "Fleur Kramer" }, { "kind": "supervisor", "value": "Ben Koning" }],
+      "mustGo": ["Fleur Kramer", "Ben Koning"],
+      "mustStay": ["ben", "fleur"]
+    },
+    {
+      "id": "t-studentwerk-07",
+      "kind": "studentwerk",
+      "text": "Telefoonnummer stagebedrijf: 071 518 8800. Afspraak op 17-11-2026 om 10.30 uur in lokaal 0.12. Ordernummer 123456 en referentie 12345678.",
+      "entries": [],
+      "studentNumberExample": "s1234567",
+      "mustGo": ["071 518 8800"],
+      "mustStay": ["17", "10", "123456", "12345678"]
+    }
+  ]
+}

@@ -735,3 +735,17 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   instelling" in BESLUIT-2026-11-13-1. Bastiaan, 2026-11-17 ("Ik wil dat er 1 optie komt om jev
   aan of uit te zetten in het beheerscherm. Als het ok is om te gebruiken, dan is dat de
   toezegging").
+- **BESLUIT-2026-11-17-3:** **De anonimiseerder haalt liever te weinig dan te veel weg, en kent
+  geen vast studentnummerformaat.** Eén motor (`app/lib/privacy/redact.ts`) voor alle tools,
+  later ook in de poort op de server. Een volledige naam gaat altijd weg, in elke schrijfwijze,
+  ook met liggende streepjes of aan elkaar met hoofdletters (bestandsnamen). Een **los deel** van
+  een naam gaat alleen met een hoofdletter; is het ook een gewoon Nederlands of Engels woord
+  (Roos, Bas, Bakker, Will), dan alleen met een hoofdletter **midden in een zin**. Namen van
+  onderzoekers en modellen (Bloom, Vygotsky, Hattie …) blijven als los woord altijd staan. Beide
+  lijsten zijn data in `app/lib/privacy/pack/` en groeien per taal. Het **studentnummer** verschilt
+  per instelling, dus er staat geen formaat in de code: de motor leert het uit het nummer dat de
+  docent invult (`s1234567` → een `s` mag, dan precies zeven cijfers); zonder voorbeeld geldt elk
+  getal van 6 tot 8 cijfers. "1200 EC" is geen postcode. Gemeten met een fictieve lekset
+  (`evals/privacy-leakset/`, afstemset en aparte toetsset), zonder model. Bastiaan, 2026-11-17
+  (ontwerp "Eén anonimiseerpoort", PR 1; over het studentnummer: "Het kan per instelling
+  natuurlijk verschillen … Wellicht zijn dat vragen die de anonimiser aan de docent kan vragen?").
