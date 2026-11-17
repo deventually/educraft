@@ -31,3 +31,26 @@ alleen het niveau van de AI; dat is de vergelijking.
    `evals/reports/`. `--rescore <raw-bestand>` maakt het opnieuw met de labels van nu.
 
 Nooit onderdeel van CI.
+
+## Uitslag (2026-11-17)
+
+Rapport: [`2026-11-17wizard-bloom-check.md`](../reports/2026-11-17wizard-bloom-check.md). 105
+leeruitkomsten van de wizard (`claude-sonnet-5-5` via Claude Code), blind gelabeld door Bastiaan,
+elk 3 keer door Jev. Gedraaid door Bastiaan met zijn sleutel.
+
+| Per leeruitkomst (meldt zich in ≥ 2 van de 3 runs) | Aantal |
+| --- | --- |
+| Niveau van de AI klopt | 69/105 |
+| De check meldt zich | 34 |
+| … terecht | 27/34 (79%) |
+| Fout niveau van de AI gevangen | 27/36 (75%) |
+| Onterechte melding bij een goed niveau | 7/69 (10%) |
+
+- Per rij (315) hetzelfde beeld: 80 van de 101 meldingen terecht, 80 van de 108 foute niveaus
+  gevangen. Jevs eigen niveau is bij een melding in 62 van de 101 gevallen Bastiaans label.
+- Jev is stabiel: 98 van de 105 leeruitkomsten krijgen elke run dezelfde uitkomst. 262 ms per
+  leeruitkomst, $0,013 voor de hele meting (315 vragen).
+- Ter vergelijking, achteraf en niet vooraf vastgelegd: had Jevs niveau dat van de AI vervangen
+  (zoals bij de import), dan was 248 van de 315 goed (79%) tegen 207 (66%) voor de AI.
+- De meeste fouten van de AI: analyseren waar Bastiaan evalueren zag (8) en toepassen waar hij
+  creëren zag (6).
