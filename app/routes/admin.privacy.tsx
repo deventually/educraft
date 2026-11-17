@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Form, useActionData } from "react-router";
 import type { Route } from "./+types/admin.privacy";
 import { requireRole } from "~/server/auth.server";
@@ -84,6 +85,13 @@ export default function AdminPrivacy({ loaderData }: Route.ComponentProps) {
     },
   });
   const { suggestions, shared } = loaderData;
+  // The word's row or chip is gone after an action: focus goes to the heading of its list.
+  const suggestionsRef = useRef<HTMLHeadingElement>(null);
+  const sharedRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (!actionData?.ok) return;
+    (actionData.intent === "share" ? suggestionsRef : sharedRef).current?.focus();
+  }, [actionData]);
 
   return (
     <div className="space-y-10">
@@ -93,7 +101,7 @@ export default function AdminPrivacy({ loaderData }: Route.ComponentProps) {
       </section>
 
       <section aria-labelledby="privacy-suggestions">
-        <h2 id="privacy-suggestions" className={sectionHeading}>
+        <h2 id="privacy-suggestions" ref={suggestionsRef} tabIndex={-1} className={sectionHeading}>
           {p.suggestionsHeading}
         </h2>
         <p className="mt-1 max-w-2xl text-sm text-slate-600">{p.suggestionsIntro}</p>
@@ -111,7 +119,9 @@ export default function AdminPrivacy({ loaderData }: Route.ComponentProps) {
                   <th scope="col" className="px-4 py-2.5 text-right font-semibold">
                     {p.colTeachers}
                   </th>
-                  <td className="px-4 py-2.5" />
+                  <th scope="col" className="px-4 py-2.5">
+                    <span className="sr-only">{p.colAction}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -140,7 +150,7 @@ export default function AdminPrivacy({ loaderData }: Route.ComponentProps) {
       </section>
 
       <section aria-labelledby="privacy-shared">
-        <h2 id="privacy-shared" className={sectionHeading}>
+        <h2 id="privacy-shared" ref={sharedRef} tabIndex={-1} className={sectionHeading}>
           {p.sharedHeading}
         </h2>
         <p className="mt-1 max-w-2xl text-sm text-slate-600">{p.sharedIntro}</p>

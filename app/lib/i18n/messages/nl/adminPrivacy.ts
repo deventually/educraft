@@ -1,4 +1,5 @@
 export const adminPrivacy = {
+  colAction: "Actie",
   colTeachers: "Docenten",
   colWord: "Woord",
   errors: {

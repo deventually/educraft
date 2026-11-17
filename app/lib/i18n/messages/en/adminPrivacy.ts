@@ -1,6 +1,7 @@
 import type { Messages } from "../nl";
 
 export const adminPrivacy: Messages["adminPrivacy"] = {
+  colAction: "Action",
   colTeachers: "Teachers",
   colWord: "Word",
   errors: {
