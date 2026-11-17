@@ -1,0 +1,279 @@
+{
+  "about": "Holdout voor de snelle check (Jev) vóór het reviewteam. Geschreven op 2026-11-17, nadat de vragen in app/lib/agents/screenQuestions.ts vastlagen en vóórdat Jev of een reviewer er ooit op draaide. Niets wordt hierop afgesteld. `faults` is wat de schrijver vooraf verwachtte (welke reviewers een waarschuwing horen te geven); de echte maatstaf is wat de reviewers zelf zeggen.",
+  "cases": [
+    {
+      "id": "h01-marketing-clean",
+      "locale": "nl",
+      "faults": [],
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          { "id": "o1", "text": "Je analyseert de doelgroep van een merk met behulp van marktonderzoek.", "bloom": "analyze" },
+          { "id": "o2", "text": "Je ontwikkelt een contentstrategie voor een opdrachtgever.", "bloom": "create" },
+          { "id": "o3", "text": "Je presenteert en verantwoordt je strategie aan de opdrachtgever.", "bloom": "evaluate" }
+        ],
+        "activities": [
+          { "id": "a1", "title": "Hoorcollege doelgroepanalyse", "week": 1, "kind": "lesson", "outcomeIds": ["o1"], "hours": 2 },
+          { "id": "a2", "title": "Werkcollege: persona's maken met echte data", "week": 2, "kind": "lesson", "outcomeIds": ["o1"], "hours": 4 },
+          { "id": "a3", "title": "Opdracht: doelgroepanalyse voor de opdrachtgever", "week": 3, "kind": "assignment", "outcomeIds": ["o1"], "hours": 20 },
+          { "id": "a4", "title": "Workshop contentstrategie", "week": 4, "kind": "lesson", "outcomeIds": ["o2"], "hours": 4 },
+          { "id": "a5", "title": "Opdracht: contentplan in teams", "week": 5, "kind": "assignment", "outcomeIds": ["o2"], "hours": 40 },
+          { "id": "a6", "title": "Pitchtraining", "week": 6, "kind": "lesson", "outcomeIds": ["o3"], "hours": 3 }
+        ],
+        "assessments": [
+          { "id": "t1", "title": "Feedbackronde op de doelgroepanalyse", "week": 4, "kind": "formative", "coverage": [{ "outcomeId": "o1" }], "hours": 2 },
+          { "id": "t2", "title": "Peerfeedback op het concept-contentplan", "week": 6, "kind": "formative", "coverage": [{ "outcomeId": "o2" }, { "outcomeId": "o3" }], "hours": 2 },
+          { "id": "t3", "title": "Contentstrategie-rapport voor de opdrachtgever", "week": 8, "kind": "summative", "weight": 60, "supervised": false, "coverage": [{ "outcomeId": "o1" }, { "outcomeId": "o2" }], "hours": 30 },
+          { "id": "t4", "title": "Pitch en verdediging bij de opdrachtgever", "week": 9, "kind": "summative", "weight": 40, "supervised": true, "coverage": [{ "outcomeId": "o2" }, { "outcomeId": "o3" }], "hours": 10 }
+        ]
+      }
+    },
+    {
+      "id": "h02-programming-portfolio-only",
+      "locale": "nl",
+      "faults": ["ai-resilience", "inclusion"],
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          { "id": "o1", "text": "Je programmeert een webapplicatie met een database-koppeling.", "bloom": "create" },
+          { "id": "o2", "text": "Je test je code met geautomatiseerde tests.", "bloom": "apply" }
+        ],
+        "activities": [
+          { "id": "a1", "title": "Les routing en templates", "week": 1, "kind": "lesson", "outcomeIds": ["o1"], "hours": 4 },
+          { "id": "a2", "title": "Practicum database-koppeling", "week": 2, "kind": "lesson", "outcomeIds": ["o1"], "hours": 6 },
+          { "id": "a3", "title": "Les unit tests schrijven", "week": 3, "kind": "lesson", "outcomeIds": ["o2"], "hours": 4 },
+          { "id": "a4", "title": "Opdracht: eigen webapp bouwen", "week": 4, "kind": "assignment", "outcomeIds": ["o1", "o2"], "hours": 60 }
+        ],
+        "assessments": [
+          { "id": "t1", "title": "Codereview door een medestudent", "week": 5, "kind": "formative", "coverage": [{ "outcomeId": "o1" }, { "outcomeId": "o2" }], "hours": 2 },
+          { "id": "t2", "title": "Portfolio met broncode en testrapport", "week": 8, "kind": "summative", "weight": 100, "supervised": false, "coverage": [{ "outcomeId": "o1" }, { "outcomeId": "o2" }], "hours": 50 }
+        ]
+      }
+    },
+    {
+      "id": "h03-nursing-skills-by-lecture",
+      "locale": "nl",
+      "faults": ["designer", "professional-practice"],
+      "course": {
+        "ec": 3,
+        "outcomes": [
+          { "id": "o1", "text": "Je voert een volledige anamnese uit bij een zorgvrager.", "bloom": "apply" },
+          { "id": "o2", "text": "Je stelt op basis van de anamnese een verpleegkundige diagnose.", "bloom": "analyze" }
+        ],
+        "activities": [
+          { "id": "a1", "title": "Hoorcollege gespreksvoering in de zorg", "week": 1, "kind": "lesson", "outcomeIds": ["o1"], "hours": 2 },
+          { "id": "a2", "title": "Hoorcollege anamnesemodellen", "week": 2, "kind": "lesson", "outcomeIds": ["o1"], "hours": 2 },
+          { "id": "a3", "title": "Hoorcollege verpleegkundige diagnostiek", "week": 3, "kind": "lesson", "outcomeIds": ["o2"], "hours": 2 },
+          { "id": "a4", "title": "Zelfstudie hoofdstuk 4 tot 7", "week": 4, "kind": "lesson", "outcomeIds": ["o1", "o2"], "hours": 30 }
+        ],
+        "assessments": [
+          { "id": "t1", "title": "Oefentoets diagnostiek", "week": 4, "kind": "formative", "coverage": [{ "outcomeId": "o2" }], "hours": 2 },
+          { "id": "t2", "title": "Schriftelijk tentamen anamnese en diagnostiek", "week": 6, "kind": "summative", "weight": 100, "supervised": true, "coverage": [{ "outcomeId": "o1" }, { "outcomeId": "o2" }], "hours": 3 }
+        ]
+      }
+    },
+    {
+      "id": "h04-economics-deadline-clash",
+      "locale": "nl",
+      "faults": ["student"],
+      "course": {
+        "ec": 6,
+        "outcomes": [
+          { "id": "o1", "text": "Je berekent de break-evenafzet van een onderneming.", "bloom": "apply" },
+          { "id": "o2", "text": "Je beoordeelt een investeringsvoorstel met kengetallen.", "bloom": "evaluate" }
+        ],
+        "activities": [
+          { "id": "a1", "title": "Werkcollege kostprijsberekening", "week": 1, "kind": "lesson", "outcomeIds": ["o1"], "hours": 4 },
+          { "id": "a2", "title": "Oefenopgaven break-even", "week": 2, "kind": "assignment", "outcomeIds": ["o1"], "hours": 8 },
+          { "id": "a3", "title": "Werkcollege investeringsselectie", "week": 3, "kind": "lesson", "outcomeIds": ["o2"], "hours": 4 },
+          { "id": "a4", "title": "Casus: investeringsadvies voor een bakkerij", "week": 4, "kind": "assignment", "outcomeIds": ["o2"], "hours": 30 }
+        ],
+        "assessments": [
+          { "id": "t1", "title": "Oefententamen", "week": 5, "kind": "formative", "coverage": [{ "outcomeId": "o1" }, { "outcomeId": "o2" }], "hours": 3 },
+          { "id": "t2", "title": "Schriftelijk tentamen bedrijfseconomie", "week": 8, "kind": "summative", "weight": 50, "supervised": true, "coverage": [{ "outcomeId": "o1" }], "hours": 3 },
+          { "id": "t3", "title": "Adviesrapport investering met mondelinge toelichting", "week": 8, "kind": "summative", "weight": 50, "supervised": false, "coverage": [{ "outcomeId": "o2" }], "hours": 40 }
+        ]
+      }
+    },
+    {
+      "id": "h05-pedagogy-insight",
+      "locale": "nl",
+      "faults": ["assessment-expert"],
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          { "id": "o1", "text": "Je hebt inzicht in de ontwikkelingspsychologie van het jonge kind.", "bloom": "understand" },
+          { "id": "o2", "text": "Je ontwerpt een speelleeractiviteit voor een groep kleuters.", "bloom": "create" }
+        ],
+        "activities": [
+          { "id": "a1", "title": "Les ontwikkelingsfasen", "week": 1, "kind": "lesson", "outcomeIds": ["o1"], "hours": 3 },
+          { "id": "a2", "title": "Observatie in de stageklas", "week": 2, "kind": "assignment", "outcomeIds": ["o1"], "hours": 8 },
+          { "id": "a3", "title": "Workshop spelbegeleiding", "week": 3, "kind": "lesson", "outcomeIds": ["o2"], "hours": 3 },
+          { "id": "a4", "title": "Opdracht: speelleeractiviteit ontwerpen en uitvoeren", "week": 4, "kind": "assignment", "outcomeIds": ["o2"], "hours": 30 }
+        ],
+        "assessments": [
+          { "id": "t1", "title": "Feedback van de werkplekbegeleider op het ontwerp", "week": 5, "kind": "formative", "coverage": [{ "outcomeId": "o2" }], "hours": 1 },
+          { "id": "t2", "title": "Kennistoets ontwikkelingspsychologie", "week": 6, "kind": "summative", "weight": 40, "supervised": true, "coverage": [{ "outcomeId": "o1" }], "hours": 2 },
+          { "id": "t3", "title": "Ontwerp, uitvoering en nabespreking van de activiteit", "week": 8, "kind": "summative", "weight": 60, "supervised": false, "coverage": [{ "outcomeId": "o2" }], "hours": 20 }
+        ]
+      }
+    },
+    {
+      "id": "h06-en-statistics-clean",
+      "locale": "en",
+      "faults": [],
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          { "id": "o1", "text": "You choose and carry out a suitable statistical test for a research question.", "bloom": "apply" },
+          { "id": "o2", "text": "You interpret and report the results of a statistical analysis.", "bloom": "evaluate" }
+        ],
+        "activities": [
+          { "id": "a1", "title": "Lecture: hypothesis testing", "week": 1, "kind": "lesson", "outcomeIds": ["o1"], "hours": 2 },
+          { "id": "a2", "title": "Computer lab: t-tests and ANOVA in R", "week": 2, "kind": "lesson", "outcomeIds": ["o1"], "hours": 4 },
+          { "id": "a3", "title": "Lab assignment: analyse a given dataset", "week": 3, "kind": "assignment", "outcomeIds": ["o1", "o2"], "hours": 16 },
+          { "id": "a4", "title": "Seminar: reporting results in APA style", "week": 4, "kind": "lesson", "outcomeIds": ["o2"], "hours": 2 },
+          { "id": "a5", "title": "Group project: analyse your own survey data", "week": 5, "kind": "assignment", "outcomeIds": ["o1", "o2"], "hours": 40 }
+        ],
+        "assessments": [
+          { "id": "t1", "title": "Feedback on the lab assignment", "week": 4, "kind": "formative", "coverage": [{ "outcomeId": "o1" }, { "outcomeId": "o2" }], "hours": 1 },
+          { "id": "t2", "title": "Computer exam: run and interpret tests in R", "week": 7, "kind": "summative", "weight": 50, "supervised": true, "coverage": [{ "outcomeId": "o1" }, { "outcomeId": "o2" }], "hours": 3 },
+          { "id": "t3", "title": "Research report on your survey with oral discussion", "week": 9, "kind": "summative", "weight": 50, "supervised": false, "coverage": [{ "outcomeId": "o1" }, { "outcomeId": "o2" }], "hours": 30 }
+        ]
+      }
+    },
+    {
+      "id": "h07-en-essays-only",
+      "locale": "en",
+      "faults": ["ai-resilience", "inclusion"],
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          { "id": "o1", "text": "You compare theories of European integration.", "bloom": "analyze" },
+          { "id": "o2", "text": "You build a reasoned argument on a current EU policy issue.", "bloom": "evaluate" }
+        ],
+        "activities": [
+          { "id": "a1", "title": "Lecture: theories of integration", "week": 1, "kind": "lesson", "outcomeIds": ["o1"], "hours": 2 },
+          { "id": "a2", "title": "Tutorial: debating EU policy", "week": 2, "kind": "lesson", "outcomeIds": ["o2"], "hours": 2 },
+          { "id": "a3", "title": "Reading and writing week", "week": 3, "kind": "assignment", "outcomeIds": ["o1", "o2"], "hours": 20 }
+        ],
+        "assessments": [
+          { "id": "t1", "title": "Draft essay with tutor feedback", "week": 3, "kind": "formative", "coverage": [{ "outcomeId": "o1" }], "hours": 4 },
+          { "id": "t2", "title": "Essay 1: comparing two theories", "week": 5, "kind": "summative", "weight": 40, "supervised": false, "coverage": [{ "outcomeId": "o1" }], "hours": 20 },
+          { "id": "t3", "title": "Essay 2: policy argument", "week": 8, "kind": "summative", "weight": 60, "supervised": false, "coverage": [{ "outcomeId": "o2" }], "hours": 30 }
+        ]
+      }
+    },
+    {
+      "id": "h08-construction-order",
+      "locale": "nl",
+      "faults": ["designer"],
+      "course": {
+        "ec": 4,
+        "outcomes": [
+          { "id": "o1", "text": "Je berekent de constructieve belasting van een houten balklaag.", "bloom": "apply" },
+          { "id": "o2", "text": "Je tekent een bouwkundig detail volgens de NEN-normen.", "bloom": "apply" }
+        ],
+        "activities": [
+          { "id": "a1", "title": "Opdracht: balklaag doorrekenen voor de casuswoning", "week": 1, "kind": "assignment", "outcomeIds": ["o1"], "hours": 16 },
+          { "id": "a2", "title": "Instructie belastingen en sterkteleer", "week": 3, "kind": "lesson", "outcomeIds": ["o1"], "hours": 4 },
+          { "id": "a3", "title": "Instructie detailleren", "week": 4, "kind": "lesson", "outcomeIds": ["o2"], "hours": 4 },
+          { "id": "a4", "title": "Opdracht: aansluitdetail tekenen", "week": 5, "kind": "assignment", "outcomeIds": ["o2"], "hours": 16 }
+        ],
+        "assessments": [
+          { "id": "t1", "title": "Feedback op de berekening", "week": 4, "kind": "formative", "coverage": [{ "outcomeId": "o1" }], "hours": 1 },
+          { "id": "t2", "title": "Feedback op het detail", "week": 6, "kind": "formative", "coverage": [{ "outcomeId": "o2" }], "hours": 1 },
+          { "id": "t3", "title": "Praktijktoets: berekening en detail onder toezicht", "week": 8, "kind": "summative", "weight": 100, "supervised": true, "coverage": [{ "outcomeId": "o1" }, { "outcomeId": "o2" }], "hours": 4 }
+        ]
+      }
+    },
+    {
+      "id": "h09-law-feedback-late",
+      "locale": "nl",
+      "faults": ["student", "assessment-expert"],
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          { "id": "o1", "text": "Je lost een casus uit het contractenrecht op met de juiste wetsartikelen.", "bloom": "apply" },
+          { "id": "o2", "text": "Je schrijft een juridisch advies aan een cliënt.", "bloom": "create" }
+        ],
+        "activities": [
+          { "id": "a1", "title": "Hoorcollege totstandkoming van overeenkomsten", "week": 1, "kind": "lesson", "outcomeIds": ["o1"], "hours": 2 },
+          { "id": "a2", "title": "Werkgroep casusoplossing", "week": 2, "kind": "lesson", "outcomeIds": ["o1"], "hours": 4 },
+          { "id": "a3", "title": "Werkgroep adviesvaardigheden", "week": 4, "kind": "lesson", "outcomeIds": ["o2"], "hours": 4 },
+          { "id": "a4", "title": "Opdracht: adviesbrief aan de cliënt", "week": 5, "kind": "assignment", "outcomeIds": ["o2"], "hours": 20 }
+        ],
+        "assessments": [
+          { "id": "t1", "title": "Oefencasus met feedback", "week": 7, "kind": "formative", "coverage": [{ "outcomeId": "o1" }, { "outcomeId": "o2" }], "hours": 2 },
+          { "id": "t2", "title": "Casustentamen contractenrecht", "week": 7, "kind": "summative", "weight": 50, "supervised": true, "coverage": [{ "outcomeId": "o1" }], "hours": 3 },
+          { "id": "t3", "title": "Juridisch adviesrapport", "week": 9, "kind": "summative", "weight": 50, "supervised": false, "coverage": [{ "outcomeId": "o2" }], "hours": 20 }
+        ]
+      }
+    },
+    {
+      "id": "h10-business-advice-clean",
+      "locale": "nl",
+      "faults": [],
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          { "id": "o1", "text": "Je adviseert een mkb-opdrachtgever over de inrichting van zijn ICT-infrastructuur.", "bloom": "evaluate", "packTags": { "activiteiten": ["Adviseren"], "architectuurlagen": ["Infrastructuur"], "beheersingsniveau": 2 } },
+          { "id": "o2", "text": "Je analyseert de huidige ICT-situatie van een organisatie.", "bloom": "analyze", "packTags": { "activiteiten": ["Analyseren"], "architectuurlagen": ["Infrastructuur"], "beheersingsniveau": 2 } }
+        ],
+        "activities": [
+          { "id": "a1", "title": "Workshop: interviewen van een opdrachtgever", "week": 1, "kind": "lesson", "outcomeIds": ["o2"], "hours": 3 },
+          { "id": "a2", "title": "Opdracht: nulmeting bij de opdrachtgever", "week": 2, "kind": "assignment", "outcomeIds": ["o2"], "hours": 24 },
+          { "id": "a3", "title": "Les adviesrapport schrijven", "week": 4, "kind": "lesson", "outcomeIds": ["o1"], "hours": 3 },
+          { "id": "a4", "title": "Opdracht: adviesrapport voor de opdrachtgever", "week": 5, "kind": "assignment", "outcomeIds": ["o1"], "hours": 40 }
+        ],
+        "assessments": [
+          { "id": "t1", "title": "Feedback van de opdrachtgever op de nulmeting", "week": 4, "kind": "formative", "coverage": [{ "outcomeId": "o2" }], "hours": 1 },
+          { "id": "t2", "title": "Peerreview van het conceptadvies", "week": 6, "kind": "formative", "coverage": [{ "outcomeId": "o1" }], "hours": 2 },
+          { "id": "t3", "title": "Adviesrapport en adviesgesprek met de opdrachtgever", "week": 8, "kind": "summative", "weight": 100, "supervised": false, "coverage": [{ "outcomeId": "o1" }, { "outcomeId": "o2" }], "hours": 20 }
+        ]
+      }
+    },
+    {
+      "id": "h11-ict-level3-stepwise",
+      "locale": "nl",
+      "faults": ["professional-practice"],
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          { "id": "o1", "text": "Je ontwerpt en realiseert een netwerkoplossing voor een complexe organisatie.", "bloom": "create", "packTags": { "activiteiten": ["Ontwerpen", "Realiseren"], "architectuurlagen": ["Infrastructuur"], "beheersingsniveau": 3 } }
+        ],
+        "activities": [
+          { "id": "a1", "title": "Les netwerkarchitectuur", "week": 1, "kind": "lesson", "outcomeIds": ["o1"], "hours": 4 },
+          { "id": "a2", "title": "Labopdracht 1 tot 6 volgens de stappenhandleiding", "week": 2, "kind": "assignment", "outcomeIds": ["o1"], "hours": 40 }
+        ],
+        "assessments": [
+          { "id": "t1", "title": "Aftekenen van de labopdrachten", "week": 4, "kind": "formative", "coverage": [{ "outcomeId": "o1" }], "hours": 1 },
+          { "id": "t2", "title": "Praktijkexamen: configureer het netwerk volgens het stappenplan", "week": 7, "kind": "summative", "weight": 100, "supervised": true, "coverage": [{ "outcomeId": "o1", "bloom": "create" }], "hours": 4 }
+        ]
+      }
+    },
+    {
+      "id": "h12-teacher-ed-vague-titles",
+      "locale": "nl",
+      "faults": ["student"],
+      "course": {
+        "ec": 5,
+        "outcomes": [
+          { "id": "o1", "text": "Je ontwerpt een les met activerende werkvormen.", "bloom": "create" },
+          { "id": "o2", "text": "Je reflecteert op je eigen lesuitvoering met behulp van feedback.", "bloom": "evaluate" }
+        ],
+        "activities": [
+          { "id": "a1", "title": "Les activerende didactiek", "week": 1, "kind": "lesson", "outcomeIds": ["o1"], "hours": 3 },
+          { "id": "a2", "title": "Opdracht 1", "week": 2, "kind": "assignment", "outcomeIds": ["o1"], "hours": 16 },
+          { "id": "a3", "title": "Intervisie", "week": 4, "kind": "lesson", "outcomeIds": ["o2"], "hours": 3 },
+          { "id": "a4", "title": "Opdracht 2", "week": 5, "kind": "assignment", "outcomeIds": ["o2"], "hours": 16 }
+        ],
+        "assessments": [
+          { "id": "t1", "title": "Feedback op opdracht 1", "week": 3, "kind": "formative", "coverage": [{ "outcomeId": "o1" }], "hours": 1 },
+          { "id": "t2", "title": "Toets A", "week": 6, "kind": "summative", "weight": 50, "supervised": false, "coverage": [{ "outcomeId": "o1" }], "hours": 10 },
+          { "id": "t3", "title": "Toets B", "week": 8, "kind": "summative", "weight": 50, "supervised": false, "coverage": [{ "outcomeId": "o2" }], "hours": 10 }
+        ]
+      }
+    }
+  ]
+}

@@ -18,11 +18,11 @@ const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 const TEXT =
   "Jan de Vries liep stage bij SportShop BV. Mail: jan@example.org. Project Zonnepark Noord.";
 
-function Harness({ onConfirm }: { onConfirm: (r: unknown) => void }) {
+function Harness({ onConfirm, text = TEXT }: { onConfirm: (r: unknown) => void; text?: string }) {
   const [draft, setDraft] = useState<RedactDraft>(emptyRedactDraft);
   return (
     <RedactReview
-      fields={[{ name: "document", label: "Document", text: TEXT }]}
+      fields={[{ name: "document", label: "Document", text }]}
       draft={draft}
       onDraft={setDraft}
       onConfirm={onConfirm}
@@ -72,5 +72,23 @@ describe("RedactReview", () => {
       "[STUDENT] liep stage bij SportShop BV. Mail: jan@example.org. Project [ANDER-1].",
     );
     expect(codes).toEqual({ STUDENT: "Jan de Vries", "ANDER-1": "Zonnepark Noord" });
+  });
+
+  it("learns the student number format from the number the teacher types, and keeps Bloom", async () => {
+    const user = userEvent.setup();
+    render(
+      <Harness
+        onConfirm={() => {}}
+        text="Lisa Bloom (s1234567) werkte met s7654321 aan Bloom; order 12345678."
+      />,
+    );
+    await user.type(screen.getByLabelText("Student name"), "Lisa Bloom");
+    await user.type(screen.getByLabelText("Student number"), "s1234567");
+    const preview = screen.getByRole("region", { name: /What the AI receives: Document/ });
+    expect(
+      within(preview).getByRole("button", { name: /s7654321.*\[NUMMER-\d\]/ }),
+    ).toBeInTheDocument();
+    expect(within(preview).queryByRole("button", { name: /12345678/ })).not.toBeInTheDocument();
+    expect(within(preview).queryByRole("button", { name: /^Bloom/ })).not.toBeInTheDocument();
   });
 });

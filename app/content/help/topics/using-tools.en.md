@@ -31,8 +31,10 @@ In tools that review student work, such as feedback or an assessment, you see th
 If a student's work goes to the AI, you **anonymise it first**:
 
 1. Fill in the student's name and student number, and any supervisors and the company.
-2. LimeOnIt replaces them with codes. Email addresses, phone numbers, postcodes, IBANs and numbers that look like a student number are removed automatically.
+2. LimeOnIt replaces them with codes. Email addresses, phone numbers, postcodes, IBANs and numbers that look like a student number are removed automatically. From the student number you fill in, LimeOnIt learns what student numbers look like; other numbers of that shape go too, other numbers stay.
 3. Check what the AI receives and choose **Send anonymised**.
+
+A full name always goes. A single part of a name goes only when it starts with a capital, and when it is also an ordinary word (such as Rose or Will) only in the middle of a sentence. Names of researchers and models, such as Bloom, Vygotsky or Hattie, stay.
 
 The real names stay in your browser and come back in the result. *Earlier work* keeps the version with codes. Note: figures and photos are not anonymised, and a misspelt name can slip through. So do check the text.
 

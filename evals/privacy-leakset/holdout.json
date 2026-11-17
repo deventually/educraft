@@ -1,0 +1,209 @@
+{
+  "about": "Toetsset: fictieve teksten, geschreven vóór de meting en niet gebruikt om de regels af te stellen. Alle namen, nummers en adressen zijn verzonnen.",
+  "cases": [
+    {
+      "id": "h-werkplaats-01",
+      "kind": "werkplaats",
+      "text": "Voor LU3 ontwierp ik een lessenreeks volgens het 4C/ID-model van Van Merriënboer. Esther Molenaar, mijn teamleider, las mee. Esther vond de taakklassen helder. Bij de molenaar op excursie zagen de studenten hoe een productieproces werkt.",
+      "entries": [{ "kind": "supervisor", "value": "Esther Molenaar" }],
+      "mustGo": ["Esther Molenaar", { "value": "Esther", "in": "Esther vond" }],
+      "mustStay": ["Merriënboer", "molenaar"]
+    },
+    {
+      "id": "h-werkplaats-02",
+      "kind": "werkplaats",
+      "text": "Tijdens de intervisie met Koen Vos en Hanna Prins bespraken we formatief handelen. Hanna verwees naar Wiliam en Black. Koen merkte op dat Sadler het begrip feedback scherper definieert. Een slimme vos, die Koen.",
+      "entries": [{ "kind": "supervisor", "value": "Koen Vos" }, { "kind": "supervisor", "value": "Hanna Prins" }],
+      "mustGo": ["Koen Vos", "Hanna Prins", { "value": "Hanna", "in": "Hanna verwees" }, { "value": "Koen", "in": "Koen merkte" }, { "value": "Koen", "in": "die Koen" }],
+      "mustStay": ["Wiliam", "Sadler", "vos"]
+    },
+    {
+      "id": "h-werkplaats-03",
+      "kind": "werkplaats",
+      "text": "Mijn lesobservatie werd gedaan door Sterre Hoek. In de hoek van het lokaal zat een groepje dat niet meedeed. Hoek adviseerde om coöperatieve werkvormen van Kagan in te zetten. Ik heb ook naar Rosenshine gekeken.",
+      "entries": [{ "kind": "supervisor", "value": "Sterre Hoek" }],
+      "mustGo": ["Sterre Hoek"],
+      "mustStay": ["hoek", "Kagan", "Rosenshine"]
+    },
+    {
+      "id": "h-werkplaats-04",
+      "kind": "werkplaats",
+      "text": "Frank Dekker, docent wiskunde, gaf me eerlijke feedback: frank en vrij, zoals hij zelf zei. Ik heb de dekking van mijn toetsmatrijs daarna vergeleken met Bloom. Volgens Frank miste ik toepassingsvragen.",
+      "entries": [{ "kind": "supervisor", "value": "Frank Dekker" }],
+      "mustGo": ["Frank Dekker", { "value": "Frank", "in": "Volgens Frank" }],
+      "mustStay": ["frank", "Bloom"]
+    },
+    {
+      "id": "h-werkplaats-05",
+      "kind": "werkplaats",
+      "text": "In het BKE-traject beoordeelde ik samen met Yusuf Demir. Demir en ik kalibreerden op de rubric. We gebruikten de constructive alignment van Biggs. Yusuf's opmerking over betrouwbaarheid neem ik mee.",
+      "entries": [{ "kind": "supervisor", "value": "Yusuf Demir" }],
+      "mustGo": ["Yusuf Demir", { "value": "Demir", "in": "Demir en ik" }, { "value": "Yusuf", "in": "Yusuf's" }],
+      "mustStay": ["Biggs"]
+    },
+    {
+      "id": "h-werkplaats-06",
+      "kind": "werkplaats",
+      "text": "Werkplekbegeleider: Anne-Marie van Dijk (a.vandijk@voorbeeldschool.nl, 06 98765432). Anne-Marie gaf aan dat mijn klassenmanagement groeide. Langs de dijk fietsend bedacht ik de opening van de les.",
+      "entries": [{ "kind": "supervisor", "value": "Anne-Marie van Dijk" }],
+      "mustGo": ["Anne-Marie van Dijk", "a.vandijk@voorbeeldschool.nl", "06 98765432", { "value": "Anne-Marie", "in": "Anne-Marie gaf" }],
+      "mustStay": ["dijk"]
+    },
+    {
+      "id": "h-werkplaats-07",
+      "kind": "werkplaats",
+      "text": "In week 6 gaf Max Storm een gastles over storm en klimaat. Max liet zien hoe je met de 5E-cyclus werkt. Dweck en Hattie kwamen terug in de nabespreking met Storm.",
+      "entries": [{ "kind": "supervisor", "value": "Max Storm" }],
+      "mustGo": ["Max Storm", { "value": "Storm", "in": "met Storm" }],
+      "mustStay": ["storm", "Dweck", "Hattie"]
+    },
+    {
+      "id": "h-werkplaats-08",
+      "kind": "werkplaats",
+      "text": "My colleague Grace Hill observed my lecture. Grace noted that the pace was too high. By God's grace and a hill of coffee I finished the marking. She suggested reading Mazur on peer instruction.",
+      "entries": [{ "kind": "supervisor", "value": "Grace Hill" }],
+      "mustGo": ["Grace Hill"],
+      "mustStay": ["grace", "hill", "Mazur"]
+    },
+    {
+      "id": "h-studentwerk-01",
+      "kind": "studentwerk",
+      "text": "Naam: Fatima Ouali\nStudentnummer: s2345678\nStagebedrijf: Gemeente Oegstgeest, afdeling Jeugd\nPraktijkbegeleider: Wim de Boer\n\nFatima heeft deze periode gewerkt aan een plan van aanpak. De boer bij wie ze op huisbezoek ging, vertelde over zijn zoon. De Boer was tevreden.",
+      "entries": [
+        { "kind": "student", "value": "Fatima Ouali" },
+        { "kind": "studentNumber", "value": "s2345678" },
+        { "kind": "company", "value": "Gemeente Oegstgeest" },
+        { "kind": "supervisor", "value": "Wim de Boer" }
+      ],
+      "studentNumberExample": "s2345678",
+      "mustGo": ["Fatima Ouali", "s2345678", "Gemeente Oegstgeest", "Wim de Boer", { "value": "Fatima", "in": "Fatima heeft" }, { "value": "De Boer", "in": "De Boer was" }],
+      "mustStay": ["boer"]
+    },
+    {
+      "id": "h-studentwerk-02",
+      "kind": "studentwerk",
+      "text": "Reflectieverslag LU2 - Tim Smit. In het praktijkonderzoek koos ik voor interviews. Smit (2026) is een fictieve bron die ik niet mag gebruiken; de smid in mijn casus was wel echt. Tim kreeg hulp van zijn medestudent Joy Baker.",
+      "entries": [{ "kind": "student", "value": "Tim Smit" }, { "kind": "student", "value": "Joy Baker" }],
+      "mustGo": ["Tim Smit", "Joy Baker", { "value": "Tim", "in": "Tim kreeg" }],
+      "mustStay": ["smid", "LU2"]
+    },
+    {
+      "id": "h-studentwerk-03",
+      "kind": "studentwerk",
+      "text": "Ik ben Ravi Bhagwandin en ik studeer Verpleegkunde. Mijn stage was bij Alrijne Zorggroep. Mijn telefoon: +31 6 2345 6789. Ik woon aan de Haarlemmerstraat 12, 2312 DK Leiden. Bhagwandin is een Surinaamse naam.",
+      "entries": [{ "kind": "student", "value": "Ravi Bhagwandin" }, { "kind": "company", "value": "Alrijne Zorggroep" }],
+      "mustGo": ["Ravi Bhagwandin", "Alrijne Zorggroep", "+31 6 2345 6789", "2312 DK", { "value": "Bhagwandin", "in": "Bhagwandin is" }],
+      "mustStay": ["Verpleegkunde", "Leiden"]
+    },
+    {
+      "id": "h-studentwerk-04",
+      "kind": "studentwerk",
+      "text": "Ons projectteam: Lotte Kuiper, Sem Jager en Mila Groot. Lotte maakte de planning, Sem de enquête. Een groot deel van de data kwam van Mila. De jager in onze persona was een metafoor voor de leerling die punten jaagt.",
+      "entries": [
+        { "kind": "student", "value": "Lotte Kuiper" },
+        { "kind": "student", "value": "Sem Jager" },
+        { "kind": "student", "value": "Mila Groot" }
+      ],
+      "mustGo": ["Lotte Kuiper", "Sem Jager", "Mila Groot", { "value": "Lotte", "in": "Lotte maakte" }, { "value": "Sem", "in": "Sem de" }, { "value": "Mila", "in": "van Mila" }],
+      "mustStay": ["groot", "jager"]
+    },
+    {
+      "id": "h-studentwerk-05",
+      "kind": "studentwerk",
+      "text": "Cijferlijst: totaal 60 EC behaald, waarvan 15 EC in de minor. Gemiddeld cijfer 7,4. Contact via de Studentenbalie: 071 518 8000. Het rooster voor 2026-2027 volgt in juni.",
+      "entries": [],
+      "mustGo": ["071 518 8000"],
+      "mustStay": ["60", "EC", "15", "2026"]
+    },
+    {
+      "id": "h-studentwerk-06",
+      "kind": "studentwerk",
+      "text": "In this essay I discuss Bloom's taxonomy and Piaget's stages. My tutor, Dr. Rose White, advised me to read Bruner as well. Rose asked whether I had considered Vygotsky. White space on the slides helps too.",
+      "entries": [{ "kind": "supervisor", "value": "Rose White" }],
+      "mustGo": ["Rose White", { "value": "Rose", "in": "Rose asked" }],
+      "mustStay": ["Bloom", "Piaget", "Bruner", "Vygotsky", "White"]
+    },
+    {
+      "id": "h-studentwerk-07",
+      "kind": "studentwerk",
+      "text": "Studentnummers van mijn groep: 1023456, 1034567 en 1045678. Mijn eigen nummer staat op het voorblad. De toets had 1200 woorden en duurde 90 minuten.",
+      "entries": [],
+      "studentNumberExample": "1012345",
+      "mustGo": ["1023456", "1034567", "1045678"],
+      "mustStay": ["1200", "90"]
+    },
+    {
+      "id": "h-studentwerk-08",
+      "kind": "studentwerk",
+      "text": "Gesprek met mijn SLB'er, mevrouw Linde Brouwer. Brouwer vroeg hoe het ging met de planning. Onder de linde op het plein hebben we verder gepraat. Ze raadde Korthagen's ui-model aan.",
+      "entries": [{ "kind": "supervisor", "value": "Linde Brouwer" }],
+      "mustGo": ["Linde Brouwer", { "value": "Brouwer", "in": "Brouwer vroeg" }],
+      "mustStay": ["linde", "Korthagen"]
+    },
+    {
+      "id": "h-studentwerk-09",
+      "kind": "studentwerk",
+      "text": "Bij Technova BV werkte ik onder leiding van Joris Bakker. De bakker om de hoek leverde de lunch. Joris gaf me een 8. Mijn e-mail: kim.lee@student.voorbeeld.nl.",
+      "entries": [{ "kind": "student", "value": "Kim Lee" }, { "kind": "company", "value": "Technova BV" }, { "kind": "supervisor", "value": "Joris Bakker" }],
+      "mustGo": ["Technova BV", "Joris Bakker", "kim.lee@student.voorbeeld.nl", { "value": "Joris", "in": "Joris gaf" }],
+      "mustStay": ["bakker"]
+    },
+    {
+      "id": "h-bestanden-01",
+      "kind": "bestanden",
+      "text": "LU1_lesvoorbereiding_FatimaOuali.docx\nOuali_F_reflectie.pdf\nfatima_ouali_observatie.pdf\nbewijs_Bloom_taxonomie.png",
+      "entries": [{ "kind": "student", "value": "Fatima Ouali" }],
+      "mustGo": ["FatimaOuali", "fatima_ouali", { "value": "Ouali", "in": "Ouali_F" }],
+      "mustStay": ["Bloom", "LU1"]
+    },
+    {
+      "id": "h-bestanden-02",
+      "kind": "bestanden",
+      "text": "s2345678_LU4_toetsmatrijs.xlsx\n2345678-feedback.docx\nverslag 12345678 versie 2.docx",
+      "entries": [],
+      "studentNumberExample": "s2345678",
+      "mustGo": ["s2345678", "2345678-"],
+      "mustStay": ["LU4", "12345678"]
+    },
+    {
+      "id": "h-bestanden-03",
+      "kind": "bestanden",
+      "text": "Feedback Roos Visser LU2.docx\nroos-visser-observatie.pdf\nfoto roos in de klas.jpg",
+      "entries": [{ "kind": "supervisor", "value": "Roos Visser" }],
+      "mustGo": ["Roos Visser", "roos-visser"],
+      "mustStay": ["roos"]
+    },
+    {
+      "id": "h-bestanden-04",
+      "kind": "bestanden",
+      "text": "Map: Stage Alrijne Zorggroep\n  - weekverslag_week1_TimSmit.docx\n  - Tim Smit - eindgesprek.docx\n  - smit_beoordeling.pdf",
+      "entries": [{ "kind": "student", "value": "Tim Smit" }, { "kind": "company", "value": "Alrijne Zorggroep" }],
+      "mustGo": ["TimSmit", "Alrijne Zorggroep", "Tim Smit", { "value": "smit", "in": "smit_beoordeling" }],
+      "mustStay": []
+    },
+    {
+      "id": "h-werkplaats-09",
+      "kind": "werkplaats",
+      "text": "Ik vroeg Eva Bos of ik haar les mocht bijwonen. Eva zei ja. In het bos achter de school deden we een buitenles. Bos gaf achteraf feedback met de feedbackladder.",
+      "entries": [{ "kind": "supervisor", "value": "Eva Bos" }],
+      "mustGo": ["Eva Bos", { "value": "Eva", "in": "Eva zei" }],
+      "mustStay": ["bos"]
+    },
+    {
+      "id": "h-studentwerk-10",
+      "kind": "studentwerk",
+      "text": "IBAN voor declaraties: NL02 RABO 0123 4567 89. Postadres: Postbus 382, 2300 AJ Leiden. Afspraak 2026-11-20. Projectcode PRJ-2026-0042.",
+      "entries": [],
+      "mustGo": ["NL02 RABO 0123 4567 89", "2300 AJ"],
+      "mustStay": ["382", "PRJ"]
+    },
+    {
+      "id": "h-werkplaats-10",
+      "kind": "werkplaats",
+      "text": "Teamleider Pieter-Jan Hendriks keurde mijn toetsplan goed. Hendriks wil dat we in het team meer met Wiley's open pedagogiek doen. Pieter-Jan stuurde een link naar het boek.",
+      "entries": [{ "kind": "supervisor", "value": "Pieter-Jan Hendriks" }],
+      "mustGo": ["Pieter-Jan Hendriks", { "value": "Hendriks", "in": "Hendriks wil" }, { "value": "Pieter-Jan", "in": "Pieter-Jan stuurde" }],
+      "mustStay": ["Wiley"]
+    }
+  ]
+}
