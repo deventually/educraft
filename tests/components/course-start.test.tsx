@@ -109,6 +109,47 @@ describe("CourseStart", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
+  it("shows Jev's Bloom check under the level, tied to the level's field", async () => {
+    const o1 = proposal.outcomes[0]!;
+    const checked: ImportProposal = {
+      ...proposal,
+      outcomes: [
+        {
+          ...o1,
+          key: "o1",
+          text: "De student beschrijft een join.",
+          bloom: "analyze",
+          bloomCheck: "understand",
+        },
+        {
+          ...o1,
+          key: "o2",
+          text: "De student heeft inzicht in indexen.",
+          bloom: "apply",
+          bloomCheck: null,
+        },
+        { ...o1, key: "o3" },
+      ],
+    };
+    const { container } = renderStart({ proposal: checked });
+    const form = screen.getByRole("form", { name: "AI-voorstel" });
+    const selects = within(form).getAllByRole("combobox", {
+      name: "Bloom-niveau (voorstel van de AI)",
+    });
+    expect(selects).toHaveLength(3);
+    expect(selects[0]!.getAttribute("aria-describedby")).toBeTruthy();
+    expect(
+      document.getElementById(selects[0]!.getAttribute("aria-describedby")!)?.textContent,
+    ).toBe("Bloom-check: het werkwoord wijst eerder op het niveau begrijpen.");
+    expect(
+      document.getElementById(selects[1]!.getAttribute("aria-describedby")!)?.textContent,
+    ).toBe("Bloom-check: het werkwoord geeft geen duidelijk niveau aan.");
+    expect(selects[2]!.hasAttribute("aria-describedby")).toBe(false);
+    // The intended level stays selected: the check only advises.
+    expect((selects[0] as HTMLSelectElement).value).toBe("analyze");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
   it("shows what the AI still needs when it proposed nothing", () => {
     renderStart({ notes: "Wat moeten studenten kunnen?" });
     const box = screen.getByRole("region", { name: "Opmerkingen van de AI" });
