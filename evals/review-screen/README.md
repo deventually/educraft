@@ -72,3 +72,31 @@ npm run eval:review-screen -- --rescore evals/reports/<datum>a-review-screen-raw
 ```
 
 Nooit onderdeel van CI.
+
+## Uitslag (2026-11-17)
+
+Rapport: [`2026-11-17a-review-screen.md`](../reports/2026-11-17a-review-screen.md) (Jev 3×,
+gedraaid op de Mac van Bastiaan; elk exact verzoek staat in het raw-bestand).
+
+| Set | Paren | Overgeslagen | Gemist: waarschuwing | Gemist: verwachte fout | Alleen tips gemist | Terecht overgeslagen |
+| --- | --- | --- | --- | --- | --- | --- |
+| Rolagenten-cases | 150 | 13 (9%) | 0 | 0 | 9 | 4 |
+| Holdout | 72 | 11 (15%) | 1 | 0 | 8 | 2 |
+
+- **Jev slaat weinig over: 24 van 222 aanroepen (11%).** Van die 24 had de reviewer in **6** echt
+  niets; in **17** gaf hij tips (`info`) en in **1** drie waarschuwingen (`h06-en-statistics-clean`,
+  Student: feedback op het eigen onderzoek komt niet vóór het rapport telt). In drie van de vier
+  keer dat Jev een reviewer overslaat, mist de docent dus advies.
+- **Geen verwachte fout gemist**: elke reviewer die op een case een bekende fout hoorde te
+  vinden, draaide.
+- **Bijna alles wat overslaat, is AI-bestendigheid (11) en Student (8).** De twee reviewers die
+  standaard aan staan, Toetsdeskundige en Ontwerper, slaat Jev elk maar 1 keer van de 37 over.
+  Voor een docent met de standaardkeuze scheelt het dus vrijwel niets.
+- **Geld:** een reviewer-aanroep kost ongeveer $0,014, Jev $0,0002 per review. Met alle zes de
+  reviewers aan scheelt het gemiddeld ongeveer 1 cent per review van 8 cent.
+- **Stabiel**: op 3 van de 222 paren gaven Jev's drie herhalingen niet hetzelfde oordeel.
+- **Waarom het weinig oplevert, al vóór Jev zichtbaar**: de reviewers geven op 210 van de 222
+  paren iets (141 keer een waarschuwing). Er valt weinig over te slaan, hoe goed de check ook is.
+
+Er is niets afgesteld na deze uitslag. Een andere drempel kiezen op deze cijfers zou afstemmen op
+de meting zelf; daarvoor is een nieuwe holdout nodig.
