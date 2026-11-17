@@ -63,7 +63,7 @@ describe("the on/off rule (P28.3)", () => {
 });
 
 describe("the feature register (P28.3)", () => {
-  it("holds the nine parts with their default stands", () => {
+  it("holds the parts with their default stands", () => {
     expect(FEATURES.map((f) => [f.id, f.defaultStand])).toEqual([
       ["portfolio", "request"],
       ["courses", "on"],
@@ -77,9 +77,12 @@ describe("the feature register (P28.3)", () => {
       ["bloomJev", "off"],
       // Jev's evidence sort: off for the same reason.
       ["evidenceJev", "off"],
+      // Jev's check of coverage and kind in the course import: off for the same reason.
+      ["coverageJev", "off"],
     ]);
     expect(FEATURES.find((f) => f.id === "bloomJev")?.instanceOnly).toBe(true);
     expect(FEATURES.find((f) => f.id === "evidenceJev")?.instanceOnly).toBe(true);
+    expect(FEATURES.find((f) => f.id === "coverageJev")?.instanceOnly).toBe(true);
     for (const f of FEATURES) {
       expect(f.name.nl.length).toBeGreaterThan(0);
       expect(f.name.en.length).toBeGreaterThan(0);

@@ -144,6 +144,8 @@ export const courses = {
     bloom: "Bloom-niveau (voorstel van de AI)",
     body: "Begin met wat er al is: plak de tekst van een OER, studiehandleiding, modulewijzer, toetsmatrijs of nakijkmodel, of kies de bestanden. De AI zet de leeruitkomsten, succescriteria, toetsen en onderdelen klaar als voorstel; jij kiest wat in de cursus komt.",
     check: "Controleer dit: deze tekst staat niet letterlijk in het document.",
+    checkCover: "Controleer dit vinkje: het document zegt het anders of niet duidelijk.",
+    checkKind: "Controleer de soort: het document zegt het anders of niet duidelijk.",
     checkShort: "controleer: staat niet letterlijk in het document",
     clipped: "Het document had meer dan er in een cursus past; de rest is weggelaten.",
     complete: "Lege velden aanvullen",

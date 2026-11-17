@@ -233,6 +233,7 @@ function AssessmentRow({
   const ti = c.import;
   const id = useId();
   const covered = new Set(a.outcomeKeys);
+  const doubted = new Set(a.check?.outcomeKeys);
   return (
     <fieldset className="rounded-md border border-slate-200 p-3">
       <legend className="px-1 text-sm font-medium text-slate-900">
@@ -266,6 +267,7 @@ function AssessmentRow({
               name={`${a.key}.kind`}
               defaultValue={a.kind ?? "summative"}
               className="mt-1"
+              aria-describedby={a.check?.kind ? `${id}-kind-check` : undefined}
             >
               {ASSESSMENT_KINDS.map((k) => (
                 <option key={k} value={k}>
@@ -273,6 +275,11 @@ function AssessmentRow({
                 </option>
               ))}
             </Select>
+            {a.check?.kind && (
+              <p id={`${id}-kind-check`} className="mt-1 text-sm text-amber-800">
+                {ti.checkKind}
+              </p>
+            )}
           </div>
           <NumberField
             id={`${id}-weight`}
@@ -295,12 +302,21 @@ function AssessmentRow({
                       value={o.key}
                       defaultChecked={covered.has(o.key)}
                       className="mt-1"
+                      aria-describedby={doubted.has(o.key) ? `${id}-${o.key}-check` : undefined}
                     />
                     <span>
                       {fmt(ti.outcomeN, { n: i + 1 })}: {o.text}
                     </span>
                   </label>
                   <CoverBloom name={`${a.key}.bloom.${o.key}`} value={o.bloom} n={i + 1} />
+                  {doubted.has(o.key) && (
+                    <p
+                      id={`${id}-${o.key}-check`}
+                      className="basis-full pl-6 text-sm text-amber-800"
+                    >
+                      {ti.checkCover}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

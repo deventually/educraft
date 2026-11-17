@@ -15,7 +15,8 @@ export type FeatureId =
   | "pilotCheckin"
   | "supervisionTracks"
   | "bloomJev"
-  | "evidenceJev";
+  | "evidenceJev"
+  | "coverageJev";
 
 export interface Feature {
   id: FeatureId;
@@ -75,6 +76,17 @@ export const FEATURES: readonly Feature[] = [
     name: {
       nl: "Bewijs in één keer sorteren door TypeSafe Jev (via OpenRouter)",
       en: "Evidence in one go sorted by TypeSafe Jev (via OpenRouter)",
+    },
+    defaultStand: "off",
+    instanceOnly: true,
+  },
+  // TypeSafe's Jev checks the course import's coverage and kind per test (evals/coverage-jev).
+  // Off by default for the same reason: the passages about each test then go to OpenRouter.
+  {
+    id: "coverageJev",
+    name: {
+      nl: "Dekking en soort toets bij de import laten controleren door TypeSafe Jev (via OpenRouter)",
+      en: "Coverage and kind of test on import checked by TypeSafe Jev (via OpenRouter)",
     },
     defaultStand: "off",
     instanceOnly: true,

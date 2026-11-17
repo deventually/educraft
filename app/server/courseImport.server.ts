@@ -12,6 +12,7 @@ import type { Locale } from "~/lib/i18n";
 import { currentAiSignal } from "./aiCalls.server";
 import type { User } from "./auth.server";
 import { isFeatureOn } from "./availability.server";
+import { withJevCoverage } from "./coverageJev.server";
 import { providerSetting } from "./env.server";
 import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
 import { log } from "./log.server";
@@ -46,7 +47,9 @@ export async function extractCourseImport(
     const parsed = parseImport(answer.text, documentText, course);
     if (parsed.ok) {
       log(EVENT, { outcome: "proposed", flagged: parsed.flagged, clipped: parsed.clipped });
-      return { ...parsed, proposal: await withJevBloom(user, parsed.proposal, locale) };
+      const withBloom = await withJevBloom(user, parsed.proposal, locale);
+      const proposal = await withJevCoverage(user, withBloom, documentText, locale);
+      return { ...parsed, proposal };
     }
     // A valid answer with nothing in it is the model's verdict on the document,
     // not a glitch: asking again costs a call and gives the same answer.

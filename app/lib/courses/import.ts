@@ -71,6 +71,8 @@ export interface ImportAssessment {
   /** From a test blueprint or marking model: form, owner, pass mark, conditions, … */
   details: ImportDetails;
   parts: ImportPart[];
+  /** Jev's second reading doubts the kind or these ticks: "check" (`coverageJev.ts`). */
+  check?: { kind: boolean; outcomeKeys: string[] };
 }
 
 export interface ImportProposal {
