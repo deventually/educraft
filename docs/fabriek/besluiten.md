@@ -735,6 +735,14 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   instelling" in BESLUIT-2026-11-13-1. Bastiaan, 2026-11-17 ("Ik wil dat er 1 optie komt om jev
   aan of uit te zetten in het beheerscherm. Als het ok is om te gebruiken, dan is dat de
   toezegging").
+- **BESLUIT-2026-11-17-2:** **Geen snelle check met Jev vóór het reviewteam; de meting blijft.** Jev
+  sloeg op 222 paren (37 cursussen × 6 reviewers) 24 reviewers over, en in 18 daarvan miste de
+  docent advies (17 keer tips, 1 keer waarschuwingen); de besparing was ongeveer 1 cent per review
+  van 8 cent, en voor de twee standaardreviewers vrijwel niets. Elke gekozen reviewer kijkt dus
+  altijd mee. De vragen, de holdout, de reviews en het rapport blijven in `evals/review-screen/`,
+  `scripts/review-screen/` en `evals/reports/2026-11-17a-review-screen.md`, zodat niemand dit
+  opnieuw hoeft te meten; een nieuwe poging begint met een nieuwe holdout. Bastiaan, 2026-11-17
+  (keuze "Alleen de meting bewaren").
 - **BESLUIT-2026-11-17-3:** **De anonimiseerder haalt liever te weinig dan te veel weg, en kent
   geen vast studentnummerformaat.** Eén motor (`app/lib/privacy/redact.ts`) voor alle tools,
   later ook in de poort op de server. Een volledige naam gaat altijd weg, in elke schrijfwijze,
