@@ -39,7 +39,6 @@ export function CourseReviewPanel({
   models,
   defaultModel,
   linkedTests = 0,
-  quickCheck = false,
   courseId,
   tools,
 }: {
@@ -52,8 +51,6 @@ export function CourseReviewPanel({
   defaultModel: string;
   /** Linked test-question generations; the "also review" box shows only when there are any. */
   linkedTests?: number;
-  /** The quick check (Jev) runs before the reviewers; the teacher can ask for a full review. */
-  quickCheck?: boolean;
   /** With both, an open finding about an item gets "Los op met…" (P27.4). */
   courseId?: string;
   tools?: CourseTools;
@@ -137,12 +134,6 @@ export function CourseReviewPanel({
             {fmt(p.includeLinked, { n: linkedTests })}
           </label>
         )}
-        {quickCheck && (
-          <label className="flex basis-full items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" name="full" value="1" />
-            {p.full}
-          </label>
-        )}
         <Button type="submit" name="intent" value="review" disabled={ticked.size === 0}>
           {p.run}
         </Button>
@@ -188,21 +179,15 @@ function AgentReview({
         <p className="mt-1 text-sm text-slate-600">{p.notYet}</p>
       ) : (
         <>
-          {!review.screened && (
-            <p className="mt-1 text-xs text-slate-500">
-              {fmt(p.reviewedWith, { model: review.model })}
-            </p>
-          )}
+          <p className="mt-1 text-xs text-slate-500">
+            {fmt(p.reviewedWith, { model: review.model })}
+          </p>
           {review.stale && (
             <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-2 text-sm text-amber-900">
               {p.stale}
             </p>
           )}
-          {review.findings.length === 0 && (
-            <p className="mt-2 text-sm text-slate-700">
-              {review.screened ? fmt(p.screened, { model: review.model }) : p.none}
-            </p>
-          )}
+          {review.findings.length === 0 && <p className="mt-2 text-sm text-slate-700">{p.none}</p>}
           {open.length > 0 && (
             <ul className="mt-2 space-y-2">
               {open.map((f) => (

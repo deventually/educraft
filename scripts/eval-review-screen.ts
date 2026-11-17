@@ -20,7 +20,7 @@ import { join } from "node:path";
 import { parseAgentReview } from "~/lib/agents/filter";
 import { buildReviewMessage, courseKeys } from "~/lib/agents/input";
 import { AGENTS } from "~/lib/agents/registry";
-import { buildScreenRequest, parseScreenAnswer, screenVerdicts } from "~/lib/agents/screen";
+import { buildScreenRequest, parseScreenAnswer, screenVerdicts } from "./review-screen/screen";
 import { providerForModel } from "~/lib/ai/provider";
 import { checkAlignment } from "~/lib/courses/alignment";
 import { getRuntimePrompt } from "~/lib/prompts";

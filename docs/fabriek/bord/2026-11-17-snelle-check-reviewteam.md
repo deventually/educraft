@@ -1,7 +1,6 @@
-- **Snelle check vóór het reviewteam met TypeSafe Jev (#370):** staat Jev aan, dan stelt Jev vóór de
-  review per reviewer een paar ja/nee-vragen over de cursus, in één verzoek. Ziet Jev voor een
-  reviewer niets, en LimeOnIt zelf ook niet (zoals twee toetsen in één week), dan kijkt die
-  reviewer niet mee en kost hij geen taalmodel-aanroep; bij de reviewer staat dan dat de snelle
-  check niets vond. Twijfelt Jev, of antwoordt hij niet, dan kijkt de reviewer gewoon. Met
-  *Volledige review* kijkt elke gekozen reviewer, zonder check. De meting van het risico (een
-  gemist advies) staat in `evals/review-screen/`.
+- **Snelle check vóór het reviewteam, gemeten en niet ingebouwd (#370):** we hebben gemeten of
+  TypeSafe Jev vóór elke reviewer kan zeggen dat die niets te doen heeft, zodat die reviewer geen
+  taalmodel-aanroep kost. Jev sloeg 24 van de 222 reviewers over, en bij 18 daarvan miste de docent
+  daardoor advies; het scheelde ongeveer 1 cent per review. Daarom zit de check niet in LimeOnIt:
+  elke gekozen reviewer kijkt altijd mee (BESLUIT-2026-11-17-2). De meting, de nieuwe testcursussen
+  en het rapport staan in `evals/review-screen/`.

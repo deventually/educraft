@@ -6,8 +6,8 @@ import {
   SCREEN_THRESHOLDS,
   screenFacts,
   screenVerdicts,
-} from "~/lib/agents/screen";
-import { SCREEN_RULES } from "~/lib/agents/screenQuestions";
+} from "../../scripts/review-screen/screen";
+import { SCREEN_RULES } from "../../scripts/review-screen/screenQuestions";
 import type { CourseData } from "~/lib/courses/types";
 
 // The quick check before the review team (TypeSafe's Jev): per reviewer a few yes/no questions,

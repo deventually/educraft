@@ -6,7 +6,7 @@ import { effectiveCoverage } from "~/lib/courses/alignment";
 import { bloomLabel } from "~/lib/courses/bloom";
 import type { Assessment, CourseData } from "~/lib/courses/types";
 import type { Locale } from "~/lib/i18n";
-import { courseKeys } from "./input";
+import { courseKeys } from "~/lib/agents/input";
 
 const TEXT = {
   nl: {

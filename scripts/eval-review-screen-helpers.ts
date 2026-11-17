@@ -5,7 +5,7 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { ScreenVerdict } from "../app/lib/agents/screen";
+import type { ScreenVerdict } from "./review-screen/screen";
 import type { CourseData } from "../app/lib/courses/types";
 import type { AgentCase } from "./eval-agents-helpers";
 import { EVALS_DIR } from "./eval-files";

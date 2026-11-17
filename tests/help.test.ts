@@ -184,14 +184,12 @@ describe("help registry — topics", () => {
       "## Kiezen wie er in je reviewteam zit",
       "## Wat een reviewer ziet",
       "## Wat een reviewer niet doet",
-      "## De snelle check vooraf",
     ])
       expect(getTopic("review-team", "nl")).toContain(heading);
     for (const heading of [
       "## Choosing who is on your review team",
       "## What a reviewer sees",
       "## What a reviewer does not do",
-      "## The quick check first",
     ])
       expect(getTopic("review-team", "en")).toContain(heading);
     expect(getTopic("courses", "nl")).toContain("(/help/review-team)");

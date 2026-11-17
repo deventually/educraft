@@ -33,7 +33,6 @@ export const agents: Messages["agents"] = {
     chooseNone: "Pick at least one reviewer to get a review.",
     decided: "Handled ({n})",
     decision: { accepted: "Agree", rejected: "Disagree" },
-    full: "Full review: every chosen reviewer looks, without the quick check first",
     includeLinked: "Also review the linked test questions ({n})",
     intro:
       "Your review team looks at your course: {roles}. They advise; you decide on each piece of advice. Nothing in your course changes.",
@@ -47,8 +46,6 @@ export const agents: Messages["agents"] = {
     reject: "Disagree",
     reviewedWith: "Reviewed with {model}",
     run: "Get a review",
-    screened:
-      "The quick check ({model}) found nothing for this reviewer, so it did not look. In doubt? Review again with a full review.",
     severity: { info: "Tip", warning: "Note" },
     stale: "Your course changed after this review. Get a new review for up-to-date advice.",
     suggestion: "Suggestion",

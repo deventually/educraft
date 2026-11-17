@@ -545,15 +545,6 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   (only when ticked): the caller's own `test-items` generations linked to the course, newest three,
   clipped. Pack tags (`LearningOutcome.packTags`) come from the pack of the course's own context
   profile and are checked at the editor intent (`packTags.ts`). Eval: `npm run eval:agents`.
-- **Quick check before the review team** (Jev): with Jev on, `reviewersToSkip`
-  (`app/server/reviewScreen.server.ts`) sends ONE Decisions request for all chosen hats before
-  any hat runs. The questions per hat live in `app/lib/agents/screenQuestions.ts` (one judgment
-  each, per item where a rule is about one item); counting and weeks are facts in code
-  (`screenFacts`); `screenVerdicts` is the truth table: a hat is skipped only when no fact and no
-  question counts for it (thresholds 0.3/0.7, unclear runs the hat), and a hat that reads linked
-  work always runs. A skipped hat gets an empty review signed with Jev's model, shown as "the
-  quick check found nothing"; the panel's "Volledige review" (`full=1`) runs every hat without the
-  check. Any Jev failure skips nobody. Measured in `evals/review-screen/`.
 - **The teacher's week (P22)** on Start. Derived, never stored, no planner and no AI
   (BESLUIT-2026-11-05-7). `app/lib/calendar/weeks.ts` does ISO-week arithmetic in UTC on whole
   days: `courseWeekDates` maps relative course weeks to Mondays, skipping the institution's break

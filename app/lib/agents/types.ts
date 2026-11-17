@@ -71,8 +71,6 @@ export interface ReviewPanelAgent {
     model: string;
     /** The course changed after this review. */
     stale: boolean;
-    /** The quick check (Jev) found nothing for this hat, so it did not run. */
-    screened?: boolean;
     findings: (ReviewFinding & { decision?: Decision; reason?: string | null })[];
   };
 }

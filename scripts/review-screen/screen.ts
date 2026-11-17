@@ -3,16 +3,16 @@
  * Jev judges, code decides (TypeSafe's skill): per reviewer, the facts in `screenQuestions.ts`
  * are computed here and the questions go to Jev in ONE request over the same state. A reviewer is
  * skipped only when no fact calls for it and every question counted for it is a clear "no";
- * an unclear or missing answer runs the reviewer (the safe direction). Pure: the call and what
- * happens with a skip live in `app/server/reviewScreen.server.ts`; the eval builds its requests
- * here too (`scripts/eval-review-screen.ts`), so it measures what the app sends.
+ * an unclear or missing answer runs the reviewer (the safe direction). Measurement only: the app
+ * does not use this check (BESLUIT-2026-11-17-2); `scripts/eval-review-screen.ts` builds its
+ * requests here, so the measurement can be repeated as it was.
  */
 import { z } from "zod";
 import { effectiveCoverage } from "~/lib/courses/alignment";
 import { bloomRank } from "~/lib/courses/bloom";
 import type { CourseData } from "~/lib/courses/types";
 import type { Locale } from "~/lib/i18n";
-import { courseKeys } from "./input";
+import { courseKeys } from "~/lib/agents/input";
 import { buildScreenState, type ScreenState } from "./screenState";
 import { SCREEN_RULES } from "./screenQuestions";
 import type { ScreenFact, ScreenQuestion, ScreenScope, ScreenWhen } from "./screenTypes";

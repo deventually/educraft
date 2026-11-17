@@ -10,9 +10,9 @@ Volgens TypeSafe's skill (`typesafe@typesafe-ai`, commit `302eea6`) en de docs (
 jaggedness, de cascade-cookbook), zonder eigen draai:
 
 - **Jev oordeelt, code beslist.** Per reviewer staan in
-  [`screenQuestions.ts`](../../app/lib/agents/screenQuestions.ts) de vragen, één oordeel per
+  [`screenQuestions.ts`](../../scripts/review-screen/screenQuestions.ts) de vragen, één oordeel per
   vraag, geschreven uit de prompt van die reviewer ("Waar je op let"). De waarheidstabel staat in
-  `screenVerdicts` ([`screen.ts`](../../app/lib/agents/screen.ts)).
+  `screenVerdicts` ([`screen.ts`](../../scripts/review-screen/screen.ts)).
 - **Eén verzoek per review**: alle gekozen reviewers samen, over dezelfde toestand ("bundle
   questions that share state").
 - **De toestand als benoemde velden**: de cursus onder dezelfde sleutels als de reviewers (L1, A1,
