@@ -52,6 +52,8 @@ export interface ImportOutcome {
   text: string;
   /** The model's Bloom proposal; the teacher confirms it. */
   bloom?: BloomLevel;
+  /** The wizard's Bloom check: the level Jev hears where it differs from `bloom` (null: none). */
+  bloomCheck?: BloomLevel | null;
   /** The text is in the document (modulo layout); otherwise "check this". */
   verbatim: boolean;
   /** The course already has this outcome; importing it only fills in empty criteria. */
