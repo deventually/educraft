@@ -102,6 +102,12 @@ Een reviewer ziet alleen deze ene cursus, zoals jij hem invulde:
 
 Gekoppeld werk, zoals toetsvragen die je met een tool maakte, gaat alleen mee als je dat bij die review aanvinkt. Andere cursussen, je chats en werk van studenten ziet een reviewer nooit.
 
+## De snelle check vooraf
+
+Staat Jev aan in je school (de beheerder zet dat aan), dan doet TypeSafe Jev eerst een snelle check. Jev is een klein beslismodel, geen taalmodel: het beantwoordt per reviewer een paar ja/nee-vragen over je cursus, zoals "staat er een vaag werkwoord in deze leeruitkomst?". Vindt Jev voor een reviewer nergens aanleiding, en ziet LimeOnIt zelf ook niets (zoals twee toetsen in dezelfde week), dan kijkt die reviewer deze keer niet mee. Dat scheelt tijd en kosten. Bij die reviewer staat dan dat de snelle check niets vond.
+
+Jev kan zich vergissen, en dan mis je een advies. Twijfel je, vink dan **Volledige review** aan: dan kijkt elke gekozen reviewer, zonder snelle check. Jev ziet dezelfde cursusgegevens als een reviewer, maar niet je verworpen adviezen en niet je gekoppelde toetsvragen; een reviewer die je toetsvragen nakijkt, kijkt altijd mee.
+
 ## Wat een reviewer niet doet
 
 - **Niets veranderen.** Akkoord legt alleen je besluit vast. Wat je overneemt, pas je zelf aan.

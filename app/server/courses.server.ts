@@ -201,6 +201,7 @@ async function runCourseIntent(
       fd.get("includeLinked") === "1",
       // The panel's boxes come with a marker, so "none ticked" differs from "no boxes".
       fd.get("agentsChosen") === "1" ? fd.getAll("agent").map(String) : undefined,
+      fd.get("full") === "1",
     );
     if (!r.ok) return { ok: false, intent, error: a.review[r.error] };
     if (r.failed.length === 0) return { ok: true, intent, message: a.review.done };

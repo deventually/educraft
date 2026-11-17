@@ -16,6 +16,7 @@ import {
   type ReviewPanelChoice,
 } from "~/lib/agents/types";
 import {
+  DECISIONS as JEV,
   DEFAULT_MODEL,
   forwardRetired,
   isResolvableModel,
@@ -45,6 +46,7 @@ import {
 } from "./repositories/agentReviews.server";
 import { getAgentStands } from "./repositories/settings.server";
 import { getAgentChoices, setAgentChoices } from "./repositories/agentChoices.server";
+import { reviewersToSkip, screenAvailable } from "./reviewScreen.server";
 
 const EVENT = "agent-review";
 
@@ -130,6 +132,8 @@ export async function reviewCourse(
   includeLinked = false,
   /** The hats the teacher ticked (remembered as their choice); absent = their earlier choice. */
   ticked?: string[],
+  /** Every chosen hat runs, without the quick check. */
+  full = false,
 ): Promise<ReviewResult> {
   const active = await courseAgents();
   if (active.length === 0) return { ok: false, error: "failed" };
@@ -156,7 +160,25 @@ export async function reviewCourse(
     : message;
   const reviewed: string[] = [];
   const failed: Agent[] = [];
+  const linkedHats = linkedWork.length
+    ? agents.filter((a) => a.watches.includes("generation")).map((a) => a.id)
+    : [];
+  const { skip, model: jevModel } = full
+    ? { skip: new Set<string>(), model: "" }
+    : await reviewersToSkip(user, course.data, agents, locale, linkedHats);
   for (const agent of agents) {
+    if (skip.has(agent.id)) {
+      // Jev saw nothing for this hat: an empty review by Jev, so the panel says so.
+      const saved = await saveReview(user.id, {
+        courseId: course.id,
+        agentId: agent.id,
+        model: jevModel,
+        findings: [],
+      });
+      if (saved) reviewed.push(agent.id);
+      else failed.push(agent);
+      continue;
+    }
     const text = agent.watches.includes("generation") ? withLinked : message;
     const ok = await runAgent(user, course, agent, text, rejected, locale, model).catch(
       () => false,
@@ -203,6 +225,8 @@ export interface ReviewPanelData {
   linkedTests: number;
   models: { id: string; displayName: string }[];
   defaultModel: string;
+  /** The quick check (Jev) runs before the reviewers, so the panel offers a full review. */
+  quickCheck: boolean;
 }
 
 /** The panel's loader data; null when role agents, or every hat, are switched off. */
@@ -219,15 +243,19 @@ export async function loadReviewPanel(user: User, course: Course): Promise<Revie
       const decisions = new Map(
         (await listDecisions(user.id, latest.id)).map((d) => [d.findingId, d]),
       );
+      const screened = !!JEV && latest.model === JEV.model;
       return {
         agentId: agent.id,
         role: agent.role,
         review: {
           id: latest.id,
           // An added model may not be installed yet on a fresh process: keep its id then.
-          model: isResolvableModel(latest.model)
-            ? resolveModelInfo(latest.model).displayName
-            : latest.model,
+          model: screened
+            ? (JEV?.name ?? latest.model)
+            : isResolvableModel(latest.model)
+              ? resolveModelInfo(latest.model).displayName
+              : latest.model,
+          ...(screened ? { screened } : {}),
           stale: course.updatedAt.getTime() > latest.courseUpdatedAt.getTime(),
           findings: latest.findings.map((f) => {
             const d = decisions.get(f.id);
@@ -252,6 +280,7 @@ export async function loadReviewPanel(user: User, course: Course): Promise<Revie
     models,
     defaultModel: await effectiveDefaultModel(user, DEFAULT_MODEL),
     linkedTests: (await linkedTestItems(user.id, course.id)).length,
+    quickCheck: await screenAvailable(),
   };
 }
 

@@ -21,8 +21,22 @@ const course: CourseData = {
     { id: "o2", text: "Je ontwerpt een genormaliseerd datamodel.", bloom: "create" },
   ],
   activities: [
-    { id: "a1", title: "Les relationeel model", week: 1, kind: "lesson", outcomeIds: ["o1"], hours: 4 },
-    { id: "a2", title: "Opdracht datamodel", week: 3, kind: "assignment", outcomeIds: ["o2"], hours: 30 },
+    {
+      id: "a1",
+      title: "Les relationeel model",
+      week: 1,
+      kind: "lesson",
+      outcomeIds: ["o1"],
+      hours: 4,
+    },
+    {
+      id: "a2",
+      title: "Opdracht datamodel",
+      week: 3,
+      kind: "assignment",
+      outcomeIds: ["o2"],
+      hours: 30,
+    },
   ],
   assessments: [
     {
@@ -52,9 +66,7 @@ function answer(
   over: Record<string, number> = {},
 ) {
   return {
-    answers: Object.fromEntries(
-      Object.keys(req.questions).map((id) => [id, noul(over[id] ?? p)]),
-    ),
+    answers: Object.fromEntries(Object.keys(req.questions).map((id) => [id, noul(over[id] ?? p)])),
     usage: { cost: 3e-5 },
   };
 }
@@ -170,8 +182,22 @@ describe("the verdict: code decides, unclear runs the reviewer", () => {
       { id: "b2", title: "Project", week: 2, kind: "assignment", outcomeIds: ["o2"], hours: 12 },
     ],
     assessments: [
-      { id: "s1", title: "Tentamen", week: 4, kind: "summative", weight: 50, coverage: [{ outcomeId: "o1" }] },
-      { id: "s2", title: "Pitch", week: 5, kind: "summative", weight: 50, coverage: [{ outcomeId: "o2" }] },
+      {
+        id: "s1",
+        title: "Tentamen",
+        week: 4,
+        kind: "summative",
+        weight: 50,
+        coverage: [{ outcomeId: "o1" }],
+      },
+      {
+        id: "s2",
+        title: "Pitch",
+        week: 5,
+        kind: "summative",
+        weight: 50,
+        coverage: [{ outcomeId: "o2" }],
+      },
     ],
   };
   const req = buildScreenRequest(spread, agents, "nl", "jev-x");
@@ -212,10 +238,24 @@ describe("the verdict: code decides, unclear runs the reviewer", () => {
     const pp = buildScreenRequest(spread, ["student"], "nl", "jev-x");
     const clear = Object.keys(pp.questions).find((id) => id.startsWith("student.clear-title."))!;
     expect(clear).toBeDefined();
-    const yes = screenVerdicts(spread, ["student"], parseScreenAnswer(answer(pp, 0.1, { [clear]: 0.9 })));
+    const yes = screenVerdicts(
+      spread,
+      ["student"],
+      parseScreenAnswer(answer(pp, 0.1, { [clear]: 0.9 })),
+    );
     expect(yes.student?.reasons).not.toContain(clear);
-    const unsure = screenVerdicts(spread, ["student"], parseScreenAnswer(answer(pp, 0.1, { [clear]: 0.5 })));
+    const unsure = screenVerdicts(
+      spread,
+      ["student"],
+      parseScreenAnswer(answer(pp, 0.1, { [clear]: 0.5 })),
+    );
     expect(unsure.student?.reasons).toContain(clear);
+  });
+
+  it("runs a reviewer that also reads linked work: Jev does not see that work", () => {
+    const v = screenVerdicts(spread, agents, parseScreenAnswer(answer(req, 0.1)), ["designer"]);
+    expect(v.designer).toEqual({ run: true, reasons: ["linked-work"] });
+    expect(v.inclusion?.run).toBe(false);
   });
 
   it("keeps the measured cost", () => {

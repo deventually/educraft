@@ -32,6 +32,7 @@ export const agents = {
     chooseNone: "Kies minstens één reviewer om te laten reviewen.",
     decided: "Afgehandeld ({n})",
     decision: { accepted: "Akkoord", rejected: "Niet akkoord" },
+    full: "Volledige review: elke gekozen reviewer kijkt, zonder snelle check vooraf",
     includeLinked: "Ook de gekoppelde toetsvragen nakijken ({n})",
     intro:
       "Je reviewteam kijkt je cursus na: {roles}. Ze geven advies; jij beslist per advies. Er verandert niets aan je cursus.",
@@ -45,6 +46,8 @@ export const agents = {
     reject: "Niet akkoord",
     reviewedWith: "Gereviewd met {model}",
     run: "Laat reviewen",
+    screened:
+      "De snelle check ({model}) heeft niets gevonden voor deze reviewer, dus hij heeft niet gekeken. Twijfel je? Laat opnieuw reviewen met een volledige review.",
     severity: { info: "Tip", warning: "Let op" },
     stale: "Je cursus is gewijzigd na deze review. Laat opnieuw reviewen voor actueel advies.",
     suggestion: "Voorstel",

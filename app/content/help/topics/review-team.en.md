@@ -102,6 +102,12 @@ A reviewer sees only this one course, as you filled it in:
 
 Linked work, such as test questions you made with a tool, only goes along when you tick that at the review. A reviewer never sees other courses, your chats or students' work.
 
+## The quick check first
+
+When Jev is on at your school (the administrator switches it on), TypeSafe Jev first does a quick check. Jev is a small decision model, not a language model: per reviewer it answers a few yes/no questions about your course, such as "does this learning outcome use a vague verb?". When Jev finds nothing for a reviewer, and LimeOnIt itself sees nothing either (such as two tests in the same week), that reviewer does not look this time. That saves time and cost. That reviewer then says the quick check found nothing.
+
+Jev can be wrong, and then you miss a piece of advice. In doubt, tick **Full review**: every chosen reviewer then looks, without the quick check. Jev sees the same course data as a reviewer, but not the advice you rejected and not your linked test questions; a reviewer that checks your test questions always looks.
+
 ## What a reviewer does not do
 
 - **Change anything.** Agree only records your decision. What you take on, you change yourself.
