@@ -38,6 +38,8 @@ Een volledige naam gaat er altijd uit. Een los deel van een naam alleen als het 
 
 Studentnamen en wat je onder *Namen die eruit moeten* invult, blijven in je browser: de server ziet alleen codes, en in het resultaat staan de namen weer goed. In *Eerder gemaakt* staat dan de versie met codes. Bij studentwerk gaat er zelfs niets anders dan de versie met codes uit je browser. De namen van jou en je collega's worden op de server vervangen en daar ook weer teruggezet, dus die staan gewoon in *Eerder gemaakt*. Let op: figuren en foto's worden niet geanonimiseerd, en een spelfout in een naam kan erdoor glippen. Kijk de tekst dus na.
 
+Waar je niet typt, zoals bij **Bewijs in één keer**, het reviewteam, het importeren uit documenten en het verwerken van een cursusevaluatie, zie je vóór het versturen **Kijk na wat er naar de AI gaat**: een lijst per woord, met hoe vaak het voorkomt en waar (bijvoorbeeld *Jan de Vries (12×)* → `[COLLEGA-1]`), ook in bestands- en mapnamen. Per woord kies je **Niet vervangen** of **Ook vervangen**, en onder *Nog een woord vervangen* voeg je een woord toe dat de lijst miste. Pas na **Versturen** gaat er iets weg. Namen in je cursus zelf vervangt de server; die komen in het resultaat weer goed terug.
+
 Alles wat naar de AI gaat, komt ook langs een controle **op de server**. Vindt die iets wat je niet zag, bijvoorbeeld een collega in je context of in een eerdere stap, dan stuurt ze niets en zie je **Eerst even kijken**: per woord kies je *Vervangen* of *Niet vervangen*, en pas na **Versturen** gaat er iets weg. Er wordt nooit iets stil vervangen.
 
 ## Voorlezen en dicteren

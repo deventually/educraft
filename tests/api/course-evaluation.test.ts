@@ -164,3 +164,27 @@ describe("the course page's evaluate-course intent (P33.2)", () => {
     expect(generate).not.toHaveBeenCalled();
   });
 });
+
+describe("evaluate-course: nothing goes that the teacher did not see (anonymiseerpoort step 4)", () => {
+  it("lays the words before the teacher first, and sends once they approved them", async () => {
+    const course = await repo.createCourse("eval-a", { name: "Databases", data: alignedCourse() });
+    const fields = {
+      intent: "evaluate-course",
+      evaluation: `${SURVEY}\nMail mij: an@x.nl`,
+      respondents: "12",
+    };
+    const first = (await post(course.id, fields)) as Record<string, unknown>;
+    expect(generate).not.toHaveBeenCalled();
+    expect(first).toMatchObject({
+      ok: false,
+      intent: "evaluate-course",
+      privacyReview: [{ value: "an@x.nl", kind: "email" }],
+    });
+    generate.mockResolvedValue({ text: ANSWER });
+    await post(course.id, {
+      ...fields,
+      privacy: JSON.stringify({ approved: ["an@x.nl"], keep: [] }),
+    });
+    expect(generate.mock.calls[0]![0].messages[0].content).toContain("Mail mij: [E-MAIL-1]");
+  });
+});

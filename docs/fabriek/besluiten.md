@@ -797,3 +797,18 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   alleen woorden, nooit iets met een cijfer of `@`; de poort leest die lijst zelf ook. Bastiaan,
   2026-11-17 (ontwerp "Eén anonimiseerpoort", stap 3; principe "niets gaat weg zonder dat de
   docent het zag").
+- **BESLUIT-2026-11-17-9:** **Ook waar de docent niet typt, gaat niets weg dat de docent niet
+  zag.** Bewijs in één keer, het reviewteam, de cursusimport en de cursusevaluatie tonen vóór het
+  versturen "Kijk na wat er naar de AI gaat": elke vervanging gegroepeerd per woord, met hoe vaak
+  en waar (ook in bestands- en mapnamen), per woord Niet vervangen of Ook vervangen, en een veld
+  voor een woord dat de lijst miste. Pas Versturen post het formulier. **Eén ronde per actie:**
+  de server draait alle model- en Jev-aanroepen van die actie met de keuzes uit het overzicht
+  (`withPrivacyRound`); zonder geldige keuzes stuurt hij niets ongeziens (dus ook zonder JS niet).
+  Weigert de poort één aanroep, dan sturen de rest van de ronde ook niets en komen alle woorden
+  in één vraag terug; een geweigerde aanroep wordt niet als gebruik geteld. **Wat de server al
+  heeft** (de cursus) wordt niet opnieuw meegestuurd: de pagina toont het, en een woord dat de
+  docent daar extra wil vervangen gaat bij naam mee (`privacy.replace`, `[ANDER-n]`), want de
+  server kent het al. Bij Bewijs in één keer is alles studentwerk: namen en teksten worden in de
+  browser vervangen, en de vervangen tekst komt in het dossier, zoals bij de oude naamcheck. De
+  losse namencheck (`RedactReview`, `checkNames`) is weg. Bastiaan, 2026-11-17 (ontwerp "Eén
+  anonimiseerpoort", stap 4; principe "niets gaat weg zonder dat de docent het zag").

@@ -213,3 +213,41 @@ describe("evidence in one go — adding what was ticked", () => {
     expect(after?.data.evidence).toHaveLength(1);
   });
 });
+
+describe("evidence in one go: nothing goes that the teacher did not see (anonymiseerpoort step 4)", () => {
+  const mailed = [{ key: "f1", name: "LU1/lesplan.docx", text: "Lesplan. Vragen: jan@school.nl" }];
+
+  it("lays the words before the teacher first, without asking the model", async () => {
+    const mine = await repo.createDossier("teacher-b", "B", confirmed());
+    const r = (await act(mine.id, [
+      ["intent", "proposeEvidence"],
+      ["files", JSON.stringify(mailed)],
+    ])) as Record<string, unknown>;
+    expect(generate).not.toHaveBeenCalled();
+    expect(r).toMatchObject({
+      ok: false,
+      intent: "proposeEvidence",
+      privacyReview: [{ value: "jan@school.nl", code: "E-MAIL-1", kind: "email", count: 1 }],
+    });
+  });
+
+  it("sends with the words replaced once the teacher approved them", async () => {
+    const mine = await repo.createDossier("teacher-b", "B", confirmed());
+    generate.mockResolvedValue({ text: "{}" });
+    await act(mine.id, [
+      ["intent", "proposeEvidence"],
+      ["files", JSON.stringify(mailed)],
+      ["privacy", JSON.stringify({ approved: ["jan@school.nl"], keep: [] })],
+    ]);
+    expect(generate.mock.calls[0]![0].messages[0].content).toContain("Vragen: [E-MAIL-1]");
+  });
+
+  it("gives the page the names the gate knows and the teacher's never-list", async () => {
+    const mine = await repo.createDossier("teacher-b", "B", confirmed());
+    const page = await route.loader({
+      request: new Request("http://localhost/x"),
+      params: { id: mine.id },
+    } as never);
+    expect(page.privacy).toEqual({ known: { colleagues: [] }, never: [] });
+  });
+});

@@ -7,6 +7,9 @@ import { Button, Card, HelpText, Input, Label, Textarea } from "~/components/ui"
 import { FileInput } from "~/components/FileInput";
 import { useT } from "~/lib/i18n/useT";
 import { AiCallField } from "~/components/AiLeaveGuard";
+import { SendRound } from "~/components/privacy/SendRound";
+import { useSendRound } from "~/lib/hooks/useSendRound";
+import type { PrivacyPage } from "~/lib/privacy/live";
 import { AiNotes, ProposalForm } from "./ProposalForm";
 
 type ImportAction = { ok: boolean; intent?: string; proposal?: unknown } | undefined;
@@ -31,22 +34,30 @@ export function useImportProposal(actionData: ImportAction): ImportProposal | nu
 /**
  * "Import from a course catalogue or study guide" (brief P26, 26.3). The file
  * is read in the browser (`fileToText`); only its text is posted (intent
- * `import-extract`). The answer is a proposal the teacher ticks and edits;
- * `import-apply` adds what is ticked. Works without JS by pasting.
+ * `import-extract`), after the overview of what is replaced (anonymiseerpoort step 4). The
+ * answer is a proposal the teacher ticks and edits; `import-apply` adds what is ticked. Works
+ * without JS by pasting; the gate then asks before anything unseen goes.
  */
 export function CourseImport({
   courseName,
   startOpen,
   proposal,
   notes,
+  answer,
+  privacy,
 }: {
   courseName: string;
   startOpen: boolean;
   proposal: ImportProposal | null;
   /** The AI's explanation when the last `import-extract` found nothing to import. */
   notes?: string;
+  /** The page's last action answer: it may carry the gate's question. */
+  answer?: unknown;
+  /** The names the gate knows and the teacher's never-list. */
+  privacy?: PrivacyPage;
 }) {
   const ti = useT().courses.import;
+  const round = useSendRound(privacy, answer, "import-extract");
   const nav = useNavigation();
   const busy = nav.state === "submitting" && nav.formData?.get("intent") === "import-extract";
   const [value, setValue] = useState("");
@@ -76,7 +87,27 @@ export function CourseImport({
             <span id={`${id}-title`}>{ti.title}</span>
           </summary>
           <p className="mt-2 text-sm text-slate-600">{ti.body}</p>
-          <Form method="post" className="mt-4 grid gap-3">
+          <Form
+            method="post"
+            className="mt-4 grid gap-3"
+            onSubmit={(e) => {
+              // Nothing goes before the overview: Versturen posts it (`useSendRound`).
+              e.preventDefault();
+              const form = new FormData(e.currentTarget);
+              round.start(form, [
+                {
+                  name: "documentText",
+                  label: ti.text,
+                  text: String(form.get("documentText") ?? ""),
+                },
+                {
+                  name: "courseName",
+                  label: ti.courseName,
+                  text: String(form.get("courseName") ?? ""),
+                },
+              ]);
+            }}
+          >
             <input type="hidden" name="intent" value="import-extract" />
             <AiCallField />
             <div>
@@ -123,6 +154,7 @@ export function CourseImport({
               </Button>
             </div>
           </Form>
+          <SendRound round={round} />
           {notes && !proposal && <AiNotes notes={notes} />}
           {proposal && <ProposalForm proposal={proposal} />}
         </details>

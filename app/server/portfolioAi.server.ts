@@ -52,8 +52,11 @@ export async function callPortfolioModel(
       },
       { exit: "portfolio", locale },
     );
-    // Without the teacher's approval the gate only counts, so it always sends (step 2 of 5).
-    if (!gated.ok) throw new Error("privacy review");
+    // Refused in a round (step 4): nothing went, so nothing is metered; the round asks the teacher.
+    if (!gated.ok) {
+      log(event, { promptId, model, outcome: "privacy-review", durationMs: Date.now() - started });
+      return null;
+    }
     const { text, usage } = gated.value;
     if (usage) meter.onUsage(usage);
     await meter.done(text.length);

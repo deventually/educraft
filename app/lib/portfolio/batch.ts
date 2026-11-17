@@ -10,8 +10,6 @@
 import { z } from "zod";
 import { extractJson } from "~/lib/ai/structuredAnswer";
 import type { Locale } from "~/lib/i18n";
-import { redactOptions } from "~/lib/privacy/pack";
-import { applyRedactions, findRedactions } from "~/lib/privacy/redact";
 import * as edit from "./edit";
 import { LIMITS } from "./schema";
 import { type DossierData, EVIDENCE_KINDS, type EvidenceKind, type Outcome } from "./types";
@@ -171,29 +169,6 @@ export function parseSortAnswer(
     check,
     ...(reason ? { reason } : {}),
   };
-}
-
-// ── The name check (in the browser) ─────────────────────────────────────────
-
-/**
- * Replaces the student names the teacher listed, and what looks like an e-mail address, phone
- * number, postcode, IBAN or student number, by a code (`~/lib/privacy/redact`). Each finding
- * is listed once, so the teacher sees per file what went.
- */
-export function checkNames(
-  text: string,
-  names: readonly string[],
-): { text: string; found: { code: string; original: string }[] } {
-  const entries = names.map((value) => ({ kind: "student" as const, value }));
-  const spans = findRedactions(text, entries, [], redactOptions());
-  const seen = new Set<string>();
-  const found = spans.flatMap((s) => {
-    const id = `${s.code}\u0000${s.original.toLowerCase()}`;
-    if (seen.has(id)) return [];
-    seen.add(id);
-    return [{ code: s.code, original: s.original }];
-  });
-  return { text: applyRedactions(text, spans).text, found };
 }
 
 // ── The form boundary ───────────────────────────────────────────────────────

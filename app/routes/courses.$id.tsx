@@ -54,6 +54,7 @@ import { CourseProgrammes } from "~/components/programmes/CourseProgrammes";
 import { courseProgrammeAction } from "~/server/programmes.server";
 import { placeOptions, programmesOfCourse } from "~/server/repositories/programmes.server";
 import { linesOfCourse } from "~/server/repositories/learningLines.server";
+import { privacyPageFor } from "~/server/privacyGate.server";
 import { NO_COURSE_TOOLS } from "~/lib/registry/courseActions";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
@@ -96,6 +97,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     dossiers: await dossierTargets(user),
     review: await loadReviewPanel(user, course),
     pack: await coursePack(course),
+    // The overview before sending (anonymiseerpoort step 4) shows what the gate will replace.
+    privacy: await privacyPageFor(user),
     // The course wizard (switched off by the admin: only the document and an empty start).
     courseDesign: await isFeatureOn(user, "courseDesign"),
     tools: await courseToolsFor(user),
@@ -167,7 +170,8 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
     },
     result: (r) => {
       if (!r) return null;
-      if (!r.ok) return { variant: "error", message: r.error };
+      // The gate's question takes focus itself; a toast would say it twice.
+      if (!r.ok) return "privacyReview" in r ? null : { variant: "error", message: r.error };
       if (r.intent === "import-extract") {
         const ready = r.flagged ? fmt(c.import.readyCheck, { n: r.flagged }) : c.import.ready;
         return { variant: "success", message: r.clipped ? `${ready} ${c.import.clipped}` : ready };
@@ -249,6 +253,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
   } = loaderData;
   const isOwner = (members?.myRole ?? "owner") === "owner";
   const { data } = course;
+  const round = { answer: actionData, privacy: loaderData.privacy };
   const [params] = useSearchParams();
   const tab = courseTab(params.get("tab"));
 
@@ -330,6 +335,7 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
               startOpen={data.outcomes.length === 0}
               proposal={designed ? null : proposal}
               notes={aiNotes("import-extract")}
+              {...round}
             />
             <CourseWeekView
               courseId={course.id}
@@ -363,11 +369,18 @@ export default function CoursePage({ loaderData }: Route.ComponentProps) {
                   : null
               }
               models={review?.models}
+              {...round}
             />
             <CoverageMatrix data={data} matrix={matrix} />
             <FindingsList data={data} findings={findings} courseId={course.id} tools={tools} />
             {review && (
-              <CourseReviewPanel data={data} {...review} courseId={course.id} tools={tools} />
+              <CourseReviewPanel
+                {...review}
+                {...round}
+                data={data}
+                courseId={course.id}
+                tools={tools}
+              />
             )}
           </>
         )}

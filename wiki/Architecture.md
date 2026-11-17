@@ -328,14 +328,26 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   "Ook vervangen") is replaced in the browser and its code table stays in component memory;
   known names and patterns go as typed with `privacy.approved`, so the gate replaces and restores
   them and `generations` keeps the real names. A `redact: true` field is replaced entirely in the
-  browser (the original never leaves it); the separate `RedactReview` step is gone from the tool
-  page (the course evaluation still uses it until step 4). The conversation and earlier steps are
+  browser (the original never leaves it); the separate `RedactReview` step is gone. The conversation and earlier steps are
   coded the same way and their known names approved. `privacy.keep` carries the words the teacher
   clicked off; a known name clicked off goes on the never-list (`privacy_keep_words`,
   `keepWords.server.ts`, `/api/privacy/keep`; words only, no digit or `@`), which the gate also
   reads itself. `studentNumberExample` is only the shape (`s0000000`). When the gate still sends
   nothing (`event: privacy`), `streamPost` calls `onPrivacy` and the page shows `PrivacyAskCard`
   (per word Replace or Do not replace, then Send), which sends again with the answer.
+- **The overview before sending (anonymiseerpoort step 4, BESLUIT-2026-11-17-9)**
+  (`app/lib/privacy/overview.ts`, `app/lib/hooks/useSendRound.ts`,
+  `app/components/privacy/SendRound.tsx`). Screens without a typing moment (Bewijs in één keer,
+  the review team, the course import, the course evaluation) hold their form back: `start` opens
+  "Kijk na wat er naar de AI gaat" (`overviewWords`: every replacement grouped per word, with
+  count and parts, Niet vervangen / Ook vervangen) and only `send` posts it, with `prepareOverview`'s
+  values and `privacy` approval. A part the server already holds (`held`: the course, via
+  `textOf`, ids left out) is shown but not sent; an added word found there goes as
+  `privacy.replace`. On the server the action runs as one round (`withPrivacyRound` in
+  `privacyGate.server.ts`, an `AsyncLocalStorage`): every gated call in it uses that approval
+  (no valid approval = nothing unseen goes); once one call is refused, the rest send nothing and
+  add their words, and the action answers `privacyReview`, which the page shows as
+  `PrivacyAskCard` and sends again. A refused `callPortfolioModel` call is not metered.
 - **Figures from the document** (`app/lib/documents/figures.ts`,
   `app/components/documents/DocumentFigurePicker.tsx`). An image field with `imagesFrom: "<document
   field>"` offers the figures of the files uploaded there: Word images the model can read (icons

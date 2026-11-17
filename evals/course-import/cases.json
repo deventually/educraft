@@ -194,6 +194,12 @@
             "weight": 40
           }
         ]
+      },
+      "privacyKnown": {
+        "teacher": "Docent B",
+        "colleagues": [
+          "Docent C"
+        ]
       }
     },
     {
@@ -225,6 +231,12 @@
             "knockOut": false
           }
         ]
+      },
+      "privacyKnown": {
+        "teacher": "Docent B",
+        "colleagues": [
+          "Docent C"
+        ]
       }
     },
     {
@@ -255,6 +267,13 @@
         "criteria": [
           "De student stelt IP-adressering en subnetten in.",
           "De student verzamelt meetgegevens met een netwerkanalyzer."
+        ]
+      },
+      "privacyKnown": {
+        "teacher": "Docent C",
+        "colleagues": [
+          "Docent D",
+          "Docent B"
         ]
       }
     }

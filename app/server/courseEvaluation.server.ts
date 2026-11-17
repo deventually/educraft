@@ -2,7 +2,7 @@
  * Processing a course evaluation (brief P33.2), the server half: the `evaluate-course` intent of
  * the course page. The anonymised survey (the browser ran the name check), the respondents counted
  * by the page, the course outline and any test analysis linked to one of the course's tests go to
- * the model the teacher chose; `parseEvaluation` checks the answer, with one retry. Nothing is
+ * the model the teacher chose, as one round with the overview the teacher saw (`withPrivacyRound`); `parseEvaluation` checks the answer, with one retry. Nothing is
  * saved: an improvement only reaches the course when the teacher accepts it (P33.3).
  * Course content, so an editor may too (BESLUIT-2026-11-10-5).
  */
@@ -22,6 +22,8 @@ import { runAiCall } from "./aiCalls.server";
 import { isModelSelectableForUser } from "./availability.server";
 import { syncModelRegistry } from "./modelRegistry.server";
 import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
+import { withPrivacyRound } from "./privacyGate.server";
+import type { ReviewItem } from "~/lib/privacy/gate";
 import { type Course, listLinkedWork } from "./repositories/courses.server";
 import { getGeneration } from "./repositories/generations.server";
 import { getProfile } from "./repositories/profiles.server";
@@ -43,7 +45,13 @@ type EvaluateError = "invalid" | "model" | "quota" | "failed";
 
 type EvaluateResult =
   | { ok: true; intent: "evaluate-course"; evaluation: CourseEvaluation }
-  | { ok: false; intent: "evaluate-course"; error: string };
+  | {
+      ok: false;
+      intent: "evaluate-course";
+      error: string;
+      /** The gate found words the teacher did not see; nothing went (anonymiseerpoort step 4). */
+      privacyReview?: ReviewItem[];
+    };
 
 /** The test analyses the caller linked to this course's tests (only their own work). */
 async function linkedTestAnalyses(user: User, course: Course) {
@@ -120,7 +128,16 @@ export async function courseEvaluationAction(
   if (fd.get("intent") !== "evaluate-course") return null;
   const locale = getLocale(request);
   // The page's call id: leaving the page with "Stop" stops this model call.
-  const r = await runAiCall(user.id, fd.get("aiCall"), () => evaluate(user, course, fd, locale));
+  // One round with the overview the teacher saw: nothing unseen goes (anonymiseerpoort step 4).
+  const round = await runAiCall(user.id, fd.get("aiCall"), () =>
+    withPrivacyRound(fd.get("privacy"), () => evaluate(user, course, fd, locale)),
+  );
+  const intent = "evaluate-course";
+  if (round.review) {
+    const error = getMessages(locale).privacy.askTitle;
+    return { ok: false, intent, error, privacyReview: round.review };
+  }
+  const r = round.value;
   if (r.ok) return { ok: true, intent: "evaluate-course", evaluation: r.evaluation };
   const m = getMessages(locale).courseEvaluation;
   return { ok: false, intent: "evaluate-course", error: m.errors[r.error] };

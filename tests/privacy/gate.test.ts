@@ -119,6 +119,25 @@ describe("the three modes", () => {
   });
 });
 
+describe("words the teacher also replaces in text the server holds (step 4)", () => {
+  it("replaces them like a name, without asking, and puts them back", () => {
+    const r = gateTexts(
+      ["Les van de Zonnebloemklas, met Mark de Groot."],
+      policy({ mode: "review", approved: ["Mark de Groot"], replace: ["Zonnebloemklas"] }),
+    );
+    expect(r.send && r.texts).toEqual(["Les van de [ANDER-1], met [DOCENT]."]);
+    expect(r.send && r.codes["ANDER-1"]).toBe("Zonnebloemklas");
+  });
+
+  it("does not count them: they are the teacher's own words, not a kind", () => {
+    const r = gateTexts(
+      ["De Zonnebloemklas."],
+      policy({ mode: "count", replace: ["Zonnebloemklas"] }),
+    );
+    expect(r.counts).toEqual({});
+  });
+});
+
 describe("a prompt", () => {
   it("adds one sentence about codes to the system prompt, only when something was replaced", () => {
     const r = gatePrompt(

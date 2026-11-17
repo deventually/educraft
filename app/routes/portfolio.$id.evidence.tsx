@@ -3,6 +3,7 @@ import { Link, useActionData } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/portfolio.$id.evidence";
 import { loadDossier, saveIntent } from "~/server/portfolio.server";
+import { privacyPageFor } from "~/server/privacyGate.server";
 import { LIMITS } from "~/lib/portfolio/schema";
 import { BatchEvidence } from "~/components/portfolio/BatchEvidence";
 import { useFormToast } from "~/components/Toast";
@@ -15,7 +16,7 @@ export function meta() {
 
 /** Evidence in one go: the framework the list needs and the room left in the dossier. */
 export async function loader({ request, params }: Route.LoaderArgs) {
-  const { dossier } = await loadDossier(request, params.id);
+  const { user, dossier } = await loadDossier(request, params.id);
   const d = dossier.data;
   return {
     id: dossier.id,
@@ -30,6 +31,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       criteria: o.criteria.map((c) => ({ id: c.id, text: c.text })),
       requiredEvidence: o.requiredEvidence,
     })),
+    // The overview before sending (anonymiseerpoort step 4) shows what the gate will replace.
+    privacy: await privacyPageFor(user),
   };
 }
 
@@ -48,7 +51,8 @@ export default function PortfolioEvidence({ loaderData }: Route.ComponentProps) 
         : { variant: "pending", message: t.toast.saving },
     result: (r) => {
       if (!r) return null;
-      if (!r.ok) return { variant: "error", message: r.error };
+      // The gate's question takes focus itself; a toast would say it twice.
+      if (!r.ok) return "privacyReview" in r ? null : { variant: "error", message: r.error };
       if (r.intent === "proposeEvidence") return { variant: "success", message: tb.proposed };
       const n = r.added ?? 0;
       return { variant: "success", message: n === 1 ? tb.addedOne : fmt(tb.added, { n }) };
@@ -89,6 +93,8 @@ export default function PortfolioEvidence({ loaderData }: Route.ComponentProps) 
         room={room}
         confirmed={confirmed}
         sorted={sorted}
+        answer={actionData}
+        privacy={loaderData.privacy}
       />
     </div>
   );

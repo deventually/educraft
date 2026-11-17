@@ -142,3 +142,62 @@ describe("with what the teacher saw", () => {
     expect(r).toEqual({ ok: true, value: { reason: "Past bij Fatima el Amrani", p: 0.9 } });
   });
 });
+
+describe("a round on a screen without a typing moment (step 4)", () => {
+  const form = (approval: unknown) => JSON.stringify(approval);
+
+  it("every call in the round gets the teacher's approval from the form", async () => {
+    generate.mockResolvedValue({ text: "Overleg met [COLLEGA-1]." });
+    const r = await gate.withPrivacyRound(
+      form({ approved: ["Fatima el Amrani", "fatima@school.nl"], keep: [] }),
+      () => gate.gatedGenerate(user, prompt, { exit: "portfolio", locale: "nl" }),
+    );
+    expect(r.review).toBeNull();
+    expect(generate.mock.calls[0]?.[0].messages[0].content).toBe(
+      "Vraag [COLLEGA-1], mail [E-MAIL-1].",
+    );
+    expect(r.value).toEqual({ ok: true, value: { text: "Overleg met Fatima el Amrani." } });
+  });
+
+  it("without a valid approval nothing unseen goes: the round asks first", async () => {
+    for (const raw of [null, "", "{nonsense", form({ approved: 3 })]) {
+      const r = await gate.withPrivacyRound(raw, () =>
+        gate.gatedGenerate(user, prompt, { exit: "portfolio", locale: "nl" }),
+      );
+      expect(r.review?.map((i) => i.value)).toEqual(["Fatima el Amrani", "fatima@school.nl"]);
+    }
+    expect(generate).not.toHaveBeenCalled();
+  });
+
+  it("once one call is refused, the rest of the round sends nothing and adds its words", async () => {
+    const r = await gate.withPrivacyRound(form({ approved: [], keep: [] }), async () => {
+      await gate.gatedGenerate(user, prompt, { exit: "portfolio", locale: "nl" });
+      await gate.gatedGenerate(
+        user,
+        { ...prompt, messages: [{ role: "user", content: "Een les zonder namen." }] },
+        { exit: "portfolio", locale: "nl" },
+      );
+      return gate.gatedDecisions(
+        user,
+        "https://jev.example/decisions",
+        { model: "jev", state: { f: "Fatima el Amrani en Mark de Groot" }, questions: {} },
+        { apiKey: "k" },
+        { exit: "jev", locale: "nl" },
+      );
+    });
+    expect(generate).not.toHaveBeenCalled();
+    expect(postDecisions).not.toHaveBeenCalled();
+    expect(r.review).toEqual([
+      { value: "Fatima el Amrani", code: "COLLEGA-1", kind: "colleague", count: 1 },
+      { value: "fatima@school.nl", code: "E-MAIL-1", kind: "email", count: 1 },
+      { value: "Mark de Groot", code: "DOCENT", kind: "teacher", count: 1 },
+    ]);
+  });
+
+  it("outside a round a call is only counted, as before", async () => {
+    generate.mockResolvedValue({ text: "Goed." });
+    const r = await gate.gatedGenerate(user, prompt, { exit: "portfolio", locale: "nl" });
+    expect(r.ok).toBe(true);
+    expect(generate.mock.calls[0]?.[0].messages).toEqual(prompt.messages);
+  });
+});
