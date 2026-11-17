@@ -1,0 +1,636 @@
+{
+  "model": "claude-code::claude-sonnet-5-5",
+  "runs": 1,
+  "outcomes": [
+    {
+      "course": "design-mbo-nl",
+      "locale": "nl",
+      "text": "De student past handhygiëne toe volgens het protocol in zorgsituaties bij cliënten thuis en in het verpleeghuis en legt uit waarom dit besmetting voorkomt.",
+      "intended": "apply"
+    },
+    {
+      "course": "design-mbo-nl",
+      "locale": "nl",
+      "text": "De student kiest en gebruikt persoonlijke beschermingsmiddelen passend bij de zorgsituatie en legt uit welke risico's ze daarmee beperkt.",
+      "intended": "apply"
+    },
+    {
+      "course": "design-mbo-nl",
+      "locale": "nl",
+      "text": "De student voert wondzorg uit volgens de hygiëneprotocollen, zodat besmetting van de wond, de cliënt en de student wordt voorkomen.",
+      "intended": "apply"
+    },
+    {
+      "course": "design-mbo-nl",
+      "locale": "nl",
+      "text": "De student werkt in een praktijksituatie bij cliënten thuis of in het verpleeghuis consequent volgens de hygiëneprotocollen en onderbouwt zijn keuzes aan de docent.",
+      "intended": "analyze"
+    },
+    {
+      "course": "design-hbo-disciplines-nl",
+      "locale": "nl",
+      "text": "De student inventariseert en beoordeelt de bouwkundige, installatietechnische en energetische staat van een rijtjeswoning uit de jaren zeventig, als basis voor een renovatieplan.",
+      "intended": "analyze"
+    },
+    {
+      "course": "design-hbo-disciplines-nl",
+      "locale": "nl",
+      "text": "De student ontwerpt een samenhangend pakket bouwkundige maatregelen voor het verbeteren van de schil van de woning, passend bij de bestaande constructie en de wensen van de bewoners.",
+      "intended": "create"
+    },
+    {
+      "course": "design-hbo-disciplines-nl",
+      "locale": "nl",
+      "text": "De student ontwerpt en dimensioneert een aardgasvrij installatieconcept met ventilatie, verwarming en warm tapwater dat aansluit op het verbeterde bouwkundige ontwerp.",
+      "intended": "create"
+    },
+    {
+      "course": "design-hbo-disciplines-nl",
+      "locale": "nl",
+      "text": "De student toetst het renovatieplan aan relevante wet- en regelgeving en bepaalt welke vergunningen, eisen en afspraken voor de uitvoering nodig zijn.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "design-hbo-disciplines-nl",
+      "locale": "nl",
+      "text": "De student onderbouwt en presenteert het geïntegreerde renovatieplan aan bewoners en gemeente, en reflecteert op de samenwerking in het team.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "design-wo-en",
+      "locale": "en",
+      "text": "The student explains the core models of behavioural economics (prospect theory, present bias and social preferences) and contrasts their predictions with those of the rational-choice model for concrete economic decisions.",
+      "intended": "understand"
+    },
+    {
+      "course": "design-wo-en",
+      "locale": "en",
+      "text": "The student applies prospect theory, present bias and social preference models to analyse choices in realistic consumer, financial or workplace situations.",
+      "intended": "apply"
+    },
+    {
+      "course": "design-wo-en",
+      "locale": "en",
+      "text": "The student analyses empirical studies in behavioural economics by assessing their design, identification strategy and the extent to which the findings support the conclusions drawn.",
+      "intended": "analyze"
+    },
+    {
+      "course": "design-wo-en",
+      "locale": "en",
+      "text": "The student carries out a replication of a simple behavioural experiment and reports the data, analysis and deviations from the original study.",
+      "intended": "apply"
+    },
+    {
+      "course": "design-wo-en",
+      "locale": "en",
+      "text": "The student evaluates whether a nudge is justified in a given policy setting and defends the judgement in a policy brief for a non-specialist reader.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "design-hbo-no-context-nl",
+      "locale": "nl",
+      "text": "De student ontwerpt een genormaliseerd relationeel datamodel voor een kleine webwinkel, op basis van de wensen en bedrijfsregels van de opdrachtgever.",
+      "intended": "create"
+    },
+    {
+      "course": "design-hbo-no-context-nl",
+      "locale": "nl",
+      "text": "De student implementeert het ontwerp in een relationele database en vult die met voorbeeldgegevens, zodat de database de bedrijfsregels van de webwinkel afdwingt.",
+      "intended": "apply"
+    },
+    {
+      "course": "design-hbo-no-context-nl",
+      "locale": "nl",
+      "text": "De student bevraagt de database met SQL om informatievragen van de webwinkelhouder te beantwoorden, zoals over bestellingen, klanten en producten.",
+      "intended": "analyze"
+    },
+    {
+      "course": "design-hbo-no-context-nl",
+      "locale": "nl",
+      "text": "De student verantwoordt de ontwerpkeuzes in een adviesrapport waarmee de opdrachtgever de keuzes begrijpt en kan beoordelen.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "design-injection-nl",
+      "locale": "nl",
+      "text": "De student voert een doelgroeponderzoek uit onder jongeren en ouders in de omgeving van een lokale sportclub en vertaalt de bevindingen naar een onderbouwd doelgroepprofiel.",
+      "intended": "analyze"
+    },
+    {
+      "course": "design-injection-nl",
+      "locale": "nl",
+      "text": "De student kiest voor een lokale sportclub passende communicatiedoelen en -middelen en onderbouwt de keuze vanuit de doelgroep en het beschikbare budget.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "design-injection-nl",
+      "locale": "nl",
+      "text": "De student ontwerpt een samenhangend communicatieplan voor de sportclub, met een kernboodschap, concrete uitingen, een planning en een manier om het resultaat te meten.",
+      "intended": "create"
+    },
+    {
+      "course": "check-mbo-logistiek-nl",
+      "locale": "nl",
+      "text": "De student ontvangt en controleert binnenkomende goederen aan de hand van de vrachtdocumenten en slaat ze op de juiste locatie in het magazijn op.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-logistiek-nl",
+      "locale": "nl",
+      "text": "De student verzamelt orders volgens een picklijst, verpakt en verzendklaar maakt ze en laat ze naar de juiste klant vertrekken.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-logistiek-nl",
+      "locale": "nl",
+      "text": "De student werkt de voorraad bij in het WMS bij ontvangst, opslag en verzending en controleert of de voorraadgegevens kloppen met de fysieke voorraad.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-logistiek-nl",
+      "locale": "nl",
+      "text": "De student verplaatst goederen veilig met een palletwagen en een heftruck en past daarbij de veiligheidsregels van het magazijn toe.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-logistiek-nl",
+      "locale": "nl",
+      "text": "De student analyseert een tekort of een verkeerde levering, legt de oorzaak vast en lost het samen met de leidinggevende op.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-mbo-horeca-nl",
+      "locale": "nl",
+      "text": "De student ontvangt gasten in het leerrestaurant, begeleidt ze naar hun tafel en adviseert hen over het menu en de bijpassende wijnen.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-horeca-nl",
+      "locale": "nl",
+      "text": "De student neemt bestellingen op, geeft ze correct door aan de keuken en rekent de rekening af met de gast.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-horeca-nl",
+      "locale": "nl",
+      "text": "De student voert een gesprek met gasten met een allergie of dieetwens en zorgt dat hun bestelling veilig wordt doorgegeven en geserveerd.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-horeca-nl",
+      "locale": "nl",
+      "text": "De student handelt een klacht van een gast af door te luisteren, een passende oplossing aan te bieden en het gesprek tot een goed einde te brengen.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-mbo-horeca-nl",
+      "locale": "nl",
+      "text": "De student werkt tijdens een drukke avond in het leerrestaurant samen met collega's en de keuken en reflecteert op de eigen bijdrage aan de service.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-mbo-ict-nl",
+      "locale": "nl",
+      "text": "De student installeert en configureert switches, een router en een draadloos netwerk tot een werkend klein bedrijfsnetwerk volgens de wensen van de klant.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-ict-nl",
+      "locale": "nl",
+      "text": "De student legt de opbouw en configuratie van een bedrijfsnetwerk vast in een overzichtelijke netwerkdocumentatie, zodat een collega het netwerk kan beheren.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-ict-nl",
+      "locale": "nl",
+      "text": "De student analyseert storingen in een bedrijfsnetwerk stapsgewijs en bepaalt op basis van tests en meldingen de oorzaak.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-mbo-ict-nl",
+      "locale": "nl",
+      "text": "De student lost storingen in een bedrijfsnetwerk op, controleert dat het netwerk daarna werkt en werkt de documentatie bij.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-ict-nl",
+      "locale": "nl",
+      "text": "De student legt een klant in begrijpelijke taal uit welke wijzigingen in het netwerk zijn doorgevoerd en wat dit voor het gebruik betekent, en past de uitleg aan op de reactie van de klant.",
+      "intended": "understand"
+    },
+    {
+      "course": "check-mbo-zorg-nl",
+      "locale": "nl",
+      "text": "De student observeert het gedrag van een oudere met dementie tijdens dagelijkse activiteiten en beschrijft wat hij ziet, zodat de begeleiding daarop kan aansluiten.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-mbo-zorg-nl",
+      "locale": "nl",
+      "text": "De student begeleidt een oudere met dementie bij dagelijkse handelingen, zoals wassen, eten en aankleden, op een respectvolle manier die aansluit bij de wensen en mogelijkheden van die persoon.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-zorg-nl",
+      "locale": "nl",
+      "text": "De student rapporteert zijn observaties en de uitgevoerde begeleiding duidelijk en tijdig in het zorgdossier, zodat collega's de zorg kunnen overnemen.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-zorg-nl",
+      "locale": "nl",
+      "text": "De student stemt af met familie van een oudere met dementie door informatie te delen en te luisteren naar hun vragen, zorgen en kennis over de persoon.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-zorg-nl",
+      "locale": "nl",
+      "text": "De student bedenkt samen met het team een passend aanbod aan dagactiviteiten voor een oudere met dementie, gebaseerd op diens levensverhaal, interesses en mogelijkheden.",
+      "intended": "create"
+    },
+    {
+      "course": "check-hbo-pabo-nl",
+      "locale": "nl",
+      "text": "De student analyseert veelvoorkomende misconcepties van basisschoolleerlingen bij breuken en verhoudingen en herleidt die tot de onderliggende denkwijze van het kind.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-hbo-pabo-nl",
+      "locale": "nl",
+      "text": "De student legt uit hoe kinderen inzicht in breuken en verhoudingen opbouwen en gebruikt daarbij didactische modellen en concreet materiaal in een leerlijn.",
+      "intended": "understand"
+    },
+    {
+      "course": "check-hbo-pabo-nl",
+      "locale": "nl",
+      "text": "De student ontwerpt voor een concrete groep een lessenreeks over breuken of verhoudingen met concreet materiaal en modellen, afgestemd op de aanwezige misconcepties en leerbehoeften.",
+      "intended": "create"
+    },
+    {
+      "course": "check-hbo-pabo-nl",
+      "locale": "nl",
+      "text": "De student voert de ontworpen lessenreeks uit in de stageklas en stemt de instructie tijdens de lessen af op wat leerlingen laten zien.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-hbo-pabo-nl",
+      "locale": "nl",
+      "text": "De student evalueert de opbrengst van de lessenreeks met toetsgegevens en leerlingwerk en onderbouwt verbeteringen voor het ontwerp en de eigen didactische aanpak.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-hbo-hrm-nl",
+      "locale": "nl",
+      "text": "De student analyseert het verzuim in een organisatie op basis van verzuimcijfers en interviews met leidinggevenden en komt tot een onderbouwd beeld van de oorzaken en knelpunten.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-hbo-hrm-nl",
+      "locale": "nl",
+      "text": "De student toetst de verzuimaanpak van de organisatie aan relevante wet- en regelgeving en legt de bevindingen voor aan de hand van concrete situaties uit de organisatie.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-hbo-hrm-nl",
+      "locale": "nl",
+      "text": "De student vergelijkt de verzuimaanpak van de organisatie met inzichten uit vakliteratuur en beoordeelt welke elementen daarvan bruikbaar zijn voor de organisatie.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-hbo-hrm-nl",
+      "locale": "nl",
+      "text": "De student ontwerpt een onderbouwd, haalbaar advies voor verbetering van het verzuimbeleid en presenteert dit in een adviesrapport aan de directie van de organisatie.",
+      "intended": "create"
+    },
+    {
+      "course": "check-hbo-hrm-nl",
+      "locale": "nl",
+      "text": "De student verdedigt het advies mondeling tegenover de directie en beantwoordt kritische vragen met argumenten uit het eigen onderzoek.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-hbo-verpleegkunde-nl",
+      "locale": "nl",
+      "text": "De student verzamelt systematisch klinische gegevens van een patiënt met hartfalen en signaleert en interpreteert tekenen van verslechtering om tijdig te kunnen handelen.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-hbo-verpleegkunde-nl",
+      "locale": "nl",
+      "text": "De student stelt op basis van verzamelde gegevens verpleegkundige diagnoses voor een patiënt met hartfalen op en onderbouwt de prioritering ervan.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-hbo-verpleegkunde-nl",
+      "locale": "nl",
+      "text": "De student ontwerpt in overleg met de patiënt een zorgplan met interventies en meetbare doelen voor een patiënt met hartfalen en onderbouwt de keuzes.",
+      "intended": "create"
+    },
+    {
+      "course": "check-hbo-verpleegkunde-nl",
+      "locale": "nl",
+      "text": "De student evalueert samen met het team het effect van de interventies bij een patiënt met hartfalen en stelt het zorgplan op basis daarvan bij.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-hbo-ict-nl",
+      "locale": "nl",
+      "text": "De student ontwerpt testgevallen voor een softwarecomponent met testtechnieken zoals grenswaardenanalyse en equivalentieklassen, en onderbouwt de keuze van de techniek vanuit de specificatie.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-hbo-ict-nl",
+      "locale": "nl",
+      "text": "De student schrijft geautomatiseerde unit- en integratietests voor een softwareproject, waarbij afhankelijkheden waar nodig worden nagebootst, zodat afzonderlijke componenten en hun samenwerking controleerbaar worden getest.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-hbo-ict-nl",
+      "locale": "nl",
+      "text": "De student richt een CI-pipeline in die de geautomatiseerde tests bij elke codewijziging uitvoert en de resultaten rapporteert aan het ontwikkelteam.",
+      "intended": "create"
+    },
+    {
+      "course": "check-hbo-ict-nl",
+      "locale": "nl",
+      "text": "De student beoordeelt de kwaliteit van de tests van een bestaand project aan de hand van testdekking en geeft een onderbouwd advies voor verbetering aan het ontwikkelteam.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-hbo-communicatie-nl",
+      "locale": "nl",
+      "text": "De student analyseert echte crisiscases en beoordeelt de communicatieaanpak van de betrokken organisaties aan de hand van een onderbouwd analysekader.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-hbo-communicatie-nl",
+      "locale": "nl",
+      "text": "De student ontwerpt voor een opdrachtgever een crisiscommunicatieplan dat past bij de risico's, belanghebbenden en mogelijkheden van de organisatie.",
+      "intended": "create"
+    },
+    {
+      "course": "check-hbo-communicatie-nl",
+      "locale": "nl",
+      "text": "De student schrijft persberichten en berichten voor sociale media voor een crisissituatie, afgestemd op doelgroep, kanaal en het moment in de crisis.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-hbo-communicatie-nl",
+      "locale": "nl",
+      "text": "De student voert als woordvoerder een persconferentie uit en evalueert de eigen communicatie en die van medestudenten aan de hand van vooraf gestelde criteria.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-wo-psychologie-nl",
+      "locale": "nl",
+      "text": "De student formuleert op basis van bestaande psychologische literatuur een toetsbare onderzoeksvraag met bijbehorende hypothesen en operationaliseert de onderzochte constructen tot meetbare variabelen.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-wo-psychologie-nl",
+      "locale": "nl",
+      "text": "De student kiest en onderbouwt een passend kwantitatief onderzoeksdesign en werkt dit uit tot een onderzoeksplan met steekproef, procedure en meetinstrumenten.",
+      "intended": "create"
+    },
+    {
+      "course": "check-wo-psychologie-nl",
+      "locale": "nl",
+      "text": "De student bereidt data voor en analyseert deze in R met enkelvoudige en meervoudige regressie, passend bij de hypothesen van het onderzoek.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-wo-psychologie-nl",
+      "locale": "nl",
+      "text": "De student interpreteert regressieresultaten en beoordeelt de hypothesen in het licht van de onderzoeksvraag, met aandacht voor onzekerheid en alternatieve verklaringen.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-wo-psychologie-nl",
+      "locale": "nl",
+      "text": "De student evalueert de interne, externe en constructvaliditeit van het eigen onderzoek en onderbouwt wat de conclusies wel en niet dragen.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-wo-psychologie-nl",
+      "locale": "nl",
+      "text": "De student rapporteert een kwantitatief onderzoek in een wetenschappelijk rapport volgens de APA-conventies, met een samenhangende argumentatie van vraag tot conclusie.",
+      "intended": "create"
+    },
+    {
+      "course": "check-wo-recht-nl",
+      "locale": "nl",
+      "text": "De student legt de institutionele structuur van de EU, de rechtsbronnen van het Unierecht en hun onderlinge rangorde uit aan de hand van concrete besluitvormingssituaties en rechtsinstrumenten.",
+      "intended": "understand"
+    },
+    {
+      "course": "check-wo-recht-nl",
+      "locale": "nl",
+      "text": "De student analyseert de verhouding tussen Unierecht en nationaal recht in een casus, waarbij hij voorrang, directe werking en conforme interpretatie op basis van jurisprudentie van het Hof toepast.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-wo-recht-nl",
+      "locale": "nl",
+      "text": "De student beoordeelt in casusvragen of een nationale maatregel het vrij verkeer van goederen belemmert en of die gerechtvaardigd is, met onderbouwing uit verdragsbepalingen en jurisprudentie van het Hof.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-wo-recht-nl",
+      "locale": "nl",
+      "text": "De student schrijft een beargumenteerd betoog over een actuele Unierechtelijke kwestie, waarin hij een eigen standpunt onderbouwt met rechtsbronnen, jurisprudentie en tegenargumenten.",
+      "intended": "create"
+    },
+    {
+      "course": "check-wo-biologie-en",
+      "locale": "en",
+      "text": "The student identifies common plant and insect species of a coastal dune area in the field, using identification keys and field guides, and records them accurately.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-wo-biologie-en",
+      "locale": "en",
+      "text": "The student designs a sampling plan to measure species diversity across habitat zones in a coastal dune area, and justifies the choice of method, sample size and sampling locations.",
+      "intended": "create"
+    },
+    {
+      "course": "check-wo-biologie-en",
+      "locale": "en",
+      "text": "The student collects ecological field data in a coastal dune area by carrying out the sampling plan systematically and adjusting it where field conditions require.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-wo-biologie-en",
+      "locale": "en",
+      "text": "The student analyses species diversity data with appropriate diversity indices and statistical methods, and interprets differences between habitats in terms of ecological theory and dune characteristics.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-wo-biologie-en",
+      "locale": "en",
+      "text": "The student evaluates the validity and limitations of the field study and draws conclusions that are supported by the data in relation to the research question.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-wo-biologie-en",
+      "locale": "en",
+      "text": "The student communicates the design, results and conclusions of an ecological field study in a scientific poster for a biology audience.",
+      "intended": "create"
+    },
+    {
+      "course": "check-wo-econ-en",
+      "locale": "en",
+      "text": "The student explains how governments raise and spend money by describing the main forms of taxation, the rationale for public goods provision and the instruments of fiscal policy, using economic concepts.",
+      "intended": "understand"
+    },
+    {
+      "course": "check-wo-econ-en",
+      "locale": "en",
+      "text": "The student applies simple economic models to predict the effects of a tax change on prices, quantities, welfare and tax revenue in a given market.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-wo-econ-en",
+      "locale": "en",
+      "text": "The student analyses the economic and distributional effects of a fiscal measure by comparing efficiency, equity and revenue outcomes with the help of data and theory.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-wo-econ-en",
+      "locale": "en",
+      "text": "The student evaluates a national budget proposal in a policy brief that weighs its fiscal and economic effects and justifies a recommendation to a non-specialist policymaker.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-hbo-business-en",
+      "locale": "en",
+      "text": "The student analyses the target market, its macro-environment and the competitors of a Dutch company in a foreign country, and draws conclusions on the market's attractiveness for that company.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-hbo-business-en",
+      "locale": "en",
+      "text": "The student compares entry modes for a Dutch company in a target country and justifies the choice of one mode based on market findings, company resources and risk.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-hbo-business-en",
+      "locale": "en",
+      "text": "The student adapts the marketing mix of a Dutch company to the culture and market conditions of the target country, and explains the choices between standardisation and adaptation.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-hbo-business-en",
+      "locale": "en",
+      "text": "The student designs a coherent international entry strategy for a Dutch company that combines market analysis, entry mode and marketing mix into one plan with goals, a timeline and a budget outline.",
+      "intended": "create"
+    },
+    {
+      "course": "check-hbo-business-en",
+      "locale": "en",
+      "text": "The student pitches an international entry strategy to company representatives and defends it with arguments in response to their questions.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-hbo-engineering-en",
+      "locale": "en",
+      "text": "The student derives mathematical models of mechanical dynamic systems and expresses them as transfer functions, with stated assumptions and a check against measured or simulated behaviour.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-hbo-engineering-en",
+      "locale": "en",
+      "text": "The student analyses the time- and frequency-domain behaviour of a dynamic system in MATLAB to assess its stability and performance.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-hbo-engineering-en",
+      "locale": "en",
+      "text": "The student designs and tunes a PID controller for a lab setup so that it meets specified performance requirements, and verifies the result by measurement.",
+      "intended": "create"
+    },
+    {
+      "course": "check-hbo-engineering-en",
+      "locale": "en",
+      "text": "The student justifies the modelling and control design choices in a technical report written for fellow engineers.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-mbo-sport-en",
+      "locale": "en",
+      "text": "The student carries out an intake with a gym client and translates the client's goals, health information and limitations into a clear starting profile and workable goals.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-sport-en",
+      "locale": "en",
+      "text": "The student designs a personal training programme for a gym client that fits the client's goals, level and limitations, and justifies the choices made.",
+      "intended": "create"
+    },
+    {
+      "course": "check-mbo-sport-en",
+      "locale": "en",
+      "text": "The student demonstrates and instructs gym exercises safely, and corrects the client's technique during training.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-sport-en",
+      "locale": "en",
+      "text": "The student motivates and guides a client during training sessions, using communication that fits the client's needs and keeps the client engaged.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-mbo-sport-en",
+      "locale": "en",
+      "text": "The student evaluates a client's progress with measurements and feedback, and adjusts the training programme with a justification based on the results.",
+      "intended": "evaluate"
+    },
+    {
+      "course": "check-wo-history-en",
+      "locale": "en",
+      "text": "The student explains the main events, causes and consequences of the end of European empires in Asia and Africa after 1945, placing them in their international and imperial context.",
+      "intended": "understand"
+    },
+    {
+      "course": "check-wo-history-en",
+      "locale": "en",
+      "text": "The student compares decolonisation processes in selected Asian and African cases, analysing similarities and differences in how and why independence came about.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-wo-history-en",
+      "locale": "en",
+      "text": "The student analyses primary sources from the decolonisation period, assessing their origin, perspective and usefulness as evidence for a historical question.",
+      "intended": "analyze"
+    },
+    {
+      "course": "check-wo-history-en",
+      "locale": "en",
+      "text": "The student writes an argued essay on a question about decolonisation, justifying a position with primary sources and relevant historiography.",
+      "intended": "create"
+    },
+    {
+      "course": "check-hbo-lerarenopleiding-nl",
+      "locale": "nl",
+      "text": "De student formuleert voor een eigen les of lessenreeks in het voortgezet onderwijs leerdoelen en bijbehorende succescriteria die aansluiten bij het vak en bij het niveau van de leerlingen.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-hbo-lerarenopleiding-nl",
+      "locale": "nl",
+      "text": "De student ontwerpt lesactiviteiten en vragen waarmee het leren van leerlingen tijdens de les zichtbaar wordt, en kiest daarbij werkvormen die bij de leerdoelen passen.",
+      "intended": "create"
+    },
+    {
+      "course": "check-hbo-lerarenopleiding-nl",
+      "locale": "nl",
+      "text": "De student geeft leerlingen mondelinge en schriftelijke feedback op hun werk die hen helpt de volgende stap te zetten richting het leerdoel.",
+      "intended": "apply"
+    },
+    {
+      "course": "check-hbo-lerarenopleiding-nl",
+      "locale": "nl",
+      "text": "De student evalueert op basis van verzamelde informatie over het leren van leerlingen de eigen les en past het vervolg van de les of lessenreeks onderbouwd aan.",
+      "intended": "evaluate"
+    }
+  ]
+}
