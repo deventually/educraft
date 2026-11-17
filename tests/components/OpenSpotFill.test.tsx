@@ -39,6 +39,13 @@ describe("ChapterEditor: filling open spots", () => {
     expect(within(region).getByLabelText("wat ik deed")).toHaveFocus();
   });
 
+  it("after the last spot, puts focus back on the chapter text", async () => {
+    render(<ChapterEditor outcomeId="lu1" defaultValue="Ik had [aanvullen: hoeveel] studenten." />);
+    await userEvent.type(screen.getByLabelText("hoeveel"), "24{Enter}");
+    expect(screen.queryByRole("region", REGION)).toBeNull();
+    expect(screen.getByLabelText("Je tekst bij deze leeruitkomst")).toHaveFocus();
+  });
+
   it("does not post the answers: only the chapter text is saved", () => {
     render(<ChapterEditor outcomeId="lu1" defaultValue={TEXT} />);
     expect(

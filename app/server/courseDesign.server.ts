@@ -140,7 +140,7 @@ async function designCourseOutcomes(
 }
 
 /**
- * Jev's Bloom check (Jev's setting, off by default): per proposed outcome, does the
+ * Jev's Bloom check (Jev's switch, off by default): per proposed outcome, does the
  * verb fit the intended level? Where Jev hears another level, or none, the outcome carries it as
  * `bloomCheck`; the level itself stays the AI's, and the teacher decides.
  */
@@ -150,7 +150,7 @@ async function withBloomCheck(
   locale: Locale,
 ): Promise<ImportProposal> {
   const texts = proposal.outcomes.map((o) => o.text);
-  const heard = await askJevBloom(user, texts, locale, "bloomJev", EVENT);
+  const heard = await askJevBloom(user, texts, locale, EVENT);
   if (!heard) return proposal;
   const outcomes = proposal.outcomes.map((o, i) => {
     const p = heard[i];

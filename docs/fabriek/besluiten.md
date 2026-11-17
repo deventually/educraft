@@ -725,3 +725,13 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   BESLUIT-2026-11-16-6 dat een teamleider alleen een gewoon lid weghaalt. Bastiaan, 2026-11-16
   ("Ik kan als teamleider/team eigenaar geen leden weghalen uit mijn team", "Maar wil dat wel
   kunnen").
+- **BESLUIT-2026-11-17-1:** **Eén schakelaar voor Jev, en aanzetten is het akkoord.** In plaats van
+  een onderdeel per gebruik (*Bloom-voorstel bij de import*, *Bewijs in één keer sorteren*) heeft
+  Jev één schakelaar op Beheer → Tools, standaard **uit**, alleen voor de hele instelling (geen
+  team of uitzondering). Een beheerder die hem aanzet, geeft daarmee het akkoord van de instelling
+  dat de gegevens naar OpenRouter en TypeSafe gaan; wie en wanneer staat bij de schakelaar en in
+  het logboek. Elk gebruik van Jev, ook een nieuw, vraagt `jevAccess()`
+  (`app/server/jev.server.ts`) en stuurt niets als die `null` geeft. Dit vervangt "achter een
+  instelling" in BESLUIT-2026-11-13-1. Bastiaan, 2026-11-17 ("Ik wil dat er 1 optie komt om jev
+  aan of uit te zetten in het beheerscherm. Als het ok is om te gebruiken, dan is dat de
+  toezegging").

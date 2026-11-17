@@ -3,7 +3,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 // Isolated in-memory SQLite before any server module loads.
 process.env.DATABASE_URL = "file::memory:";
 
-// The Bloom check in the course wizard (step 1): behind Jev's instance setting (now `bloomJev`),
+// The Bloom check in the course wizard (step 1): behind Jev's one admin switch (`jevAccess`),
 // off by default. The LLM writes the outcomes and their intended level as before; Jev reads
 // each outcome's verb, and where it hears another level (or none), the proposal says so. The
 // level itself stays the LLM's; the teacher decides.
@@ -72,7 +72,7 @@ beforeEach(() => {
 afterEach(async () => {
   vi.unstubAllGlobals();
   delete process.env.JEV_API_KEY;
-  await settings.setFeatureStand("bloomJev", "off");
+  await settings.setJevConsent(false, "admin-1");
 });
 
 async function designOutcomes(name: string) {
@@ -99,7 +99,7 @@ describe("design-outcomes with Jev's Bloom check", () => {
   });
 
   it("when on, marks the outcomes whose verb Jev hears at another level, or at none", async () => {
-    await settings.setFeatureStand("bloomJev", "on");
+    await settings.setJevConsent(true, "admin-1");
     const outcomes = await designOutcomes("On");
     // The intended level stays the LLM's: the check only advises.
     expect(outcomes.map((o) => o.bloom)).toEqual(["create", "analyze", "understand"]);
@@ -114,7 +114,7 @@ describe("design-outcomes with Jev's Bloom check", () => {
   });
 
   it("counts Jev's cost in the usage dashboard, under the wizard", async () => {
-    await settings.setFeatureStand("bloomJev", "on");
+    await settings.setJevConsent(true, "admin-1");
     await designOutcomes("Cost");
     const rows = (await usage.listAiUsage("teacher-bc", "2000-01-01")).filter(
       (r) => r.model === "typesafe/jev-1.14",
@@ -125,7 +125,7 @@ describe("design-outcomes with Jev's Bloom check", () => {
   });
 
   it("checks nothing without Jev's key, and leaves an outcome Jev did not answer alone", async () => {
-    await settings.setFeatureStand("bloomJev", "on");
+    await settings.setJevConsent(true, "admin-1");
     delete process.env.JEV_API_KEY;
     const noKey = await designOutcomes("No key");
     expect(noKey.map((o) => "bloomCheck" in o)).toEqual([false, false, false]);

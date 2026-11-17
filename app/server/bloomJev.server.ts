@@ -1,17 +1,15 @@
 /**
  * TypeSafe's Jev on the Bloom level of outcomes, the server half: one request per outcome
  * (`app/lib/courses/bloomJev.ts` builds it and reads the answer), a few at a time, each call
- * metered at the cost Jev reports. Nothing goes to Jev without the setting and Jev's own key.
+ * metered at the cost Jev reports. Nothing goes to Jev unless `jevAccess` allows it.
  */
 import { postDecisions } from "~/lib/ai/decisions";
-import { DECISIONS, usdInEuroMicros } from "~/lib/ai/models";
+import { usdInEuroMicros } from "~/lib/ai/models";
 import { buildBloomJevRequest, type LevelP, parseBloomJevAnswer } from "~/lib/courses/bloomJev";
-import type { FeatureId } from "~/lib/features";
 import type { Locale } from "~/lib/i18n";
 import { currentAiSignal } from "./aiCalls.server";
 import type { User } from "./auth.server";
-import { isFeatureOn } from "./availability.server";
-import { providerSetting } from "./env.server";
+import { jevAccess } from "./jev.server";
 import { recordAiUsage } from "./repositories/aiUsage.server";
 
 /** Outcomes asked at once; a course rarely has more than a few dozen. */
@@ -19,18 +17,17 @@ const JEV_PARALLEL = 6;
 
 /**
  * Each outcome's yes-probability per level, in order; null for an outcome Jev did not answer.
- * The whole answer is null when Jev is not available (setting `feature` off, or no key).
+ * The whole answer is null when nothing may go to Jev (`jevAccess`: the switch, the key).
  */
 export async function askJevBloom(
   user: User,
   texts: readonly string[],
   locale: Locale,
-  feature: FeatureId,
   source: string,
 ): Promise<(LevelP | null)[] | null> {
-  const apiKey = DECISIONS ? providerSetting(DECISIONS.keyEnv) : undefined;
-  if (!DECISIONS || !apiKey || !(await isFeatureOn(user, feature))) return null;
-  const { url, model, provider } = DECISIONS;
+  const jev = await jevAccess();
+  if (!jev) return null;
+  const { url, model, provider, apiKey } = jev;
   const signal = currentAiSignal();
 
   const ask = async (text: string): Promise<LevelP | null> => {

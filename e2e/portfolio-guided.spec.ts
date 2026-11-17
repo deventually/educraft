@@ -8,7 +8,8 @@ test.use({ storageState: storageStateOf("admin") });
 /**
  * Guided writing (BDB/BKE plan, step 6) on the chapter tab: every part with its questions,
  * answer fields reachable by keyboard and labelled by their question, axe finds nothing, and
- * nothing scrolls sideways at 320px. Saving the chapter keeps an answer typed beside it.
+ * nothing scrolls sideways at 320px. Saving the chapter keeps an answer typed beside it, and
+ * focus with the save button.
  */
 test("the chapter tab guides writing part by part, by keyboard", async ({ page }) => {
   const csp = watchCsp(page);
@@ -46,8 +47,15 @@ test("the chapter tab guides writing part by part, by keyboard", async ({ page }
 
   await expectNoAxeViolations(page);
 
-  await page.getByRole("button", { name: "Hoofdstuk opslaan" }).click();
+  await page
+    .getByRole("textbox", { name: "Je tekst bij deze leeruitkomst" })
+    .fill("Mijn groep was een tweedejaars klas.");
+  const save = page.getByRole("button", { name: "Hoofdstuk opslaan" });
+  await save.focus();
+  await page.keyboard.press("Enter");
   await expect(page.getByText("Opgeslagen.")).toBeVisible();
+  // The chapter reloads after saving; focus stays on the button, not back on the page.
+  await expect(save).toBeFocused();
   await page.reload();
   await expect(page.getByRole("textbox", { name: "Hoe bracht je dat in kaart?" })).toHaveValue(
     "Met de toets van week 1.",
