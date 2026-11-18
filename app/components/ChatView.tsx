@@ -240,33 +240,12 @@ export function ChatView({
     (texts ?? []).map((text) => loc(text, outputLanguage));
 
   return (
-    // Two-pane chat. On a wide screen it's a fixed-height layout: the aside sits
-    // on the right, and the chat column's thread scrolls internally so the
-    // composer stays pinned. On mobile it collapses to a single column (aside on
-    // top) that scrolls with the page — pinning there would trap the tall aside
-    // and its model/language controls off-screen.
+    // Two-pane chat. On a wide screen it's a fixed-height layout: the side column
+    // sits on the right, and the chat column's thread scrolls internally so the
+    // composer stays pinned. On mobile it collapses to a single column (chat first,
+    // side column below) that scrolls with the page — pinning there would trap the
+    // tall side column and its model/language controls off-screen.
     <div className="flex flex-col gap-4 md:min-h-0 md:flex-1 md:flex-row md:gap-6">
-      <ChatSettingsAside
-        tool={tool}
-        summary={settingsSummary ?? summarizeSandbox(tool.inputs, sandboxValues, locale)}
-        onEdit={
-          tool.inputs.length > 0 && !presetValues ? () => setSandboxSubmitted(false) : undefined
-        }
-        values={sandboxValues}
-        studentPrompt={studentPrompt}
-        hasContextProfile={!!contextProfile}
-        outputLanguage={outputLanguage}
-        onOutputLanguage={setOutputLanguage}
-        model={{
-          options: modelOptions,
-          selected: selectedModel,
-          onSelect: setSelectedModel,
-          supportsThinking: selectedModelSupportsThinking,
-          thinking,
-          onThinking: setThinking,
-        }}
-      />
-
       {/* Chat column — on wide screens the thread fills the height and the
           composer pins; on mobile it flows in the page scroll. */}
       <div className="flex flex-col md:min-h-0 md:flex-1">
@@ -284,18 +263,6 @@ export function ChatView({
           outputLanguage={outputLanguage}
           model={selectedModel}
           renderAssistant={renderAssistant}
-          footer={
-            resultContext &&
-            chat.savedId &&
-            !chat.isStreaming && (
-              <ResultActions
-                {...resultContext}
-                generationId={chat.savedId}
-                courseId={courseId}
-                itemId={itemId}
-              />
-            )
-          }
         />
         {privacy.ask && (
           <PrivacyAskCard
@@ -321,6 +288,42 @@ export function ChatView({
           fields={[{ name: "message", label: t.privacy.message, text: messageInput }]}
           compact
         />
+      </div>
+
+      {/* The side column: settings, and once the conversation is saved, what to do with it
+          (export, keep with a course, feedback). It sits beside the conversation, never in
+          it, so the next steps neither push the turns up nor stand between them and the
+          composer. On a wide screen it is the right-hand column with its own scroll; on a
+          phone it follows the conversation, so the chat comes first. */}
+      <div className="flex flex-none flex-col gap-4 md:w-72 md:overflow-y-auto">
+        <ChatSettingsAside
+          tool={tool}
+          summary={settingsSummary ?? summarizeSandbox(tool.inputs, sandboxValues, locale)}
+          onEdit={
+            tool.inputs.length > 0 && !presetValues ? () => setSandboxSubmitted(false) : undefined
+          }
+          values={sandboxValues}
+          studentPrompt={studentPrompt}
+          hasContextProfile={!!contextProfile}
+          outputLanguage={outputLanguage}
+          onOutputLanguage={setOutputLanguage}
+          model={{
+            options: modelOptions,
+            selected: selectedModel,
+            onSelect: setSelectedModel,
+            supportsThinking: selectedModelSupportsThinking,
+            thinking,
+            onThinking: setThinking,
+          }}
+        />
+        {resultContext && chat.savedId && (
+          <ResultActions
+            {...resultContext}
+            generationId={chat.savedId}
+            courseId={courseId}
+            itemId={itemId}
+          />
+        )}
       </div>
     </div>
   );

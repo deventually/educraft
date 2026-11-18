@@ -47,6 +47,25 @@ export function ChatComposer({
     el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
   }, [value]);
 
+  // Focus stays in the message box, so the next message needs no click. Sending, stopping or
+  // regenerating removes the button that was pressed (the composer swaps Send for Stop and
+  // back), and a browser then leaves focus on nothing: whenever a reply starts or ends with
+  // focus lost like that, it returns to the box. Focus the user moved elsewhere on purpose,
+  // or text they are selecting, stays where it is.
+  const wasStreaming = useRef(isStreaming);
+  useEffect(() => {
+    if (wasStreaming.current === isStreaming) return;
+    wasStreaming.current = isStreaming;
+    const active = document.activeElement;
+    const selecting = window.getSelection()?.isCollapsed === false;
+    if ((!active || active === document.body) && !selecting) inputRef.current?.focus();
+  });
+
+  const send = (message?: string) => {
+    onSend(message);
+    inputRef.current?.focus();
+  };
+
   return (
     <div className="flex-none pt-3">
       <div className="mx-auto w-full max-w-3xl">
@@ -60,7 +79,7 @@ export function ChatComposer({
               <button
                 key={reply}
                 type="button"
-                onClick={() => onSend(reply)}
+                onClick={() => send(reply)}
                 className="rounded-full border border-violet-300 bg-white px-4 py-1.5 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
               >
                 {reply}
@@ -77,12 +96,13 @@ export function ChatComposer({
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey && !isStreaming) {
                 e.preventDefault();
-                onSend();
+                send();
               }
             }}
             placeholder={t.chat.inputPlaceholder}
-            disabled={isStreaming}
-            className="max-h-[200px] flex-1 resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed placeholder-slate-500 focus:outline-none disabled:opacity-60"
+            // Never disabled while a reply streams: a browser drops focus from a disabled
+            // field. The next message can be typed already; Enter waits for the reply.
+            className="max-h-[200px] flex-1 resize-none bg-transparent px-2 py-1.5 text-sm leading-relaxed placeholder-slate-500 focus:outline-none"
           />
 
           {isStreaming ? (
@@ -118,7 +138,7 @@ export function ChatComposer({
               )}
               <button
                 type="button"
-                onClick={() => onSend()}
+                onClick={() => send()}
                 disabled={!value.trim() || isStreaming}
                 className="grid size-9 shrink-0 place-items-center rounded-xl bg-violet-600 text-white hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 disabled:bg-slate-300"
                 title={t.tool.generate}
