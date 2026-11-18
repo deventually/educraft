@@ -1,4 +1,4 @@
-- **BDB/BKE: Grill me over het hele dossier.** Een nieuw tabblad *Schrijven* in je dossier met
+- **BDB/BKE: Grill me over het hele dossier (#379).** Een nieuw tabblad *Schrijven* in je dossier met
   één knop *Grill me* voor al je leeruitkomsten tegelijk. Alle vragen staan in één lijst, per
   leeruitkomst; je beantwoordt ze in één zit (ook inspreken kan) en drukt opnieuw tot de coach
   niets meer vraagt. Daarna schrijft *Stel alle hoofdstukken op* elk hoofdstuk, onderdeel voor
