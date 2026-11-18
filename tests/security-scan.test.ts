@@ -11,12 +11,14 @@ const root = resolve(__dirname, "..");
 const read = (p: string) => readFileSync(resolve(root, p), "utf8");
 
 describe("security scan", () => {
-  // Production dependencies must be clean from moderate up. The whole tree (dev tools too) blocks
-  // only from high, so known moderate findings in dev tooling don't turn CI red.
+  // Production dependencies must be clean from moderate up, without exceptions. The whole tree
+  // (dev tools too) blocks from high, apart from a dated exception in config/audit-exceptions.json
+  // (BESLUIT-2026-11-17-7).
   it("CI audits production dependencies from moderate and the whole tree from high", () => {
     const ci = read(".github/workflows/ci.yml");
     expect(ci).toContain("npm audit --omit=dev --audit-level=moderate");
-    expect(ci).toContain("npm audit --audit-level=high");
+    expect(ci).toContain("node scripts/audit.ts");
+    expect(ci).not.toContain("npm audit --audit-level=high");
   });
 
   it("CodeQL scans the JavaScript and TypeScript on every pull request and on main", () => {
