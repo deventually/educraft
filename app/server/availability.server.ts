@@ -47,6 +47,7 @@ export {
   isModelSelectableForUser,
   narrowLocalModels,
   servedModelFor,
+  withDefaultModelFor,
 } from "./modelAvailability.server";
 
 interface Layers {

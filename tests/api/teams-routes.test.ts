@@ -555,6 +555,26 @@ describe("a team's choices for parts, tools and models (P28.3)", () => {
     expect((await stored(team.id)).models).toBeNull();
   });
 
+  it("stores the team's default model, only one the instance offers; empty clears it", async () => {
+    // The lead sets it; the admin can too (Bastiaan, 18-11).
+    const { team, lead } = await leadOfNewTeam();
+    await as(lead);
+    const act = (fields: Record<string, string>) =>
+      call(teamPage.action, {
+        request: post({ intent: "settings", ...fields }),
+        params: { id: team.id },
+      });
+    expect(await act({ defaultModel: "claude-haiku-4-5" })).toEqual({ saved: true });
+    expect((await stored(team.id)).defaultModel).toBe("claude-haiku-4-5");
+    // Saving the other half of the form leaves the default alone.
+    await act({ "feature:portfolio": "on" });
+    expect((await stored(team.id)).defaultModel).toBe("claude-haiku-4-5");
+    expect(await act({ defaultModel: "claude-opus-4-8" })).toEqual({ error: "invalid" });
+    expect((await stored(team.id)).defaultModel).toBe("claude-haiku-4-5");
+    await act({ defaultModel: "" });
+    expect((await stored(team.id)).defaultModel ?? null).toBeNull();
+  });
+
   it("refuses an unknown choice", async () => {
     const { team, lead } = await leadOfNewTeam();
     await as(lead);

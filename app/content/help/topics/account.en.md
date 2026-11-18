@@ -31,6 +31,8 @@ At the top of every page you switch between Dutch and English. The tools write t
 
 Your administrator decides which AI models are available to you. You choose from that set under **Advanced** on the tool page.
 
+Under **My default model** you choose the model your tools start on. If you choose none, your team's default applies, and otherwise the institution's. You only choose from the models you may use, and your monthly limit still applies.
+
 ## Your teams
 
 If you are in a team, it shows on **Account**. Being a member shares none of your work. See [Teams and sharing](/help/teams).

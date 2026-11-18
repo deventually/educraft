@@ -164,7 +164,8 @@ function ToolsBulkForm({ slugs }: { slugs: string[] }) {
 export default function AdminTools({ loaderData }: Route.ComponentProps) {
   const t = useT();
   const locale = useLocale();
-  const { rows, features, jev, providers, models, choices, local } = loaderData;
+  const { rows, features, jev, providers, models, choices, local, defaultModel, fallbackModel } =
+    loaderData;
   const [params] = useSearchParams();
   const tab = tabFrom(params.get("tab"));
   const f = t.features;
@@ -184,7 +185,13 @@ export default function AdminTools({ loaderData }: Route.ComponentProps) {
       <div className="space-y-10">
         <TabNav current={tab} />
         {tab === "models" ? (
-          <ModelsTab providers={providers} models={models} choices={choices} />
+          <ModelsTab
+            providers={providers}
+            models={models}
+            choices={choices}
+            defaultModel={defaultModel}
+            fallbackModel={fallbackModel}
+          />
         ) : (
           <ProvidersTab providers={providers} local={local} />
         )}

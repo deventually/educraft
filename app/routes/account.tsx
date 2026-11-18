@@ -25,6 +25,8 @@ import { Button, Card, Input, Label } from "~/components/ui";
 import type { Role } from "~/lib/registry/access";
 import { HelpLink } from "~/components/HelpLink";
 import { SlideTemplateCard } from "~/components/export/SlideTemplateCard";
+import { DefaultModelCard } from "~/components/account/DefaultModelCard";
+import { ownDefaultModelView, saveOwnDefaultModel } from "~/server/ownDefaultModel.server";
 
 export function meta({ matches }: Route.MetaArgs) {
   const root = matches.find((m) => m?.id === "root")?.loaderData as { locale?: Locale } | undefined;
@@ -46,6 +48,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     lostCourses: await countCoursesWithoutSuccessor(user.id),
     // My own PowerPoint template (P30.7b); a team's is on the team page.
     slideTemplate: (await listTemplatesForUser(user.id)).find((t) => t.scope === "own") ?? null,
+    // My own default model, from the models I may use (BESLUIT-2026-11-18-4).
+    defaultModel: await ownDefaultModelView(user),
   };
 }
 
@@ -61,6 +65,8 @@ export async function action({ request }: Route.ActionArgs) {
     await logOutEverywhere(user.id);
     return logout(request, "signedOutEverywhere");
   }
+
+  if (intent === "defaultModel") return saveOwnDefaultModel(user, fd);
 
   // The password hash never leaves the server boundary, so re-read the row here to
   // check the current password before any self-service change.
@@ -186,6 +192,8 @@ export default function Account({ loaderData }: Route.ComponentProps) {
           </ul>
         </Card>
       )}
+
+      {loaderData.defaultModel && <DefaultModelCard {...loaderData.defaultModel} />}
 
       <SlideTemplateCard
         action="/account/slide-template"

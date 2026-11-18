@@ -7,6 +7,11 @@ export const account: Messages["account"] = {
   dangerHeading: "Delete account and data",
   dangerIntro:
     "This permanently deletes your account and all your data (materials, context profiles, feedback and usage). This cannot be undone.",
+  defaultModelHeading: "My default model",
+  defaultModelIntro:
+    "Your tools start on this one. In every tool you can pick another model each time.",
+  defaultModelLabel: "My default model",
+  defaultModelNone: "None: my team's or the institution's default",
   deleteButton: "Delete my account and data",
   email: "Email address",
   emailHeading: "Change email address",

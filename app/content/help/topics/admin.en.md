@@ -29,7 +29,7 @@ Put an announcement as a bar above every page, for everyone, one team or one per
 ## Tools and models
 
 - **Tools:** set each tool to *On*, *On request* or *Off*. *Off* is for nobody; *On request* only through a team or an exception for one teacher.
-- **Models:** choose which AI models teachers may pick themselves. A teacher follows that choice, or gets a choice of their own.
+- **Models:** choose which AI models teachers may pick themselves. A teacher follows that choice, or gets a choice of their own. Here you also choose **the institution's default model**: the tools start on it. A team (on the team page) and a teacher (on their account page, or you on the person page) can choose a default of their own, but only from the models they may use.
 - **Providers:** the AI services the models come from.
 
 What is off really disappears: a teacher can't open such a tool through a link either.

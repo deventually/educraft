@@ -46,7 +46,7 @@ export async function getTeamSettingsOffer(): Promise<TeamSettingsOffer> {
  * `tool:<slug>` with "on", "off" or "" (no choice), and `modelMode` ("own" | "inherit")
  * with `models`. Only offered items change; a choice for something the instance has Off
  * stays stored (it never counts while the instance says Off). Absent `modelMode` leaves
- * the models alone.
+ * the models alone; `defaultModel` ("" = none) likewise.
  */
 export function applyTeamSettingsForm(
   current: TeamSettings,
@@ -91,5 +91,14 @@ export function applyTeamSettingsForm(
     models = chosen;
   } else if (mode !== null) return { error: "invalid" };
 
-  return { features, tools, models };
+  // The team's default model (BESLUIT-2026-11-18-4): "" = none (the institution's).
+  let defaultModel = current.defaultModel ?? null;
+  const wanted = fd.get("defaultModel");
+  if (wanted === "") defaultModel = null;
+  else if (wanted !== null) {
+    if (!offer.models.some((m) => m.id === wanted)) return { error: "invalid" };
+    defaultModel = String(wanted);
+  }
+
+  return { features, tools, models, ...(defaultModel ? { defaultModel } : {}) };
 }

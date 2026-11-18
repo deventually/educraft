@@ -101,6 +101,8 @@ const loaderData = {
     { id: "claude-sonnet-5-5", displayName: "Claude Sonnet 5.5", checked: true, group: "frontier" },
     { id: "claude-code", displayName: "Claude Code (CLI)", checked: false, group: "cli" },
   ],
+  defaultModel: null,
+  fallbackModel: "Claude Sonnet 5.5",
 };
 
 function renderRoute(action?: (args: { request: Request }) => unknown, data: object = loaderData) {
@@ -235,6 +237,23 @@ describe("Admin — models part of Tools and models", () => {
     expect((within(group).getByLabelText("Claude Code (CLI)") as HTMLInputElement).checked).toBe(
       false,
     );
+  });
+
+  it("chooses the institution's default model from the models that are on, and autosaves it", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderRoute(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    const select = screen.getByRole("combobox", { name: /standaardmodel van de instelling/i });
+    expect(select).toHaveValue("");
+    // Only a model that is on, never a CLI agent that is off.
+    expect(within(select).queryByRole("option", { name: "Claude Code (CLI)" })).toBeNull();
+    expect(select).toHaveAccessibleDescription(/claude sonnet 5\.5/i);
+    await user.selectOptions(select, "claude-sonnet-5-5");
+    await waitFor(() => expect(body?.get("intent")).toBe("defaultModel"));
+    expect(body?.get("defaultModel")).toBe("claude-sonnet-5-5");
   });
 
   it("adds a provider: name, kind of API, address, and whether it needs a key", async () => {

@@ -132,6 +132,10 @@ export const admin: Messages["admin"] = {
     localGroup: "Local (discovered)",
     localGroupHint:
       "Only visible in development mode (npm run dev). In production, CLI agents and local models do not exist. Discovered models depend on what is running now (Ollama/LM Studio).",
+    teacherDefault: "This teacher's default model",
+    teacherDefaultHint:
+      "Only counts when the teacher may use this model. Otherwise tools start on the team's or the institution's default.",
+    teacherDefaultNone: "None: follows team or institution",
     teacherInherit: "Follows the instance",
     teacherIntro:
       "A teacher follows the instance's models, or gets an own selection. An own selection replaces the instance's and may be wider.",

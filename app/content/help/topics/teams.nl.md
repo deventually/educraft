@@ -53,6 +53,7 @@ Ben je teamleider, dan open je je team bij **Onderwijs › Teams**. Daar kun je:
 - een **uitnodigingslink** maken voor een nieuwe collega, die daarmee docent en lid van je team wordt;
 - iemand uit het team halen met **Weghalen**, ook een andere teamleider (dat vraagt eerst of je het zeker weet), of een collega ook teamleider maken;
 - je team aan opleidingen koppelen met **Opleiding toevoegen**, of het eraf halen met **Weghalen**;
+- het **standaardmodel van dit team** kiezen: daar starten de tools van je teamleden op, tenzij een docent een eigen standaard heeft. Je kiest uit de modellen die de instelling aan heeft;
 - zelf stoppen als teamleider.
 
 Jezelf haal je niet weg; daarvoor kies je **Stoppen als teamleider**.

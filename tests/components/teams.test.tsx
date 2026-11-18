@@ -334,6 +334,19 @@ describe("/teams/:id for an admin", () => {
     expect(bodies[0]!.get("feature:portfolio")).toBe("on");
   });
 
+  it("chooses the team's default model, or none (the institution's), and autosaves it", async () => {
+    const user = userEvent.setup();
+    const { bodies, action } = recorder();
+    page(action);
+    const select = screen.getByRole("combobox", { name: /standaardmodel van dit team/i });
+    expect(select).toHaveValue("");
+    await user.selectOptions(select, offer.models[0]!.id);
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0]!.get("intent")).toBe("settings");
+    expect(bodies[0]!.get("defaultModel")).toBe(offer.models[0]!.id);
+    expect(bodies[0]!.has("modelMode")).toBe(false);
+  });
+
   it("deletes the team only after a confirmation", async () => {
     const user = userEvent.setup();
     const { bodies, action } = recorder();
@@ -379,6 +392,11 @@ describe("/teams/:id — the lead's page (P28.2)", () => {
     expect(within(mo).getAllByText("mo@school.nl").length).toBeGreaterThan(0);
     const lea = screen.getByRole("row", { name: /lea lead/i });
     expect(within(lea).getByText(/^teamleider$/i)).toBeInTheDocument();
+  });
+
+  it("lets the lead choose the team's default model too (Bastiaan, 18-11)", () => {
+    page();
+    expect(screen.getByRole("combobox", { name: /standaardmodel van dit team/i })).toHaveValue("");
   });
 
   it("lets the lead remove anyone but themselves, also another lead (Bastiaan, 16-11)", () => {

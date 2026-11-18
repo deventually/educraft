@@ -31,6 +31,8 @@ Bovenaan elke pagina wissel je tussen Nederlands en Engels. De tools maken hun r
 
 De beheerder bepaalt welke AI-modellen voor jou beschikbaar zijn. Je kiest uit die set onder **Geavanceerd** op de toolpagina.
 
+Onder **Mijn standaardmodel** kies je op welk model je tools starten. Kies je niets, dan geldt de standaard van je team, en anders die van de instelling. Je kiest alleen uit de modellen die je mag gebruiken, en je limiet per maand blijft gelden.
+
 ## Je teams
 
 Zit je in een team, dan staat dat op **Account**. Lid zijn deelt niets van je werk. Zie [Teams en delen](/help/teams).

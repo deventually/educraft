@@ -8,6 +8,7 @@ import {
   getSelectableModels,
   isToolAvailable,
   narrowLocalModels,
+  withDefaultModelFor,
 } from "~/server/availability.server";
 import { requireUser } from "~/server/auth.server";
 import { getVerbatimPrompt } from "~/lib/prompts";
@@ -59,10 +60,12 @@ function courseItem(
 
 export async function loader({ params, request }: Route.LoaderArgs) {
   const user = await requireUser(request);
-  const tool = getToolBySlugOrThrow(params.slug);
+  const registered = getToolBySlugOrThrow(params.slug);
   // A tool the instance has disabled is indistinguishable from a non-existent tool
   // (no info leak).
-  if (!(await isToolAvailable(user, tool))) throw new Response("Not Found", { status: 404 });
+  if (!(await isToolAvailable(user, registered))) throw new Response("Not Found", { status: 404 });
+  // The picker starts on this person's default model: own, team, institution, config.
+  const tool = await withDefaultModelFor(user, registered);
 
   const profiles = await listProfiles(user.id);
   const defaultProfile = await getDefaultProfile(user.id);
