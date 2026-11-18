@@ -22,12 +22,14 @@ function Harness({
   text,
   redact = false,
   onSend,
+  privacyPage = page,
 }: {
   text: string;
   redact?: boolean;
   onSend?: (r: unknown) => void;
+  privacyPage?: PrivacyPage;
 }) {
-  const privacy = usePrivacy(page);
+  const privacy = usePrivacy(privacyPage);
   const fields = [{ name: "q", label: "Question", text, redact }];
   return (
     <>
@@ -82,6 +84,23 @@ describe("PrivacyPreview", () => {
     expect(screen.getByRole("button", { name: "Replace Visser again" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Send" }));
     expect(onSend.mock.calls[0]?.[0].approval.keep).toContain("Visser");
+  });
+
+  it("leaves a word the institution keeps, without offering to take it off (PR 5)", async () => {
+    const user = userEvent.setup();
+    const onSend = vi.fn();
+    render(
+      <Harness
+        text="Volgens Visser werkt het."
+        onSend={onSend}
+        privacyPage={{ ...page, shared: ["Visser"] }}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: /Visser/ })).toBeNull();
+    expect(screen.getByText("Nothing is replaced.")).toBeInTheDocument();
+    // The gate reads the institution's words itself; the page sends no choice for them.
+    await user.click(screen.getByRole("button", { name: "Send" }));
+    expect(onSend.mock.calls[0]?.[0].values.q).toBe("Volgens Visser werkt het.");
   });
 
   it("replaces a student the teacher names, in the browser only", async () => {

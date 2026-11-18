@@ -8,7 +8,8 @@
  * preview (PR 3: every tool that streams) carries the teacher's approval: the gate replaces what
  * they saw, sends nothing while anything is left they did not see, and puts the names back in the
  * answer. A call without one (the screens of step 4, until then) is only counted. The code table lives only as long as the call; the log line
- * holds counts per kind, never a word.
+ * and the counters on the health screen (PR 5) hold counts per kind, never a word. The words the
+ * institution keeps (PR 5) are never replaced.
  */
 import { z } from "zod";
 import { type DecisionsPayload, postDecisions } from "~/lib/ai/decisions";
@@ -27,8 +28,10 @@ import {
 import { restoreNames } from "~/lib/privacy/redact";
 import type { PrivacyPage } from "~/lib/privacy/live";
 import { log } from "./log.server";
+import { recordGateCall } from "./repositories/gateCounts.server";
 import { listKeepWords } from "./repositories/keepWords.server";
 import { listKnownPeople } from "./repositories/knownPeople.server";
+import { listSharedKeepWords } from "./repositories/sharedKeepWords.server";
 
 const Words = z.array(z.string().max(200)).max(500);
 
@@ -46,10 +49,15 @@ export type PrivacyApproval = z.infer<typeof PrivacyApprovalSchema>;
 
 /**
  * What a page with a live preview gets (PR 3): the names the gate knows, so the preview shows
- * exactly what the gate will do, and the teacher's never-list.
+ * exactly what the gate will do, the teacher's never-list, and the words the institution keeps
+ * (PR 5), apart, since the teacher cannot take those off.
  */
 export async function privacyPageFor(user: { id: string }): Promise<PrivacyPage> {
-  return { known: await listKnownPeople(user.id), never: await listKeepWords(user.id) };
+  return {
+    known: await listKnownPeople(user.id),
+    never: await listKeepWords(user.id),
+    shared: await listSharedKeepWords(),
+  };
 }
 
 export interface GateContext {
@@ -64,14 +72,17 @@ export type Gated<T> = { ok: true; value: T } | { ok: false; review: ReviewItem[
 
 async function policyFor(user: { id: string }, ctx: GateContext): Promise<GatePolicy> {
   const mode: GateMode = ctx.approval ? "review" : "count";
+  // The words the institution keeps hold everywhere, also when only counting (PR 5).
+  const shared = await listSharedKeepWords();
   return {
     known: await listKnownPeople(user.id),
     mode,
+    keep: shared,
     ...(ctx.approval
       ? {
           approved: ctx.approval.approved,
           // The teacher's never-list holds even when the page did not send it (PR 3).
-          keep: [...ctx.approval.keep, ...(await listKeepWords(user.id))],
+          keep: [...ctx.approval.keep, ...(await listKeepWords(user.id)), ...shared],
           ...(ctx.approval.studentNumberExample
             ? { studentNumberExample: ctx.approval.studentNumberExample }
             : {}),
@@ -80,8 +91,16 @@ async function policyFor(user: { id: string }, ctx: GateContext): Promise<GatePo
   };
 }
 
-function count(ctx: GateContext, mode: GateMode, sent: boolean, counts: GateCounts): void {
+/** The log line and the health screen's counters (PR 5): counts per kind, never a word. */
+async function count(
+  ctx: GateContext,
+  mode: GateMode,
+  sent: boolean,
+  counts: GateCounts,
+): Promise<void> {
   log("privacy-gate", { exit: ctx.exit, mode, outcome: sent ? "sent" : "review", counts });
+  // A counter that cannot be written never stops a call.
+  await recordGateCall(counts, sent).catch(() => {});
 }
 
 /** One model call, whole answer. */
@@ -92,7 +111,7 @@ export async function gatedGenerate(
 ): Promise<Gated<GenerateResult>> {
   const policy = await policyFor(user, ctx);
   const g = gatePrompt(opts, policy, ctx.locale);
-  count(ctx, policy.mode, g.send, g.counts);
+  await count(ctx, policy.mode, g.send, g.counts);
   if (!g.send) return { ok: false, review: g.review };
   const result = await providerForModel(opts.model).generate({
     ...opts,
@@ -110,7 +129,7 @@ export async function gatedStream(
 ): Promise<Gated<AsyncIterable<string>>> {
   const policy = await policyFor(user, ctx);
   const g = gatePrompt(opts, policy, ctx.locale);
-  count(ctx, policy.mode, g.send, g.counts);
+  await count(ctx, policy.mode, g.send, g.counts);
   if (!g.send) return { ok: false, review: g.review };
   const tokens = providerForModel(opts.model).streamChat({
     ...opts,
@@ -130,7 +149,7 @@ export async function gatedDecisions(
 ): Promise<Gated<unknown>> {
   const policy = await policyFor(user, ctx);
   const g = gateJson(payload.state, policy);
-  count(ctx, policy.mode, g.send, g.counts);
+  await count(ctx, policy.mode, g.send, g.counts);
   if (!g.send) return { ok: false, review: g.review };
   const answer = await postDecisions(url, { ...payload, state: g.value }, opts);
   return { ok: true, value: restoreJson(answer, g.codes) };

@@ -142,3 +142,55 @@ describe("with what the teacher saw", () => {
     expect(r).toEqual({ ok: true, value: { reason: "Past bij Fatima el Amrani", p: 0.9 } });
   });
 });
+
+describe("the institution's never-words and the counters (PR 5)", () => {
+  const lone = {
+    ...prompt,
+    messages: [{ role: "user" as const, content: "Volgens Amrani werkt dit." }],
+  };
+
+  it("never replaces a word the admin kept for everyone, also when only counting", async () => {
+    const shared = await import("~/server/repositories/sharedKeepWords.server");
+    const logs = vi.spyOn(console, "log").mockImplementation(() => {});
+    generate.mockResolvedValue({ text: "Ja." });
+    await gate.gatedGenerate(user, lone, { exit: "portfolio", locale: "nl" });
+    expect(gateLogs(logs)[0]?.counts).toEqual({ colleague: 1 });
+    await shared.addSharedKeepWord("Amrani", "pg-admin");
+    await gate.gatedGenerate(user, lone, { exit: "portfolio", locale: "nl" });
+    expect(gateLogs(logs)[1]?.counts).toEqual({});
+    streamChat.mockReturnValue(tokens("Ja."));
+    const r = await gate.gatedStream(user, lone, {
+      exit: "stream",
+      locale: "nl",
+      approval: { approved: [], keep: [] },
+    });
+    expect(r.ok).toBe(true);
+    await shared.removeSharedKeepWord("Amrani");
+    logs.mockRestore();
+  });
+
+  it("adds every call to the counters of the health screen", async () => {
+    const counters = await import("~/server/repositories/gateCounts.server");
+    const before = await counters.gateHealth();
+    generate.mockResolvedValue({ text: "Ja." });
+    await gate.gatedGenerate(user, prompt, { exit: "portfolio", locale: "nl" });
+    await gate.gatedStream(user, prompt, {
+      exit: "stream",
+      locale: "nl",
+      approval: { approved: [], keep: [] },
+    });
+    const after = await counters.gateHealth();
+    expect(after.calls - before.calls).toBe(2);
+    expect(after.stopped - before.stopped).toBe(1);
+    const recent = (h: typeof after, k: string) => h.kinds.find((x) => x.kind === k)?.recent ?? 0;
+    expect(recent(after, "colleague") - recent(before, "colleague")).toBe(2);
+    expect(recent(after, "email") - recent(before, "email")).toBe(2);
+  });
+
+  it("gives the page the shared words apart from the teacher's own list", async () => {
+    const shared = await import("~/server/repositories/sharedKeepWords.server");
+    await shared.addSharedKeepWord("Engelmann", "pg-admin");
+    expect(await gate.privacyPageFor(user)).toMatchObject({ never: [], shared: ["Engelmann"] });
+    await shared.removeSharedKeepWord("Engelmann");
+  });
+});

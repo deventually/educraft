@@ -34,4 +34,13 @@ describe("help follows the menu", () => {
     expect(topic("admin", "nl")).toContain("## Faculteiten en opleidingen");
     expect(topic("admin", "en")).toContain("## Faculties and programmes");
   });
+
+  it("explains the never-words page and the gate's counters (anonymiseerpoort PR 5)", () => {
+    expect(topic("admin", "nl")).toContain("## Anonimiseren");
+    expect(topic("admin", "en")).toContain("## Anonymising");
+    expect(topic("admin", "nl")).toMatch(/nooit wie/);
+    expect(topic("admin", "en")).toMatch(/never who/);
+    expect(topic("admin", "nl")).toMatch(/anonimiseerpoort/i);
+    expect(topic("admin", "en")).toMatch(/anonymiser gate/i);
+  });
 });

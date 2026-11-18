@@ -3,6 +3,7 @@ import { about } from "./about";
 import { account } from "./account";
 import { admin } from "./admin";
 import { adminErrors } from "./adminErrors";
+import { adminPrivacy } from "./adminPrivacy";
 import { adminSetup } from "./adminSetup";
 import { agents } from "./agents";
 import { auditLog } from "./auditLog";
@@ -85,6 +86,7 @@ export const en: Messages = {
   account,
   admin,
   adminErrors,
+  adminPrivacy,
   adminSetup,
   agents,
   aiLeave,

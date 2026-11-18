@@ -16,3 +16,30 @@ export const privacyKeepWords = sqliteTable(
   },
   (t) => [primaryKey({ columns: [t.userId, t.word] })],
 );
+
+/**
+ * The institution's never-list (anonymiseerpoort PR 5): words an admin keeps for everyone, picked
+ * from what teachers put on their own list. Never a user's full name. `word` is lower-case, one
+ * entry per word; `shown` keeps the spelling.
+ */
+export const privacySharedKeepWords = sqliteTable("privacy_shared_keep_words", {
+  word: text("word").primaryKey(),
+  shown: text("shown").notNull(),
+  addedBy: text("added_by").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+});
+
+/**
+ * The gate's counters (anonymiseerpoort PR 5), per UTC day: per kind how often it found something
+ * (`teacher`, `colleague`, `email` …), plus `call` (calls through the gate) and `stopped` (calls
+ * it held back to ask the teacher). Counts only, never a word; kept for a short while.
+ */
+export const privacyGateCounts = sqliteTable(
+  "privacy_gate_counts",
+  {
+    day: text("day").notNull(),
+    kind: text("kind").notNull(),
+    count: integer("count").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.day, t.kind] })],
+);
