@@ -125,10 +125,14 @@ export const admin: Messages["admin"] = {
     available: "Available to users",
     caption: "Selectable models from the catalog.",
     cliGroup: "CLI agents",
+    extraHint:
+      "Expensive models are not in the institution's choice. Tick one here, and this teacher or team can pick it, also as their default. The monthly limit still applies.",
+    extraTeacher: "Expensive models for this teacher",
+    extraTeam: "Expensive models for this team",
     frontierGroup: "Frontier API",
     heading: "Models",
     intro:
-      "Choose which models teachers may pick themselves. Expensive models (such as Opus) are not listed: only a tool uses them, as its fixed default.",
+      "Choose which models teachers may pick themselves. Expensive models (such as Opus) are not listed: you switch them on per team or teacher, on the team page or the person page.",
     localGroup: "Local (discovered)",
     localGroupHint:
       "Only visible in development mode (npm run dev). In production, CLI agents and local models do not exist. Discovered models depend on what is running now (Ollama/LM Studio).",

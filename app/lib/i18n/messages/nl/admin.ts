@@ -124,10 +124,14 @@ export const admin = {
     available: "Beschikbaar voor gebruikers",
     caption: "Selecteerbare modellen uit de catalogus.",
     cliGroup: "CLI-agents",
+    extraHint:
+      "Dure modellen staan niet in de keuze van de instelling. Vink er hier een aan, dan kan deze docent of dit team het kiezen, ook als standaard. De limiet per maand blijft gelden.",
+    extraTeacher: "Dure modellen voor deze docent",
+    extraTeam: "Dure modellen voor dit team",
     frontierGroup: "Frontier-API",
     heading: "Modellen",
     intro:
-      "Kies welke modellen docenten zelf mogen kiezen. Dure modellen (zoals Opus) staan hier niet: die gebruikt alleen een tool, als vaste standaard.",
+      "Kies welke modellen docenten zelf mogen kiezen. Dure modellen (zoals Opus) staan hier niet: die zet je per team of docent aan, op de teampagina of de personenpagina.",
     localGroup: "Lokaal (gevonden)",
     localGroupHint:
       "Alleen zichtbaar in ontwikkelmodus (npm run dev). In productie bestaan CLI-agents en lokale modellen niet. Gevonden modellen hangen af van wat er nu draait (Ollama/LM Studio).",

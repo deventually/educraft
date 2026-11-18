@@ -301,7 +301,8 @@ describe("Admin — models part of Tools and models", () => {
     renderRoute();
     const allow = screen.getByRole("region", { name: "Beschikbaar voor gebruikers" });
     expect(allow.textContent).not.toMatch(/serverzijdig|Opus-klasse/);
-    expect(allow.textContent).toMatch(/alleen een tool/i);
+    // Switched on per team or teacher instead (BESLUIT-2026-11-18-5).
+    expect(allow.textContent).toMatch(/per team of docent/i);
   });
 
   it("has no axe violations", async () => {

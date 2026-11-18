@@ -11,22 +11,26 @@ import type { LocalizedText } from "~/lib/i18n/localized";
 import { getFeatureStands, getToolStands } from "./repositories/settings.server";
 import { getInvalidToolSlugs } from "~/lib/registry/boot.server";
 import { getSelectableModels } from "./availability.server";
+import { expensiveCatalog, isGrantable } from "./modelCatalog.server";
 
 export interface TeamSettingsOffer {
   features: { id: string; name: LocalizedText }[];
   tools: { slug: string; name: LocalizedText }[];
   models: { id: string; displayName: string }[];
+  /** Expensive models the admin may switch on for the team; empty for a lead. */
+  expensive: { id: string; displayName: string }[];
 }
 
 /**
  * The features, tools and models a team can choose: everything the instance has not Off,
  * except an instance-only feature (the role agents, BESLUIT-2026-11-05-11).
  */
-export async function getTeamSettingsOffer(): Promise<TeamSettingsOffer> {
-  const [featureStands, toolStands, models] = await Promise.all([
+export async function getTeamSettingsOffer(forAdmin = false): Promise<TeamSettingsOffer> {
+  const [featureStands, toolStands, models, expensive] = await Promise.all([
     getFeatureStands(),
     getToolStands(),
     getSelectableModels(),
+    forAdmin ? expensiveCatalog() : [],
   ]);
   const invalid = getInvalidToolSlugs();
   return {
@@ -38,6 +42,7 @@ export async function getTeamSettingsOffer(): Promise<TeamSettingsOffer> {
         !invalid.has(t.slug) && (toolStands.get(t.slug) ?? (t.enabled ? "on" : "off")) !== "off",
     ).map((t) => ({ slug: t.slug, name: t.name })),
     models: models.map((m) => ({ id: m.id, displayName: m.displayName })),
+    expensive,
   };
 }
 
@@ -91,14 +96,27 @@ export function applyTeamSettingsForm(
     models = chosen;
   } else if (mode !== null) return { error: "invalid" };
 
-  // The team's default model (BESLUIT-2026-11-18-4): "" = none (the institution's).
+  // The team's default model (BESLUIT-2026-11-18-4): "" = none (the institution's). An
+  // expensive model the admin switched on for the team may be it too (BESLUIT-2026-11-18-5).
   let defaultModel = current.defaultModel ?? null;
   const wanted = fd.get("defaultModel");
   if (wanted === "") defaultModel = null;
   else if (wanted !== null) {
-    if (!offer.models.some((m) => m.id === wanted)) return { error: "invalid" };
+    const ok =
+      offer.models.some((m) => m.id === wanted) ||
+      (current.extraModels ?? []).includes(String(wanted));
+    if (!ok) return { error: "invalid" };
     defaultModel = String(wanted);
   }
 
-  return { features, tools, models, ...(defaultModel ? { defaultModel } : {}) };
+  // Whatever this form does not touch (the admin's expensive models) stays as it was.
+  const { defaultModel: _, ...rest } = current;
+  return { ...rest, features, tools, models, ...(defaultModel ? { defaultModel } : {}) };
+}
+
+/** The admin's choice of expensive models for a team (`extraModels`): only grantable ones. */
+export function applyTeamExtraModels(current: TeamSettings, fd: FormData): TeamSettings {
+  const chosen = [...new Set(fd.getAll("extraModels").map(String))].filter(isGrantable);
+  const { extraModels: _, ...rest } = current;
+  return chosen.length > 0 ? { ...rest, extraModels: chosen } : rest;
 }

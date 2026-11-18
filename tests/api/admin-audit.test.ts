@@ -177,6 +177,12 @@ describe("the audit log records every admin action that changes access", () => {
       targetUserId: t.id,
       detail: { models: ["claude-haiku-4-5"] },
     });
+    await onPerson(t.id, { intent: "teacherExtraModels", extraModels: ["claude-opus-5-5"] });
+    expect(await latest()).toMatchObject({
+      action: "teacherExtraModelsChanged",
+      targetUserId: t.id,
+      detail: { models: ["claude-opus-5-5"] },
+    });
     await onPerson(t.id, { intent: "teacherModels", mode: "inherit" });
     expect(await latest()).toMatchObject({
       action: "teacherModelsChanged",

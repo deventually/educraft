@@ -5,7 +5,7 @@ import { loc } from "~/lib/i18n/localized";
 import { fmt } from "~/lib/i18n/format";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
-import { ModelCheckboxes } from "~/components/admin/TeacherModelForm";
+import { ExtraModelsForm, ModelCheckboxes } from "~/components/admin/TeacherModelForm";
 import { Label, Select } from "~/components/ui";
 import { ChoiceSelect } from "./selects";
 
@@ -14,6 +14,10 @@ export interface TeamOffer {
   features: { id: string; name: LocalizedText }[];
   tools: { slug: string; name: LocalizedText }[];
   models: { id: string; displayName: string }[];
+  /** Expensive models the admin may switch on (empty for a lead, BESLUIT-2026-11-18-5). */
+  expensive?: { id: string; displayName: string }[];
+  /** The expensive models switched on for this team: they may be its default too. */
+  teamExtras?: { id: string; displayName: string }[];
 }
 
 /**
@@ -130,7 +134,7 @@ export function TeamSettingsForm({
           className="mt-1"
         >
           <option value="">{f.teamDefaultModelNone}</option>
-          {offer.models.map((m) => (
+          {[...offer.models, ...(offer.teamExtras ?? [])].map((m) => (
             <option key={m.id} value={m.id}>
               {m.displayName}
             </option>
@@ -140,6 +144,17 @@ export function TeamSettingsForm({
           {f.teamDefaultModelHint}
         </p>
       </AutoSaveForm>
+      {(offer.expensive?.length ?? 0) > 0 && (
+        <ExtraModelsForm
+          intent="teamExtraModels"
+          idPrefix={`${idPrefix}-extra`}
+          hidden={hidden}
+          expensive={offer.expensive ?? []}
+          checkedIds={settings.extraModels ?? []}
+          legend={t.admin.models.extraTeam}
+          errorMessage={errorMessage}
+        />
+      )}
     </div>
   );
 }

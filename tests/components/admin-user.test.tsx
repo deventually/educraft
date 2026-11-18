@@ -26,6 +26,9 @@ const base = [
   { id: "ollama::gemma", displayName: "Ollama · gemma" },
 ];
 
+const expensive = [{ id: "claude-opus-5-5", displayName: "Claude Opus 5.5" }];
+const extras = { expensive, extraModels: [] as string[], defaultChoices: [...base, ...expensive] };
+
 const loaderData = {
   // Default viewer: the owner (super admin), looking at a teacher.
   isOwner: true,
@@ -34,11 +37,14 @@ const loaderData = {
   // Production: the full password rule applies to the admin's forms.
   strictPasswords: true,
   person: teacher,
-  models: { base, mode: "own", models: ["claude-haiku-4-5"], defaultModel: null } as {
+  models: { base, mode: "own", models: ["claude-haiku-4-5"], defaultModel: null, ...extras } as {
     base: typeof base;
     mode: "own" | "inherit";
     models: string[];
     defaultModel: string | null;
+    expensive: typeof expensive;
+    extraModels: string[];
+    defaultChoices: typeof base;
   } | null,
   features: [
     {
@@ -242,7 +248,13 @@ describe("Admin person page (P28.1)", () => {
   it("offers inherit/own models; the boxes are disabled while inheriting", async () => {
     const user = userEvent.setup();
     renderPage(undefined, {
-      models: { base, mode: "inherit", models: ["claude-sonnet-4-6"], defaultModel: null },
+      models: {
+        base,
+        mode: "inherit",
+        models: ["claude-sonnet-4-6"],
+        defaultModel: null,
+        ...extras,
+      },
     });
     const group = screen.getByRole("group", { name: "Teacher T" });
     expect(within(group).getByRole("radio", { name: /volgt de instelling/i })).toBeChecked();
@@ -267,6 +279,21 @@ describe("Admin person page (P28.1)", () => {
     await waitFor(() => expect(body?.get("intent")).toBe("teacherDefaultModel"));
     expect(body?.get("defaultModel")).toBe("claude-haiku-4-5");
     expect(body?.get("userId")).toBe("teacher-9");
+  });
+
+  it("switches an expensive model on for this teacher, which they can then have as default", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderPage(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    const group = screen.getByRole("group", { name: /dure modellen voor deze docent/i });
+    await user.click(within(group).getByRole("checkbox", { name: "Claude Opus 5.5" }));
+    await waitFor(() => expect(body?.get("intent")).toBe("teacherExtraModels"));
+    expect(body?.getAll("extraModels")).toEqual(["claude-opus-5-5"]);
+    const select = screen.getByRole("combobox", { name: /standaardmodel van deze docent/i });
+    expect(within(select).getByRole("option", { name: "Claude Opus 5.5" })).toBeInTheDocument();
   });
 
   it("has no models section for an admin", () => {

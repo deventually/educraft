@@ -196,6 +196,14 @@ LimeOnIt is not tied to one model vendor.
   they may use. The tool page and the rehearsal hand the client a tool with that
   `defaultModel` (`withDefaultModelFor`); `servedModelFor` uses it when a request names no
   model; a stage pin still wins.
+- **Expensive models per team or teacher (BESLUIT-2026-11-18-5).** A model that is not
+  `clientSelectable` (Opus-class) is never in the instance list, but the admin can switch it
+  on for one teacher (`extraModels:<userId>`, person page) or one team
+  (`TeamSettings.extraModels`, an admin-only intent on the team page; a lead's saves keep it).
+  `grantedSet` adds those on top of what the teacher may pick, in `getSelectableModelIds` and
+  `isModelSelectableForUser`; anywhere else such a model stays out. Only grantable ids are
+  stored (`isGrantable` in `modelCatalog.server.ts`), and the default layers above may then
+  name it.
 
 - **Measuring AI use (usage dashboard, PR A).** Every adapter reports a call's tokens in one
   shape, `TokenUsage` (`input` uncached, `cacheRead`, `cacheWrite`, `output`, `reasoning`), via

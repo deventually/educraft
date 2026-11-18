@@ -19,6 +19,7 @@ export const auditLog = {
     resetLinkCreated: "Herstellink gemaakt",
     roleChanged: "Rol gewijzigd",
     teacherDefaultModelChanged: "Standaardmodel van een docent gewijzigd",
+    teacherExtraModelsChanged: "Dure modellen van een docent gewijzigd",
     teacherModelsChanged: "Modellen van docent gewijzigd",
     twoFactorDisabled: "Tweestapsverificatie uitgezet",
     twoFactorEnabled: "Tweestapsverificatie aangezet",

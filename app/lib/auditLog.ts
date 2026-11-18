@@ -22,6 +22,7 @@ export const AUDIT_ACTIONS = [
   "resetLinkCreated",
   "roleChanged",
   "teacherDefaultModelChanged",
+  "teacherExtraModelsChanged",
   "teacherModelsChanged",
   "twoFactorDisabled",
   "twoFactorEnabled",

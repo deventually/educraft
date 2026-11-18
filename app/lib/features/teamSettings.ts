@@ -14,6 +14,8 @@ export const TeamSettingsSchema = z
     models: z.array(z.string()).nullable().catch(null).default(null),
     /** The model the team's tools start on (before the institution's); null = none. */
     defaultModel: z.string().min(1).max(200).nullable().optional().catch(undefined),
+    /** Expensive models the admin switched on for this team (BESLUIT-2026-11-18-5). */
+    extraModels: z.array(z.string().min(1).max(200)).max(50).optional().catch(undefined),
   })
   .catch({ features: {}, tools: {}, models: null });
 

@@ -19,11 +19,13 @@ export function ModelCheckboxes({
   base,
   checkedIds,
   disabled,
+  name = "models",
 }: {
   idPrefix: string;
   base: ModelBox[];
   checkedIds: string[];
   disabled: boolean;
+  name?: string;
 }) {
   return (
     <ul className="mt-2 space-y-2.5">
@@ -32,7 +34,7 @@ export function ModelCheckboxes({
           <input
             type="checkbox"
             id={`${idPrefix}-${m.id}`}
-            name="models"
+            name={name}
             value={m.id}
             defaultChecked={checkedIds.includes(m.id)}
             disabled={disabled}
@@ -157,6 +159,45 @@ export function TeacherDefaultModelForm({
       <p id={`${id}-hint`} className="mt-1 text-xs text-slate-500">
         {m.teacherDefaultHint}
       </p>
+    </AutoSaveForm>
+  );
+}
+
+/**
+ * Expensive models (not client-selectable, like Opus) the admin switches on for one teacher
+ * or one team (BESLUIT-2026-11-18-5). They come on top of what they may pick; each box saves.
+ */
+export function ExtraModelsForm({
+  intent,
+  idPrefix,
+  hidden,
+  expensive,
+  checkedIds,
+  legend,
+  errorMessage,
+}: {
+  intent: string;
+  idPrefix: string;
+  hidden?: Record<string, string>;
+  expensive: ModelBox[];
+  checkedIds: string[];
+  legend: string;
+  errorMessage: (code: string | true) => string | undefined;
+}) {
+  const m = useT().admin.models;
+  return (
+    <AutoSaveForm intent={intent} hidden={hidden} errorMessage={errorMessage} className="mt-4">
+      <fieldset className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <legend className="px-1 text-sm font-semibold text-slate-800">{legend}</legend>
+        <p className="text-xs text-slate-500">{m.extraHint}</p>
+        <ModelCheckboxes
+          idPrefix={idPrefix}
+          base={expensive}
+          checkedIds={checkedIds}
+          disabled={false}
+          name="extraModels"
+        />
+      </fieldset>
     </AutoSaveForm>
   );
 }

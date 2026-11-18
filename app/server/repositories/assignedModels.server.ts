@@ -104,3 +104,18 @@ export async function getUserDefaultModel(userId: string): Promise<string | null
 export async function setUserDefaultModel(userId: string, id: string | null): Promise<void> {
   return setAssignedList("defaultModel", userId, id ? [id] : null);
 }
+
+/**
+ * The expensive models the admin switched on for one teacher (`extraModels:<userId>`,
+ * BESLUIT-2026-11-18-5): models teachers may not pick themselves, like Opus. They add to
+ * whatever the teacher may pick; null/empty = none.
+ */
+export async function getUserExtraModels(userId: string): Promise<string[] | null> {
+  const list = await getAssignedList("extraModels", userId);
+  return list ? [...list] : null;
+}
+
+/** Set (or clear, with null/[]) the expensive models switched on for one teacher. */
+export async function setUserExtraModels(userId: string, ids: string[] | null): Promise<void> {
+  return setAssignedList("extraModels", userId, ids);
+}

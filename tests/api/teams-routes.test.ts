@@ -575,6 +575,43 @@ describe("a team's choices for parts, tools and models (P28.3)", () => {
     expect((await stored(team.id)).defaultModel ?? null).toBeNull();
   });
 
+  it("only the admin switches an expensive model on for the team; the lead's saves keep it", async () => {
+    const OPUS = "claude-opus-5-5";
+    const { team, lead } = await leadOfNewTeam();
+    await as(lead);
+    const leadPage = await call(teamPage.loader, { request: get(), params: { id: team.id } });
+    expect(leadPage.offer?.expensive ?? []).toEqual([]);
+    expect(
+      await call(teamPage.action, {
+        request: post({ intent: "teamExtraModels", extraModels: OPUS }),
+        params: { id: team.id },
+      }),
+    ).toEqual({ error: "unknown" });
+    expect((await stored(team.id)).extraModels ?? []).toEqual([]);
+
+    await as(await mk("Extra Admin", "admin"));
+    const adminPage = await call(teamPage.loader, { request: get(), params: { id: team.id } });
+    expect(adminPage.offer?.expensive?.map((m) => m.id)).toContain(OPUS);
+    expect(
+      await call(teamPage.action, {
+        request: post({ intent: "teamExtraModels", extraModels: [OPUS, "claude-haiku-4-5"] }),
+        params: { id: team.id },
+      }),
+    ).toEqual({ saved: true });
+    // Only expensive models; an ordinary one goes through the team's model set.
+    expect((await stored(team.id)).extraModels).toEqual([OPUS]);
+
+    // The lead saves the other choices, and may make it the team's default.
+    await as(lead);
+    const save = (fields: Record<string, string>) =>
+      call(teamPage.action, {
+        request: post({ intent: "settings", ...fields }),
+        params: { id: team.id },
+      });
+    expect(await save({ "feature:portfolio": "on", defaultModel: OPUS })).toEqual({ saved: true });
+    expect(await stored(team.id)).toMatchObject({ extraModels: [OPUS], defaultModel: OPUS });
+  });
+
   it("refuses an unknown choice", async () => {
     const { team, lead } = await leadOfNewTeam();
     await as(lead);

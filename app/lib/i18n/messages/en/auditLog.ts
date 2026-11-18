@@ -21,6 +21,7 @@ export const auditLog: Messages["auditLog"] = {
     resetLinkCreated: "Reset link created",
     roleChanged: "Role changed",
     teacherDefaultModelChanged: "Teacher's default model changed",
+    teacherExtraModelsChanged: "Teacher's expensive models changed",
     teacherModelsChanged: "Teacher's models changed",
     twoFactorDisabled: "Two-step verification turned off",
     twoFactorEnabled: "Two-step verification turned on",
