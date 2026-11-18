@@ -14,6 +14,8 @@ export const portfolio: RouteArea = {
       route(":id/outcome/:outcomeId", "routes/portfolio.$id.outcome.$outcomeId.tsx"),
       // Evidence in one go: many files, a proposal per file, one list to confirm.
       route(":id/evidence", "routes/portfolio.$id.evidence.tsx"),
+      // Quotes from feedback per criterion: proposed by LimeOnIt, chosen by the candidate.
+      route(":id/quotes", "routes/portfolio.$id.quotes.tsx"),
       // 29.3: the rehearsal assessment, from step 5 only.
       route(":id/rehearsal", "routes/portfolio.$id.rehearsal.tsx"),
     ]),

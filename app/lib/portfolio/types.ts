@@ -90,6 +90,33 @@ export interface RequirementRef {
   line: string;
 }
 
+/** Who gave a piece of feedback (the five questionnaires of the BDB/BKE), for the citation. */
+export const FEEDBACK_ROLES = [
+  "workplace-supervisor",
+  "fellow-student",
+  "expert",
+  "second-assessor",
+  "fellow-candidate",
+  "other",
+] as const;
+export type FeedbackRole = (typeof FEEDBACK_ROLES)[number];
+
+/** A sentence from the feedback, verbatim (checked in code), chosen for one criterion. */
+export interface FeedbackQuote {
+  criterionId: string;
+  text: string;
+}
+
+/** Feedback of another person on an evidence item: who, when, and the quotes the candidate chose. */
+export interface FeedbackSource {
+  /** The giver's name, as the candidate typed it; it never goes to the AI. */
+  giver: string;
+  role: FeedbackRole;
+  /** `YYYY-MM-DD`. */
+  date?: string;
+  quotes: FeedbackQuote[];
+}
+
 export interface EvidenceItem {
   id: string;
   title: string;
@@ -98,6 +125,8 @@ export interface EvidenceItem {
   text: string;
   criterionIds: string[];
   sourceGenerationId?: string;
+  /** Feedback of another person, with the quotes the candidate chose per criterion. */
+  feedback?: FeedbackSource;
   /** The required-evidence lines the teacher ticked this item for (`requirementChecklist`). */
   requirements?: RequirementRef[];
   /** A snapshot of a course (P26.4); "Opnieuw ophalen" replaces the text with the course as it is now. */

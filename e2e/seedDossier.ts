@@ -65,6 +65,16 @@ export function guidedDossier(courseId?: string): DossierData {
         },
       ],
     },
+    // Feedback from someone else, for "Citaten uit feedback"; linked to no criterion yet.
+    evidence: [
+      {
+        id: "e2e-feedback",
+        title: "Feedback werkplekbegeleider",
+        kind: "feedback",
+        text: "Je startte met een vraag over de dosering en iedereen dacht mee.",
+        criterionIds: [],
+      },
+    ],
     ...(courseId && { anchors: { [lu]: { course: { courseId, itemId: "e2e-les-1" } } } }),
     guided: {
       [lu]: {

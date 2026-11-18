@@ -14,6 +14,7 @@ import { z } from "zod";
 import { extractJson } from "~/lib/ai/structuredAnswer";
 import { COACH_LIMITS } from "./schema";
 import { evidencePending } from "./evidence";
+import { quoteAttribution, standingQuotes } from "./quotes";
 import type { CoachReview, CriterionReview, DossierData, Outcome } from "./types";
 import { VERDICTS } from "./types";
 import type { Locale } from "~/lib/i18n";
@@ -48,6 +49,7 @@ const LABELS = {
     empty: "(Het hoofdstuk is nog leeg.)",
     truncated: "[… ingekort]",
     linkedTo: "hoort bij",
+    from: "van",
     provisional: "Voorlopig kader: het landelijke startpunt, niet het formulier van de hogeschool.",
     pending: "(Volgt nog: hier is nog geen tekst. Telt nog niet als bewijs.)",
   },
@@ -62,6 +64,7 @@ const LABELS = {
     empty: "(The chapter is still empty.)",
     truncated: "[… shortened]",
     linkedTo: "belongs to",
+    from: "from",
     provisional: "Provisional framework: the national starting point, not the institution's form.",
     pending: "(Still to come: there is no text yet. Does not count as evidence yet.)",
   },
@@ -85,9 +88,10 @@ function criteriaBlock(o: Outcome, l: (typeof LABELS)[Locale], only?: readonly s
 function evidenceBlock(
   d: DossierData,
   o: Outcome,
-  l: (typeof LABELS)[Locale],
+  locale: Locale,
   only?: readonly string[],
 ): string {
+  const l = LABELS[locale];
   const keyOf = new Map(o.criteria.map((c, i) => [c.id, `K${i + 1}`]));
   const items = d.evidence.filter((e) =>
     e.criterionIds.some((id) => (only ? only.includes(id) : keyOf.has(id))),
@@ -101,8 +105,19 @@ function evidenceBlock(
       ? l.pending
       : clip(e.text, Math.min(COACH_INPUT_LIMITS.evidenceItem, budget), l.truncated);
     budget -= text.length;
+    // The quotes the candidate chose from someone's feedback, with role and date, never the name.
+    const f = e.feedback;
+    const quotes = f
+      ? standingQuotes(e)
+          .filter((q) => keyOf.has(q.criterionId) && (!only || only.includes(q.criterionId)))
+          .map(
+            (q) =>
+              `<quote ${l.linkedTo}="${keyOf.get(q.criterionId)}" ${l.from}="${quoteAttribution(f, locale)}">${q.text}</quote>\n`,
+          )
+          .join("")
+      : "";
     parts.push(
-      `<item id="B${i + 1}" kind="${e.kind}" ${l.linkedTo}="${keys}">\n# ${e.title}\n${text}\n</item>`,
+      `<item id="B${i + 1}" kind="${e.kind}" ${l.linkedTo}="${keys}">\n# ${e.title}\n${quotes}${text}\n</item>`,
     );
   });
   return parts.length ? parts.join("\n") : l.none;
@@ -137,7 +152,7 @@ export function buildCoachMessage(d: DossierData, outcomeId: string, locale: Loc
     `<required-evidence>\n${l.required}:\n${required}\n</required-evidence>`,
     `<requirements>\n${l.requirements}:\n${requirementsBlock(d, l)}\n</requirements>`,
     `<chapter>\n${chapter ? clip(chapter, COACH_INPUT_LIMITS.chapter, l.truncated) : l.empty}\n</chapter>`,
-    `<evidence>\n${evidenceBlock(d, o, l)}\n</evidence>`,
+    `<evidence>\n${evidenceBlock(d, o, locale)}\n</evidence>`,
     `<references>\n${referencesBlock(d, l)}\n</references>`,
   ].join("\n\n");
 }
@@ -160,7 +175,7 @@ export function criteriaMaterial(
   return {
     outcome: `${l.outcome}: ${[o.code, o.title].filter(Boolean).join(" ")}`,
     criteria: `<criteria>\n${criteriaBlock(o, l, criterionIds)}\n</criteria>`,
-    evidence: `<evidence>\n${evidenceBlock(d, o, l, criterionIds)}\n</evidence>`,
+    evidence: `<evidence>\n${evidenceBlock(d, o, locale, criterionIds)}\n</evidence>`,
     chapter: `<chapter-so-far>\n${text ? clip(text, COACH_INPUT_LIMITS.chapter, l.truncated) : l.empty}\n</chapter-so-far>`,
     references: `<references>\n${referencesBlock(d, l)}\n</references>`,
     hasEvidence: d.evidence.some(

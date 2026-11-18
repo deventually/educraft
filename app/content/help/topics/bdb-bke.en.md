@@ -45,6 +45,7 @@ Other evidence you already have:
 - **My work:** anything you made in LimeOnIt before, with *Add to dossier*.
 - **A course:** your test blueprint or coverage matrix, through *Use as evidence in BDB/BKE* on the course page. That is a snapshot; *Fetch again* updates it.
 - **You may already have this:** at a criterion, LimeOnIt suggests earlier work that fits. Tick what you want to use.
+- **Quotes from feedback:** add the answers to your feedback questions (from your workplace supervisor, a fellow student, an expert, your second assessor or fellow candidates) as evidence of the kind *Feedback*. Then open *Quotes from feedback* on your dossier and fill in who gave the feedback: name, role and date. With *Propose quotes*, LimeOnIt looks for sentences per criterion that you can quote word for word; it leaves out vague praise such as "Good lesson!", and a sentence that is not word for word in the feedback is taken out by LimeOnIt itself. You tick which quotes you keep. The feedback giver's name stays in your dossier and does not go to the AI; when your chapter is drafted, LimeOnIt quotes the chosen sentences word for word, with role and date.
 
 **Done when:** every criterion has at least one linked piece of evidence.
 

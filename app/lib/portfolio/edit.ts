@@ -12,6 +12,7 @@ import type {
   RequirementRef,
 } from "./types";
 import { applySuggestion } from "./proofread";
+import { standingQuotes } from "./quotes";
 
 const newId = (): string => crypto.randomUUID();
 
@@ -207,7 +208,14 @@ export function updateEvidence(
   if (!d.evidence.some((e) => e.id === evidenceId))
     throw new Error(`Unknown evidence: ${evidenceId}`);
   const next = clone(d);
-  next.evidence = next.evidence.map((e) => (e.id === evidenceId ? { ...e, ...patch } : e));
+  next.evidence = next.evidence.map((e) => {
+    if (e.id !== evidenceId) return e;
+    const updated = { ...e, ...patch };
+    // A chosen quote stays only while its text and its criterion stay on the item.
+    return updated.feedback
+      ? { ...updated, feedback: { ...updated.feedback, quotes: standingQuotes(updated) } }
+      : updated;
+  });
   return next;
 }
 

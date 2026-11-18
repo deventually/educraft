@@ -37,6 +37,7 @@
     "eval:judge-jev3": "vite-node -c scripts/eval.config.ts scripts/eval-judge-jev3.ts",
     "eval:judge-jev4": "vite-node -c scripts/eval.config.ts scripts/eval-judge-jev4.ts",
     "eval:proofread": "vite-node -c scripts/eval.config.ts scripts/eval-proofread.ts",
+    "eval:quotes": "vite-node -c scripts/eval.config.ts scripts/eval-quotes.ts",
     "eval:import": "vite-node -c scripts/eval.config.ts scripts/eval-import.ts",
     "eval:design": "vite-node -c scripts/eval.config.ts scripts/eval-design.ts",
     "eval:design-assessments": "vite-node -c scripts/eval.config.ts scripts/eval-design-assessments.ts",

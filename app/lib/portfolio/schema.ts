@@ -4,6 +4,7 @@ import {
   CRITERION_STATUSES,
   type DossierData,
   EVIDENCE_KINDS,
+  FEEDBACK_ROLES,
   PROOFREAD_ISSUES,
   type Track,
   TRACKS,
@@ -144,6 +145,30 @@ const FrameworkSchema = z.object({
   provisional: z.literal(true).optional(),
 });
 
+/** Quotes from feedback per criterion. */
+export const QUOTE_LIMITS = {
+  /** Characters of the feedback the AI reads. */
+  excerpt: 12_000,
+  quote: 600,
+  /** Proposed per criterion. */
+  perCriterion: 3,
+  /** Chosen per evidence item. */
+  quotes: 40,
+  giver: 200,
+} as const;
+
+const FeedbackSchema = z.object({
+  giver: z.string().trim().min(1).max(QUOTE_LIMITS.giver),
+  role: z.enum(FEEDBACK_ROLES),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  quotes: z
+    .array(z.object({ criterionId: Id, text: z.string().min(1).max(QUOTE_LIMITS.quote) }))
+    .max(QUOTE_LIMITS.quotes),
+});
+
 const EvidenceSchema = z.object({
   id: Id,
   title: z.string().min(1).max(LIMITS.title),
@@ -151,6 +176,7 @@ const EvidenceSchema = z.object({
   text: z.string().max(LIMITS.documentText),
   criterionIds: z.array(Id).max(LIMITS.criteriaPerOutcome * LIMITS.outcomes),
   sourceGenerationId: Id.optional(),
+  feedback: FeedbackSchema.optional(),
   requirements: z
     .array(z.object({ outcomeId: Id, line: z.string().min(1).max(LIMITS.requiredEvidenceText) }))
     .max(LIMITS.requiredEvidence * LIMITS.outcomes)

@@ -218,26 +218,21 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
                   { date: fmtDate(framework.confirmedAt, locale) },
                 )
               : t.portfolio.frameworkNotConfirmed}{" "}
-            <Link
-              to={`/portfolio/${id}/framework`}
-              className="font-medium text-violet-700 underline underline-offset-2"
-            >
-              {t.portfolio.frameworkLink}
-            </Link>{" "}
-            ·{" "}
-            <Link
-              to={startHref(id, "track")}
-              className="font-medium text-violet-700 underline underline-offset-2"
-            >
-              {t.portfolioStart.open}
-            </Link>{" "}
-            ·{" "}
-            <Link
-              to={`/portfolio/${id}/evidence`}
-              className="font-medium text-violet-700 underline underline-offset-2"
-            >
-              {t.portfolioBatch.open}
-            </Link>
+            {(
+              [
+                [`/portfolio/${id}/framework`, t.portfolio.frameworkLink],
+                [startHref(id, "track"), t.portfolioStart.open],
+                [`/portfolio/${id}/evidence`, t.portfolioBatch.open],
+                [`/portfolio/${id}/quotes`, t.portfolioQuotes.title],
+              ] as const
+            ).map(([to, label], i) => (
+              <span key={to}>
+                {i > 0 && " · "}
+                <Link to={to} className="font-medium text-violet-700 underline underline-offset-2">
+                  {label}
+                </Link>
+              </span>
+            ))}
           </p>
           {deadline && daysLeft !== undefined && (
             <DeadlineNote deadline={deadline} daysLeft={daysLeft} className="mt-2" />

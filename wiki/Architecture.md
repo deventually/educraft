@@ -447,6 +447,20 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   starts with nothing ticked; `addEvidenceBatch` adds the ticked items with their criteria and
   required-evidence line in one save, or refuses the whole batch. Sorting is not in `aiLog`: it
   writes no text. Eval: `npm run eval:evidence` (deterministic, `evals/portfolio-evidence/`).
+  Quotes from feedback (`/portfolio/:id/quotes`; `quotes.ts`, `portfolioQuotes.server.ts`,
+  BESLUIT-2026-11-18-3): for an evidence item of kind `feedback` the candidate records who gave it
+  (`EvidenceItem.feedback`: name, role from `FEEDBACK_ROLES`, date). `proposeQuotes` sends the
+  keyed framework and the feedback with only the role to `portfolio-quotes@v1`, in one
+  `withPrivacyRound` with the overview before sending (the feedback is held by the server; the
+  giver's typed name is added to "Ook vervangen"), and stores nothing. `parseQuotesAnswer` keeps a
+  quote only under a known criterion and only when `verbatimSpan` finds it in the feedback word for
+  word (spacing, case and quote marks aside, no elision, at least three words), stored in the
+  feedback's own words. `chooseQuotes` checks the same again and links the item to the quotes'
+  criteria. A quote stays only while its text and criterion stay on the item (`standingQuotes`,
+  applied in `updateEvidence`). `criteriaMaterial` lays the chosen quotes before the coach, the
+  questions and the draft as `<quote hoort bij="K2" van="werkplekbegeleider, 12 november 2026">`:
+  role and date, never the name. Eval: `npm run eval:quotes` (deterministic,
+  `evals/portfolio-quotes/`).
   The day plan (`plan.ts`, step 7): `remainingWork` turns the open milestones of `dossierRoute`
   into minutes with fixed rates (`PLAN_MINUTES`, shown to the teacher), `dayPlan` lays them over
   working days (Monday to Friday, `hoursPerDay` or 8) from today and compares that with the

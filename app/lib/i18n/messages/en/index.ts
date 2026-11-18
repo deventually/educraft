@@ -53,6 +53,7 @@ import { portfolioGrill } from "./portfolioGrill";
 import { portfolioGuided } from "./portfolioGuided";
 import { portfolioOutline } from "./portfolioOutline";
 import { portfolioPlan } from "./portfolioPlan";
+import { portfolioQuotes } from "./portfolioQuotes";
 import { portfolioReadiness } from "./portfolioReadiness";
 import { portfolioRehearsal } from "./portfolioRehearsal";
 import { portfolioRoute } from "./portfolioRoute";
@@ -138,6 +139,7 @@ export const en: Messages = {
   portfolioGuided,
   portfolioOutline,
   portfolioPlan,
+  portfolioQuotes,
   portfolioReadiness,
   portfolioRehearsal,
   portfolioRoute,
