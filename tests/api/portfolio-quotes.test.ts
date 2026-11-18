@@ -181,6 +181,22 @@ describe("Bewaar citaten", () => {
     expect(e?.criterionIds).toEqual([C1, C2]);
   });
 
+  it("refuses an item that is no feedback", async () => {
+    const mine = await repo.createDossier("teacher-q", "Q", dossier());
+    const r = await act(mine.id, [
+      ["intent", "chooseQuotes"],
+      ["evidenceId", "lesplan"],
+      ["giver", "M. de Groot"],
+      ["role", "expert"],
+      ["date", ""],
+      ["quotes", "[]"],
+    ]);
+    expect(r).toMatchObject({ ok: false });
+    expect(
+      (await repo.getDossier("teacher-q", mine.id))?.data.evidence[1]?.feedback,
+    ).toBeUndefined();
+  });
+
   it("refuses a quote that is not in the feedback, and stores nothing", async () => {
     const mine = await repo.createDossier("teacher-q", "Q", dossier());
     const r = await act(mine.id, [

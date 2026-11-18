@@ -89,6 +89,8 @@ async function choose(
   const input = ChooseQuotesSchema.safeParse(Object.fromEntries(fd));
   if (!input.success) return { ok: false, error: m.portfolio.errorInvalid };
   const { evidenceId, giver, role, date, quotes } = input.data;
+  const item = dossier.data.evidence.find((e) => e.id === evidenceId);
+  if (item?.kind !== "feedback") return { ok: false, error: m.portfolioQuotes.errors.notFeedback };
   let next: Dossier["data"];
   try {
     next = setFeedbackQuotes(dossier.data, evidenceId, {

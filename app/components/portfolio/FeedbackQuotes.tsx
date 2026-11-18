@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Form } from "react-router";
 import { Button, Card, HelpText, Input, Label, Select } from "~/components/ui";
 import { fmt } from "~/lib/i18n/format";
@@ -45,11 +45,14 @@ export function FeedbackQuotes({
   outcomes,
   proposal,
   round,
+  justSaved = false,
 }: {
   item: QuotesItem;
   outcomes: QuotesOutcome[];
   proposal?: QuotesProposal;
   round: SendRoundState;
+  /** Bewaar just stored this item: the form starts afresh, so focus goes to its heading. */
+  justSaved?: boolean;
 }) {
   const t = useT().portfolioQuotes;
   const uid = useId();
@@ -86,11 +89,20 @@ export function FeedbackQuotes({
     }),
   );
   const heading = `${uid}-h`;
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (justSaved) headingRef.current?.focus();
+  }, [justSaved]);
 
   return (
     <Card className="p-4">
       <section aria-labelledby={heading}>
-        <h2 id={heading} className="text-lg font-medium text-slate-900">
+        <h2
+          id={heading}
+          ref={headingRef}
+          tabIndex={-1}
+          className="text-lg font-medium text-slate-900 focus:outline-none"
+        >
           {item.title}
         </h2>
         <details className="mt-2">

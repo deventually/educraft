@@ -98,6 +98,11 @@ export default function PortfolioQuotes({ loaderData }: Route.ComponentProps) {
               item={item}
               outcomes={outcomes}
               round={round}
+              justSaved={
+                actionData?.ok === true &&
+                actionData.intent === "chooseQuotes" &&
+                actionData.evidenceId === item.id
+              }
               {...(proposal?.evidenceId === item.id ? { proposal } : {})}
             />
           ))}

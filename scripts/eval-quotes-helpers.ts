@@ -21,7 +21,7 @@ export interface QuotesCase {
   maxQuotes?: number;
 }
 
-export const EVAL_OUTCOME = "eval-lu1";
+const EVAL_OUTCOME = "eval-lu1";
 const criterionId = (i: number) => `eval-c${i + 1}`;
 
 export function caseToDossier(c: QuotesCase): DossierData {

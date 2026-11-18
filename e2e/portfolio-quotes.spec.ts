@@ -45,6 +45,8 @@ test("asks who gave the feedback and shows what goes to the AI first", async ({ 
   await save.focus();
   await page.keyboard.press("Enter");
   await expect(page.getByText("Citaten bewaard.")).toBeVisible();
+  // The form starts afresh from what is stored: focus goes to its heading, not to nowhere.
+  await expect(page.getByRole("heading", { name: "Feedback werkplekbegeleider" })).toBeFocused();
   await expect(page.getByLabel("Naam")).toHaveValue("Marieke de Groot");
   expect(csp).toEqual([]);
 });
