@@ -158,7 +158,13 @@ LimeOnIt is not tied to one model vendor.
   new work (pickers, tool defaults, stage pins, allow-list, own and team sets) goes to the
   successor at once, a running conversation may finish on the old id. **Finish** makes it
   `retired`: every request naming it is served by the successor. **Undo/restore** makes it
-  active again. Nothing is deleted, so old results keep their model's name. The registry is one
+  active again. An added model can be **edited** (name, effort, temperature, switches; never
+  its provider or API id, which make its id) and **removed** only while nothing has used it
+  (`generations`, `agent_reviews`, `ai_usage`, its rollup) and no setting names it (the
+  institution's, a teacher's or a team's set, default or expensive models; the allow-list and
+  its price go with it), and it is not part of an upgrade (`modelEditAdmin.server.ts`,
+  `repositories/modelReferences.server.ts`, BESLUIT-2026-11-18-6). A used model is phased out
+  with an upgrade instead, so old results keep their model's name. The registry is one
   `instance_settings` JSON (`modelRegistry`), parsed by `app/lib/ai/modelRegistry.ts` and
   installed into the catalog by `modelRegistry.server.ts`, so every `resolveModelInfo` call
   sees it; `currentModelId` / `forwardRetired` in `models.ts` follow the upgrade chain and

@@ -2,8 +2,8 @@
 import { useEffect, useRef } from "react";
 import { useFetcher } from "react-router";
 import { Button, Input, Label, Select } from "~/components/ui";
+import { ModelSettingsFields } from "~/components/admin/ModelSettingsFields";
 import {
-  CheckField,
   type ModelActionResult,
   type ProviderView,
   sectionHeading,
@@ -81,61 +81,7 @@ export function AddModelForm({ providers }: { providers: ProviderView[] }) {
               />
             </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="add-effort">{a.effort}</Label>
-              <Select
-                id="add-effort"
-                name="effort"
-                defaultValue=""
-                aria-describedby="add-effort-hint"
-                className="mt-1"
-              >
-                <option value="">{a.effortDefault}</option>
-                {(["low", "medium", "high", "xhigh", "max"] as const).map((e) => (
-                  <option key={e} value={e}>
-                    {e}
-                  </option>
-                ))}
-              </Select>
-              <p id="add-effort-hint" className="mt-1 text-xs text-slate-500">
-                {a.effortHint}
-              </p>
-            </div>
-            <div>
-              <Label htmlFor="add-temperature">{a.temperature}</Label>
-              <Input
-                id="add-temperature"
-                name="temperature"
-                type="number"
-                inputMode="decimal"
-                min={0}
-                max={2}
-                step={0.1}
-                aria-describedby="add-temperature-hint"
-                className="mt-1"
-              />
-              <p id="add-temperature-hint" className="mt-1 text-xs text-slate-500">
-                {a.temperatureHint}
-              </p>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <CheckField id="add-images" name="supportsImages" label={a.supportsImages} />
-            <CheckField
-              id="add-thinks"
-              name="alwaysThinks"
-              label={a.alwaysThinks}
-              hint={a.alwaysThinksHint}
-            />
-            <CheckField
-              id="add-selectable"
-              name="clientSelectable"
-              label={a.clientSelectable}
-              hint={a.clientSelectableHint}
-              defaultChecked
-            />
-          </div>
+          <ModelSettingsFields idPrefix="add" />
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Button type="submit" disabled={fetcher.state !== "idle"}>
               {a.add}

@@ -33,6 +33,16 @@ export interface ModelView {
   /** Whose price: the admin's own, or the catalog's list price (looked up on `priceChecked`). */
   priceFrom: "admin" | "catalog" | null;
   priceChecked?: string;
+  /** Only on a model added on screen: what its edit form starts with. */
+  config?: ModelConfig;
+}
+
+/** An added model's switches and settings (effort, temperature). */
+export interface ModelConfig {
+  supportsImages: boolean;
+  alwaysThinks: boolean;
+  clientSelectable: boolean;
+  settings?: { effort?: string; temperature?: number | null };
 }
 
 export interface ChoiceView {
@@ -51,7 +61,9 @@ export type ModelActionResult =
   | { saved?: true; error?: string | true }
   | { providerAdded?: { name: string; setting?: string } }
   | { providerRemoved?: { name: string } }
-  | { priced?: { name: string; cleared?: boolean } };
+  | { priced?: { name: string; cleared?: boolean } }
+  | { edited?: string }
+  | { removed?: string };
 
 /** Toast every models action the same way: the done text, or the error text. */
 export function useModelToast(data: ModelActionResult | undefined) {
@@ -78,6 +90,10 @@ export function useModelToast(data: ModelActionResult | undefined) {
           : fmt(a.providerAddReady, { name }),
       };
     }
+    if ("edited" in d && d.edited)
+      return { variant: "success", message: fmt(a.editDone, { name: d.edited }) };
+    if ("removed" in d && d.removed)
+      return { variant: "success", message: fmt(a.removeDone, { name: d.removed }) };
     if ("priced" in d && d.priced) {
       const text = d.priced.cleared ? a.priceCleared : a.priceDone;
       return { variant: "success", message: fmt(text, { name: d.priced.name }) };

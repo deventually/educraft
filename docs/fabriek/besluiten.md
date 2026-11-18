@@ -883,3 +883,14 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   per maand blijft de rem. Bastiaan, 2026-11-18 ("Als beheer opus aanzet voor een team of docent,
   dan moet het team of de docent ook dit dure model als standaard kunnen instellen. Quota's zijn
   enorm belangrijk dus"; "Ok akkoord" op het voorstel voor een aparte PR).
+- **BESLUIT-2026-11-18-6:** **Beheer kan een zelf toegevoegd model bewerken en verwijderen.**
+  Bewerken: de naam, het denkniveau, de temperatuur en de vinkjes (afbeeldingen, denkt eerst na,
+  docenten mogen kiezen). De aanbieder en het model-id blijven: die vormen de id waar resultaten
+  en tellingen naar wijzen. Verwijderen kan alleen zolang het model **nooit gebruikt** is (geen
+  resultaat, review of getelde aanroep) en **nergens gekozen** is (instelling, team of docent,
+  als set, standaard of duur model), en niet in een upgrade zit. Het gaat dan ook uit de keuze
+  van de instelling en zijn prijs verdwijnt. Een gebruikt model faseer je uit met een upgrade,
+  zodat oude resultaten hun model houden. Modellen uit `config/models.json` blijven daar. Beide
+  acties komen in het logboek. Bastiaan, 2026-11-18 ("Ik wil ook modellen kunnen verwijderen en
+  editen (bv. de temperatuur instellen en andere dingen die ik kon instellen bij het toevoegen
+  van het model)", "Als beheerder").
