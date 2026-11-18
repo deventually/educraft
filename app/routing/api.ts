@@ -18,6 +18,8 @@ export const api: RouteArea = {
     route("api/announcements/dismiss", "routes/api.announcements.dismiss.tsx"),
     // Stores or dismisses a teacher's periodic pilot check-in.
     route("api/checkin", "routes/api.checkin.tsx"),
+    // The teacher's never-list from the live privacy preview (anonymiseerpoort PR 3).
+    route("api/privacy/keep", "routes/api.privacy.keep.tsx"),
     // Public health probe for orchestrators (no auth, no chrome).
     route("healthz", "routes/healthz.tsx"),
     // Persists the chosen UI locale in a cookie.

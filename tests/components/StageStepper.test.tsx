@@ -236,3 +236,45 @@ describe("StageStepper — leaving with the choice of the dialog", () => {
     expect(signal?.aborted).toBe(false);
   });
 });
+
+/** The live preview in a multi-step tool (anonymiseerpoort PR 3). */
+describe("StageStepper — what goes to the AI", () => {
+  const privacy = { known: { teacher: "Mark de Groot", colleagues: ["Anna Visser"] }, never: [] };
+
+  it("shows each step's input as it goes, sends the approval and asks before resending", async () => {
+    const spy = await streamSpy();
+    spy.mockImplementation(async (_url, body, handlers) => {
+      if (spy.mock.calls.length === 1)
+        handlers.onPrivacy?.([
+          { value: "Piet Klaassen", code: "COLLEGA-2", kind: "colleague", count: 1 },
+        ]);
+      else {
+        handlers.onToken(`analyse van ${body.values.gradeSubject}`);
+        handlers.onDone?.();
+      }
+    });
+    const user = userEvent.setup();
+    const Stub = createRoutesStub([
+      {
+        path: "/",
+        Component: () => (
+          <StageStepper tool={tool} profiles={[]} defaultProfileId="" privacy={privacy} />
+        ),
+      },
+    ]);
+    const { container } = render(<Stub initialEntries={["/"]} />);
+    await fillRequired(user);
+    await user.type(screen.getAllByRole("textbox")[0]!, " Anna Visser");
+    expect(
+      await screen.findByRole("button", { name: "Anna Visser wordt [COLLEGA-1]" }),
+    ).toBeInTheDocument();
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+
+    await user.click(screen.getAllByRole("button", { name: m.tool.runStage })[0]!);
+    expect(spy.mock.calls[0]![1].privacy.approved).toEqual(["Anna Visser"]);
+    expect(await screen.findByRole("heading", { name: m.privacy.askTitle })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: m.privacy.askSend }));
+    expect(spy.mock.calls[1]![1].privacy.approved).toContain("Piet Klaassen");
+    expect(await screen.findByText(/analyse van x Anna Visser/)).toBeInTheDocument();
+  });
+});

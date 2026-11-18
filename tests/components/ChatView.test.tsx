@@ -31,49 +31,53 @@ vi.mock("~/lib/i18n/localized", () => ({
 }));
 
 // Mock useLocale and useT
-vi.mock("~/lib/i18n/useT", () => ({
-  useLocale: () => "en",
-  useT: () => ({
-    tool: {
-      contextProfile: "Context",
-      generate: "Generate",
-      generating: "Generating…",
-      stop: "Stop",
-      regenerate: "Regenerate",
-      model: "Model",
-      outputLanguage: "Output language",
-      dutch: "Dutch",
-      english: "English",
-      reasoning: "Reason before answering",
-      reasoningHint: "Off is much faster.",
-      advanced: "Advanced",
-      noProfileAction: "Set up teaching context",
-      course: "Course",
-      noCourse: "No course",
-      courseHint: "Fills in its learning outcomes and links the result to it.",
-    },
-    chat: {
-      send: "Send",
-      stop: "Stop",
-      regenerate: "Regenerate",
-      streaming: "Thinking…",
-      inputPlaceholder: "Your message…",
-      sandboxHint: "Fill in the details",
-      setupHeading: "Before you start",
-      noProfileHint: "This conversation does not know your teaching context.",
-      continue: "Continue",
-      startConversation: "Start the conversation",
-      interrupted: "Interrupted",
-      yourSettings: "Your settings",
-      edit: "Edit",
-      endSession: "End session",
-    },
-    error: {
-      unknown: "Something went wrong",
-    },
-    speech: { readAloud: "Read aloud", stopReading: "Stop reading" },
-  }),
-}));
+vi.mock("~/lib/i18n/useT", async () => {
+  const { messages } = await import("~/lib/i18n");
+  return {
+    useLocale: () => "en",
+    useT: () => ({
+      privacy: messages.en.privacy,
+      tool: {
+        contextProfile: "Context",
+        generate: "Generate",
+        generating: "Generating…",
+        stop: "Stop",
+        regenerate: "Regenerate",
+        model: "Model",
+        outputLanguage: "Output language",
+        dutch: "Dutch",
+        english: "English",
+        reasoning: "Reason before answering",
+        reasoningHint: "Off is much faster.",
+        advanced: "Advanced",
+        noProfileAction: "Set up teaching context",
+        course: "Course",
+        noCourse: "No course",
+        courseHint: "Fills in its learning outcomes and links the result to it.",
+      },
+      chat: {
+        send: "Send",
+        stop: "Stop",
+        regenerate: "Regenerate",
+        streaming: "Thinking…",
+        inputPlaceholder: "Your message…",
+        sandboxHint: "Fill in the details",
+        setupHeading: "Before you start",
+        noProfileHint: "This conversation does not know your teaching context.",
+        continue: "Continue",
+        startConversation: "Start the conversation",
+        interrupted: "Interrupted",
+        yourSettings: "Your settings",
+        edit: "Edit",
+        endSession: "End session",
+      },
+      error: {
+        unknown: "Something went wrong",
+      },
+      speech: { readAloud: "Read aloud", stopReading: "Stop reading" },
+    }),
+  };
+});
 
 // Mock tool (mentorai-like)
 const mockTool: Tool = {

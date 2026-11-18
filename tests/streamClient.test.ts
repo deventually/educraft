@@ -130,3 +130,43 @@ describe("streamClient — heartbeat", () => {
     expect(onError).not.toHaveBeenCalled();
   });
 });
+
+/** The anonymiseerpoort sent nothing (PR 3): the words the teacher did not see yet. */
+describe("streamClient — the gate asks first", () => {
+  it("hands the review to onPrivacy, not to onError or onDone", async () => {
+    const review = [{ value: "Jan de Vries", code: "COLLEGA-1", kind: "colleague", count: 2 }];
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue(
+          sseResponse([`event: privacy\ndata: ${JSON.stringify({ review })}\n\n`]),
+        ),
+    );
+    const onPrivacy = vi.fn();
+    const onError = vi.fn();
+    const onDone = vi.fn();
+    await streamPost("/api/stream", {}, { onToken: () => {}, onPrivacy, onError, onDone });
+    expect(onPrivacy).toHaveBeenCalledWith(review);
+    expect(onError).not.toHaveBeenCalled();
+    expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it("drops a malformed review item and falls back to an error without a handler", async () => {
+    const frame = `event: privacy\ndata: ${JSON.stringify({
+      review: [{ value: 3 }, { value: "Ab", code: "DOCENT", kind: "teacher", count: 1 }],
+    })}\n\n`;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async () => sseResponse([frame])),
+    );
+    const onPrivacy = vi.fn();
+    await streamPost("/api/stream", {}, { onToken: () => {}, onPrivacy });
+    expect(onPrivacy).toHaveBeenCalledWith([
+      { value: "Ab", code: "DOCENT", kind: "teacher", count: 1 },
+    ]);
+    let received: StreamError | undefined;
+    await streamPost("/api/stream", {}, { onToken: () => {}, onError: (e) => (received = e) });
+    expect(received?.code).toBe("privacy");
+  });
+});

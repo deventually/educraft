@@ -113,6 +113,22 @@ describe("with what the teacher saw", () => {
     logs.mockRestore();
   });
 
+  it("never replaces or asks about a word on the teacher's never-list (PR 3)", async () => {
+    const keepWords = await import("~/server/repositories/keepWords.server");
+    await keepWords.addKeepWord("pg-a", "Fatima el Amrani");
+    streamChat.mockReturnValue(tokens("Goed."));
+    const r = await gate.gatedStream(user, prompt, {
+      exit: "stream",
+      locale: "nl",
+      approval: { approved: ["fatima@school.nl"], keep: [] },
+    });
+    expect(r.ok).toBe(true);
+    expect(streamChat.mock.calls[0]?.[0].messages[0].content).toBe(
+      "Vraag Fatima el Amrani, mail [E-MAIL-1].",
+    );
+    await keepWords.removeKeepWord("pg-a", "Fatima el Amrani");
+  });
+
   it("gates Jev's state and restores the strings of its answer", async () => {
     postDecisions.mockResolvedValue({ reason: "Past bij [COLLEGA-1]", p: 0.9 });
     const r = await gate.gatedDecisions(

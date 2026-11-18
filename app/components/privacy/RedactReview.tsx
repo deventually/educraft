@@ -2,6 +2,7 @@ import { useId, useMemo, useRef, useState } from "react";
 import { ShieldCheck } from "lucide-react";
 import { Button, Input, Label, Textarea } from "~/components/ui";
 import { useT } from "~/lib/i18n/useT";
+import { ScrollText } from "./ScrollText";
 import { fmt } from "~/lib/i18n/format";
 import {
   applyRedactions,
@@ -202,19 +203,16 @@ export function RedactReview({ fields, draft, onDraft, onConfirm, onCancel }: Pr
             >
               {fmt(t.preview, { field: f.label })}
             </h3>
-            {/* biome-ignore lint/a11y/noNoninteractiveTabindex: a scrollable region must be keyboard-reachable */}
-            <div tabIndex={0} className="max-h-80 overflow-y-auto px-3 py-2">
-              <p className="whitespace-pre-wrap text-sm leading-7 text-slate-800">
-                <Marked
-                  text={f.text}
-                  spans={f.spans}
-                  undone={undone[f.name]}
-                  onToggle={(s) => toggle(f.name, s)}
-                  replaced={t.replaced}
-                  kept={t.kept}
-                />
-              </p>
-            </div>
+            <ScrollText className="max-h-80">
+              <Marked
+                text={f.text}
+                spans={f.spans}
+                undone={undone[f.name]}
+                onToggle={(s) => toggle(f.name, s)}
+                replaced={t.replaced}
+                kept={t.kept}
+              />
+            </ScrollText>
           </section>
         ))}
       </div>

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { Tool } from "~/lib/registry/types";
 import type { FormValues } from "~/lib/forms/values";
 import { useT } from "~/lib/i18n/useT";
@@ -13,6 +14,8 @@ interface ChatSetupCardProps {
   values: FormValues;
   onChange: (name: string, value: FormValues[string]) => void;
   onSubmit: () => void;
+  /** Under the form: what goes to the AI (anonymiseerpoort PR 3). */
+  children?: ReactNode;
 }
 
 /** Sandbox gate: a focused card the user fills once before the chat opens. */
@@ -24,6 +27,7 @@ export function ChatSetupCard({
   values,
   onChange,
   onSubmit,
+  children,
 }: ChatSetupCardProps) {
   const t = useT();
   return (
@@ -36,6 +40,7 @@ export function ChatSetupCard({
         <div className="space-y-4">
           <CoursePicker courses={courses} value={courseId} onChange={onSelectCourse} />
           <DynamicForm fields={tool.inputs} values={values} onChange={onChange} />
+          {children}
         </div>
         <Button onClick={onSubmit} className="mt-4">
           {t.chat.continue}

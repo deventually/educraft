@@ -18,6 +18,10 @@ import { Badge, Button } from "./ui";
 import { streamPost } from "~/lib/streamClient";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { loc } from "~/lib/i18n/localized";
+import { privacyFields, usePrivacy } from "~/lib/hooks/usePrivacy";
+import type { PrivacyPage } from "~/lib/privacy/live";
+import { restoreNames, type CodeTable } from "~/lib/privacy/redact";
+import { PrivacyAskCard, PrivacyPreview } from "./privacy/PrivacyPreview";
 // i18n: all visible strings resolved via useT()/loc() (locale-aware).
 
 interface Props {
@@ -36,6 +40,8 @@ interface Props {
   resultContext?: ResultContext;
   /** This history entry: Back and Forward bring its form and finished steps back. */
   memoryKey?: string;
+  /** The names the anonymiseerpoort knows and the teacher's never-list (PR 3). */
+  privacy?: PrivacyPage;
 }
 
 interface StageState {
@@ -55,6 +61,7 @@ export function StageStepper({
   initialItemId,
   resultContext,
   memoryKey,
+  privacy: privacyPage,
 }: Props) {
   const t = useT();
   const locale = useLocale();
@@ -72,6 +79,10 @@ export function StageStepper({
   });
   const { values, setValue, contextProfileId, selectProfile, courseId, selectCourse, itemId } =
     sandbox;
+  // The live preview (anonymiseerpoort PR 3); the teacher's names come back in each step.
+  const privacy = usePrivacy(privacyPage);
+  const liveFields = privacyFields(tool.inputs, values, locale);
+  const [codes, setCodes] = useState<CodeTable>({});
   const [outputLanguage, setOutputLanguage] = useState<OutputLanguage>(tool.defaultOutputLanguage);
   // Pre-select an OFFERED model, not blindly the tool default: a teacher
   // whose set holds only a local model must not start on the frontier default.
@@ -149,20 +160,32 @@ export function StageStepper({
     }
     setStage(stage.id, { output: "", streaming: true, error: null });
     const signal = streams.start(stage.id);
+    // Earlier steps go along as they came back: with the codes, names the gate knows approved.
+    const prior = Object.entries(outputs());
+    const prepared = privacy.prepare({
+      fields: liveFields,
+      others: prior.map(([, text]) => text),
+    });
+    setCodes((prev) => ({ ...prev, ...prepared.codes }));
     await streamPost(
       "/api/stream",
       {
         slug: tool.slug,
         stageId: stage.id,
-        values,
+        values: { ...values, ...prepared.values },
         contextProfileId,
         outputLanguage,
         model,
-        priorOutputs: outputs(),
+        priorOutputs: Object.fromEntries(prior.map(([id], i) => [id, prepared.others[i] ?? ""])),
         courseId: courseId || undefined,
         itemId: (courseId && itemId) || undefined,
+        privacy: prepared.approval,
       },
       {
+        onPrivacy: (items) => {
+          setStage(stage.id, { streaming: false });
+          privacy.askFirst(items, () => void runStage(stage));
+        },
         onToken: (text) =>
           setStages((prev) => {
             const existing: StageState = prev[stage.id] ?? {
@@ -219,6 +242,11 @@ export function StageStepper({
             catalogModels={catalogModels}
           />
           <DynamicForm fields={tool.inputs} values={values} onChange={setValue} />
+          <PrivacyPreview
+            privacy={privacy}
+            fields={liveFields}
+            studentWork={tool.inputs.some((f) => f.redact)}
+          />
           {formError && (
             <p className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
               <AlertTriangle className="mt-0.5 size-4 shrink-0" />
@@ -229,6 +257,13 @@ export function StageStepper({
       }
     >
       <div className="min-w-0 space-y-4">
+        {privacy.ask && (
+          <PrivacyAskCard
+            items={privacy.ask.items}
+            onAnswer={privacy.answer}
+            onCancel={privacy.cancelAsk}
+          />
+        )}
         {tool.stages.map((stage) => {
           const st = stages[stage.id];
           const ready = depsReady(stage);
@@ -275,7 +310,7 @@ export function StageStepper({
               {(hasOutput || st?.streaming) && (
                 <div className="p-3">
                   <ResultPanel
-                    markdown={st?.output ?? ""}
+                    markdown={restoreNames(st?.output ?? "", codes)}
                     title={loc(stage.name, locale)}
                     streaming={st?.streaming}
                     lang={outputLanguage}

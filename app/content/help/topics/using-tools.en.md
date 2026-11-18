@@ -28,17 +28,17 @@ Many tools let you upload a **PDF or Word file**. Your browser takes the text ou
 
 In tools that review student work, such as feedback or an assessment, you see the original next to the result. **Show in document** jumps to the place where a quote is.
 
-If a student's work goes to the AI, you **anonymise it first**:
+Under the form, every tool shows **What goes to the AI**: the text as it goes, with each replacement marked and its code next to it (for example *Jan de Vries* → `[COLLEGA-1]`). It works while you type; nothing is sent until you press the button yourself.
 
-1. Fill in the student's name and student number, and any supervisors and the company.
-2. LimeOnIt replaces them with codes. Email addresses, phone numbers, postcodes, IBANs and numbers that look like a student number are removed automatically. From the student number you fill in, LimeOnIt learns what student numbers look like; other numbers of that shape go too, other numbers stay.
-3. Check what the AI receives and choose **Send anonymised**.
+- LimeOnIt knows your name and those of your colleagues (your teams and the people on your courses) and recognises email addresses, phone numbers, postcodes, IBANs and numbers that look like a student number.
+- LimeOnIt does not know student names. Fill them in under **Names that must go**, with the student number, the company and supervisors. In tools for student work this is open already. From the student number you fill in, LimeOnIt learns what student numbers look like; other numbers of that shape go too, other numbers stay.
+- Click a replacement to keep the word. If it is a word such as a surname that is also a term from your field, LimeOnIt remembers it on your **Never replace** list; you take it off there too. Select a word in the preview and choose **Also replace** to remove something extra.
 
 A full name always goes. A single part of a name goes only when it starts with a capital, and when it is also an ordinary word (such as Rose or Will) only in the middle of a sentence. Names of researchers and models, such as Bloom, Vygotsky or Hattie, stay.
 
-The real names stay in your browser and come back in the result. *Earlier work* keeps the version with codes. Note: figures and photos are not anonymised, and a misspelt name can slip through. So do check the text.
+Student names and what you fill in under *Names that must go* stay in your browser: the server only sees codes, and the result shows the names again. *Earlier work* then keeps the version with codes. For student work, nothing but the version with codes leaves your browser. Your own name and your colleagues' names are replaced on the server and put back there too, so *Earlier work* shows them as written. Note: figures and photos are not anonymised, and a misspelt name can slip through. So do check the text.
 
-Everything that goes to the AI also passes a check **on the server**. It knows your name and those of your colleagues (your teams and the people on your courses) and recognises e-mail addresses and numbers. For now the check only counts how often it finds something, never what; nothing is replaced yet on the server. That changes once you see what goes before you send.
+Everything that goes to the AI also passes a check **on the server**. If it finds something you did not see, for example a colleague in your context or in an earlier step, it sends nothing and you see **Look first**: per word you choose *Replace* or *Do not replace*, and only after **Send** does anything go. Nothing is ever replaced silently.
 
 ## Read aloud and dictation
 
