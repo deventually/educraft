@@ -823,5 +823,5 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   dagen bewaard. Het gezondheidsscherm toont de afgelopen 7 dagen naast de 7 ervoor en waarschuwt
   als één soort minstens 20 keer en drie keer zo vaak afging als de week ervoor (niet in een
   eerste week). Geen regel in het logboek: het is een instelling zoals het reviewteam. Bastiaan,
-  2026-11-17 (ontwerp "Eén anonimiseerpoort", stap 5); de drempels (20 keer, drie keer zo vaak,
-  60 dagen) zijn een voorstel van de werker in PR 5.
+  2026-11-17 (ontwerp "Eén anonimiseerpoort", stap 5); drempels en losse naamdelen bevestigd
+  op 2026-11-18.
