@@ -49,6 +49,11 @@ export function adminMenu(t: Messages, { isOwner }: { isOwner: boolean }): MenuG
       links: [
         { to: "/admin/tools", label: nav.tools, description: m.tools },
         { to: "/admin/agents", label: nav.agents, description: m.agents },
+        {
+          to: "/admin/privacy",
+          label: t.adminPrivacy.nav,
+          description: t.adminPrivacy.menuDescription,
+        },
         { to: "/usage", label: nav.aiUsage, description: m.aiUsage },
       ],
     },

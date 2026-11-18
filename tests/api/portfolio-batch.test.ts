@@ -248,6 +248,6 @@ describe("evidence in one go: nothing goes that the teacher did not see (anonymi
       request: new Request("http://localhost/x"),
       params: { id: mine.id },
     } as never);
-    expect(page.privacy).toEqual({ known: { colleagues: [] }, never: [] });
+    expect(page.privacy).toEqual({ known: { colleagues: [] }, never: [], shared: [] });
   });
 });

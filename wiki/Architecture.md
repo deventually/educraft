@@ -335,6 +335,16 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   reads itself. `studentNumberExample` is only the shape (`s0000000`). When the gate still sends
   nothing (`event: privacy`), `streamPost` calls `onPrivacy` and the page shows `PrivacyAskCard`
   (per word Replace or Do not replace, then Send), which sends again with the answer.
+- **The institution's never-words and the gate's counters (anonymiseerpoort PR 5,
+  BESLUIT-2026-11-17-8).** `/admin/privacy` (`sharedKeepWords.server.ts`) lists the words on
+  teachers' never-lists with how many teachers chose each, never who, leaving out a user's full
+  name and what `pack/keep.ts` already keeps; one click puts a word on
+  `privacy_shared_keep_words`. The gate (`policyFor`, every mode) and the live preview
+  (`PrivacyPage.shared` → `LiveChoices.shared`, passed to the engine like the pack's keep list)
+  never replace those words. Every gated call adds to `privacy_gate_counts` (per UTC day: per
+  kind, plus `call` and `stopped`; counts only, kept 60 days, `gateCounts.server.ts`); the admin
+  layout shows the last 7 days against the 7 before in `HealthPanel` (`GateCounts`), with a
+  warning when a kind jumps (`isSpike`, `app/lib/privacy/gateHealth.ts`).
 - **The overview before sending (anonymiseerpoort step 4, BESLUIT-2026-11-17-9)**
   (`app/lib/privacy/overview.ts`, `app/lib/hooks/useSendRound.ts`,
   `app/components/privacy/SendRound.tsx`). Screens without a typing moment (Bewijs in één keer,
@@ -776,7 +786,10 @@ is on; a wrapper that renders a native control (`Select`, `StandSelect`) is list
 **Security scanning** runs on GitHub itself (`tests/security-scan.test.ts`). The CI job `audit`
 runs `npm audit`: production dependencies must be clean from *moderate* up, the whole tree (dev
 tools such as Stryker too) blocks only from *high*, so a moderate finding deep in dev tooling
-doesn't need an `overrides` workaround. `.github/workflows/codeql.yml` runs CodeQL
+doesn't need an `overrides` workaround. The whole-tree step is `scripts/audit.ts`: a high advisory
+in a dev tool that has no fix yet may be let through by a dated exception in
+`config/audit-exceptions.json` (advisory id, package, reason, at most three months); after its
+`until` date the check is red again (BESLUIT-2026-11-17-7). Production has no exceptions. `.github/workflows/codeql.yml` runs CodeQL
 (`security-extended`) on every pull request, on `main` and weekly; findings appear under
 *Security › Code scanning*. `.github/dependabot.yml` opens weekly update PRs for npm and GitHub
 Actions: minor and patch bundled in one PR per ecosystem, each major version apart.

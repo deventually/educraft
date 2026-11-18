@@ -797,6 +797,34 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   alleen woorden, nooit iets met een cijfer of `@`; de poort leest die lijst zelf ook. Bastiaan,
   2026-11-17 (ontwerp "Eén anonimiseerpoort", stap 3; principe "niets gaat weg zonder dat de
   docent het zag").
+- **BESLUIT-2026-11-17-7:** **Een hoog advies zonder oplossing in ontwikkelgereedschap mag
+  tijdelijk door de audit, met reden en einddatum.** Aanleiding: GHSA-fc5q-39xc-vjpf (ReDoS in
+  picomatch, alle versies t/m 4.0.7, nog geen oplossing) maakte de verplichte check `audit` rood op
+  `main` en op elke PR. Alleen vite, vitest, knip en `@react-router/dev` gebruiken picomatch, met
+  patronen uit onze eigen configuratie, nooit invoer van een gebruiker. De audit van de
+  productie-afhankelijkheden (vanaf *moderate*) blijft ongewijzigd en kent geen uitzonderingen.
+  De audit van de hele boom (vanaf *high*) loopt nu via `scripts/audit.ts` en laat alleen door wat
+  in `config/audit-exceptions.json` staat: één advies in één pakket, met reden, en hooguit drie
+  maanden (`tests/scripts/audit.test.ts`). Na de einddatum is de check weer rood; een uitzondering
+  die niet meer nodig is, noemt het script, en het onderhoud haalt hem weg. De picomatch-uitzondering
+  loopt tot en met 2026-12-31. Gekozen boven `--omit=dev` voor alles (dan ziet niemand nog een
+  nieuw hoog advies in ontwikkelgereedschap) en boven een `overrides` (er is geen veilige versie).
+  Bastiaan, 2026-11-17 ("het is verplicht op github"; de check moet weer groen).
+- **BESLUIT-2026-11-17-8:** **Een beheerder neemt woorden van de nooit-lijsten over voor de hele
+  instelling, en de poort telt per soort op het gezondheidsscherm.** Op *Beheer → Anonimiseren*
+  (`/admin/privacy`) ziet een beheerder welke woorden docenten op hun nooit-lijst zetten, met
+  hoeveel docenten elk woord kozen, **nooit wie**. Een volledige naam van een gebruiker en wat de
+  vaste lijst (`pack/keep.ts`) al bewaart, staan er niet tussen en kunnen er niet op; een los deel
+  van een naam ("Visser") wel, want dat is waar een nooit-lijst voor is. Met één klik blijft een
+  woord voor iedereen staan (`privacy_shared_keep_words`): de poort vervangt het bij niemand, ook
+  als ze alleen telt, en het live voorbeeld markeert het niet (net als de vaste lijst). Elke
+  aanroep door de poort telt per dag en per soort mee in `privacy_gate_counts`, plus het aantal
+  aanroepen en hoe vaak ze eerst aan de docent voorlegde: alleen aantallen, nooit een woord, 60
+  dagen bewaard. Het gezondheidsscherm toont de afgelopen 7 dagen naast de 7 ervoor en waarschuwt
+  als één soort minstens 20 keer en drie keer zo vaak afging als de week ervoor (niet in een
+  eerste week). Geen regel in het logboek: het is een instelling zoals het reviewteam. Bastiaan,
+  2026-11-17 (ontwerp "Eén anonimiseerpoort", stap 5); drempels en losse naamdelen bevestigd
+  op 2026-11-18.
 - **BESLUIT-2026-11-17-9:** **Ook waar de docent niet typt, gaat niets weg dat de docent niet
   zag.** Bewijs in één keer, het reviewteam, de cursusimport en de cursusevaluatie tonen vóór het
   versturen "Kijk na wat er naar de AI gaat": elke vervanging gegroepeerd per woord, met hoe vaak

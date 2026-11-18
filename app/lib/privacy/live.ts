@@ -44,12 +44,16 @@ export const emptyNamed: NamedPeople = {
 export interface PrivacyPage {
   known: KnownPeople;
   never: string[];
+  /** The words the institution keeps (PR 5): never replaced, not the teacher's to take off. */
+  shared?: string[];
 }
 
 export interface LiveChoices {
   named: NamedPeople;
   /** Words not replaced: clicked off in the preview, or on the teacher's never-list. */
   keep: readonly string[];
+  /** The words the institution keeps (PR 5): like the pack's, never marked at all. */
+  shared?: readonly string[];
   /** Words the gate found and the teacher then approved. */
   approved?: readonly string[];
 }
@@ -136,7 +140,7 @@ function spansAcross(texts: readonly string[], known: KnownPeople, c: LiveChoice
     joined,
     [...knownEntries(known), ...namedEntries(c.named)],
     lines(c.named.extra),
-    options,
+    { ...options, keep: [...(options.keep ?? []), ...(c.shared ?? [])] },
   );
   const out: LiveSpan[][] = [];
   let at = 0;

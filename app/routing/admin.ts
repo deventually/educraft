@@ -17,6 +17,7 @@ export const admin: RouteArea = {
       route("announcements", "routes/admin.announcements.tsx"), // banners for teachers
       route("tools", "routes/admin.tools.tsx"),
       route("agents", "routes/admin.agents.tsx"), // the role agents' switches
+      route("privacy", "routes/admin.privacy.tsx"), // the institution's never-words
       route("context", "routes/admin.context.tsx"),
       route("usage", "routes/admin.usage.tsx"),
       route("audit", "routes/admin.audit.tsx"), // the audit log of admin actions

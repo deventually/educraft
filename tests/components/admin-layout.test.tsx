@@ -51,6 +51,7 @@ describe("Admin layout", () => {
     expect(group("AI")).toEqual([
       ["Tools en modellen", "/admin/tools"],
       ["Reviewteam", "/admin/agents"],
+      ["Anonimiseren", "/admin/privacy"],
       ["AI-gebruik en kosten", "/usage"],
     ]);
     expect(group("Controle")).toEqual([
@@ -64,7 +65,7 @@ describe("Admin layout", () => {
     await renderLayout({ isOwner: true });
     const nav = screen.getByRole("navigation", { name: /beheersecties|admin sections/i });
     const links = within(nav).getAllByRole("link");
-    expect(links).toHaveLength(12);
+    expect(links).toHaveLength(13);
     expect(links.at(-1)).toHaveTextContent("Recente fouten");
     expect(links.at(-1)).toHaveAttribute("href", "/admin/errors");
   });
