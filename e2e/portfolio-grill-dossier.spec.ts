@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { expectNoAxeViolations, watchCsp } from "./helpers";
-import { E2E_DOSSIER } from "./seedDossier";
+import { E2E_GRILL_DOSSIER } from "./seedDossier";
 import { storageStateOf } from "./users";
 
 test.use({ storageState: storageStateOf("admin") });
@@ -14,7 +14,7 @@ test.use({ storageState: storageStateOf("admin") });
 test("the write tab grills the whole dossier, by keyboard", async ({ page }) => {
   const csp = watchCsp(page);
   await page.goto("/portfolio");
-  await page.getByRole("link", { name: E2E_DOSSIER }).first().click();
+  await page.getByRole("link", { name: E2E_GRILL_DOSSIER }).first().click();
   await page.waitForURL(/\/portfolio\/[^/?]+$/);
   await page
     .getByRole("navigation", { name: "Onderdelen van je dossier" })

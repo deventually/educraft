@@ -10,6 +10,8 @@ import type { CourseData } from "../app/lib/courses/types";
 import type { DossierData } from "../app/lib/portfolio/types";
 
 export const E2E_DOSSIER = "BDB (e2e)";
+/** Its own copy for portfolio-grill-dossier.spec.ts, so the two specs never write the same one. */
+export const E2E_GRILL_DOSSIER = "Hele dossier (e2e)";
 
 /** The admin's course that LU1 is anchored to: a lesson with a goal, and a schedule. */
 export function anchoredCourse(): CourseData {
