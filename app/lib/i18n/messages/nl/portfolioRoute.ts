@@ -81,6 +81,7 @@ export const portfolioRoute = {
     perCriterionTitle: "Bewijs per criterium",
     review: "Beoordelen",
     statusTitle: "Jouw oordeel per criterium",
+    write: "Schrijven",
   },
   title: "Voortgang",
 };

@@ -25,6 +25,7 @@ import { addGenerationToDossier } from "./evidence.server";
 import { refreshCourseEvidence } from "./courseEvidence.server";
 import { saveAnchors } from "./dossierAnchors.server";
 import { runBatchIntent } from "./portfolioBatch.server";
+import { runDossierGrillIntent } from "./portfolioGrillDossier.server";
 import type { SortProposal } from "~/lib/portfolio/batch";
 import { loadCourseLinks } from "./courses.server";
 import { getToolBySlug } from "~/lib/registry";
@@ -135,7 +136,7 @@ export type PortfolioActionResult =
       /** guideDraftAll: sections written; with guideQuestionsAll, `failed` counts sections. */
       drafted?: number;
       failed?: number;
-      /** guideFollowUp, guideGrill: new questions (0: the answers are concrete enough). */
+      /** guideFollowUp, guideGrill, grillDossier: new questions (0: concrete enough). */
       followUps?: number;
     }
   | { ok: false; error: string };
@@ -283,6 +284,17 @@ async function runIntent(
       if (!added.ok) return added;
     }
     return { ok: true, intent };
+  }
+
+  // Grill me over the whole dossier, and every chapter drafted from its answers.
+  const grilled = await runDossierGrillIntent(user, dossier, intent, fd, locale);
+  if (grilled) {
+    if (grilled.ok) return grilled;
+    const error =
+      grilled.error === "invalid"
+        ? m.portfolio.errorInvalid
+        : m.portfolioGuided.errors[grilled.error];
+    return { ok: false, error };
   }
 
   // Evidence in one go: a proposal per file (model calls), then what the teacher ticked.

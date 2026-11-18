@@ -422,6 +422,13 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   material not yet drafted, one call per section, in the outline's order, each with the chapter
   so far, so the quality is that of drafting them one by one. `GuidedSection.draftedAt` marks a
   drafted section (new questions clear it); a failed section is counted and keeps its own button.
+  The whole dossier on one screen (the dossier's Write tab, `DossierGrill`,
+  `portfolioGrillDossier.server.ts`): `grillDossier` is Grill me (`grillOutcomes`) over every
+  outcome at once, four parts at a time over all chapters; `draftDossier` runs `draftChapter` for
+  a few chapters at a time and takes each chapter's text, parts and log lines over. Both work on
+  the same `DossierData.guided` as the chapter tab, so the buttons mix in any order; a follow-up
+  never repeats an earlier question. Fields are `answer:<outcomeId>:<sectionId>`. A part holds
+  `GUIDED_LIMITS.total` (10) questions: a first round of four and three rounds of two follow-ups.
   What the anchor's course already says (`courseFacts.ts`, pure, no AI): `anchorFacts` reads the
   module's details and schedule and the anchored lesson (goal, discipline, outcomes) or test (form,
   weight, pass mark, resit, parts). `anchorCourseFacts` looks the course up with `getCourse`, so a

@@ -400,6 +400,13 @@ describe("following up on vague answers", () => {
     expect(DossierDataSchema.safeParse(d).success).toBe(true);
   });
 
+  it("has room for three rounds of follow-ups after a full first round", () => {
+    const asked = (rounds: number) =>
+      Array.from({ length: GUIDED_LIMITS.questions + rounds * GUIDED_LIMITS.followUps }, () => "x");
+    expect(canFollowUp({ questions: asked(2), answers: asked(2) })).toBe(true);
+    expect(canFollowUp({ questions: asked(3), answers: asked(3) })).toBe(false);
+  });
+
   it("offers a follow-up once something is answered and there is room", () => {
     expect(canFollowUp({ questions: ["A?"], answers: [""] })).toBe(false);
     expect(canFollowUp({ questions: ["A?"], answers: ["Ja, goed."] })).toBe(true);

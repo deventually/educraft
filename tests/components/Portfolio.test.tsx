@@ -1058,14 +1058,14 @@ describe("Portfolio tabs", () => {
     expect((await axe(review.container, axeOpts)).violations).toEqual([]);
   });
 
-  it("splits the dossier into an overview and finishing", async () => {
+  it("splits the dossier into an overview, writing and finishing", async () => {
     const { container } = renderRoute(PortfolioOverview, overviewData(confirmed()));
     const nav = screen.getByRole("navigation", { name: "Onderdelen van je dossier" });
     expect(
       within(nav)
         .getAllByRole("link")
         .map((a) => a.textContent),
-    ).toEqual(["Overzicht", "Afronden"]);
+    ).toEqual(["Overzicht", "Schrijven", "Afronden"]);
     expect(within(nav).getByRole("link", { name: "Afronden" })).toHaveAttribute(
       "href",
       `/portfolio/${ID}?tab=finish`,
