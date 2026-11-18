@@ -24,8 +24,6 @@ interface ChatThreadProps {
   outputLanguage: "nl" | "en";
   model: string;
   renderAssistant?: RenderAssistant;
-  /** Shown below the turns (next steps), e.g. `ResultActions` once the reply is saved. */
-  footer?: ReactNode;
 }
 
 /**
@@ -42,7 +40,6 @@ export function ChatThread({
   outputLanguage,
   model,
   renderAssistant,
-  footer,
 }: ChatThreadProps) {
   const t = useT();
   const endRef = useRef<HTMLDivElement>(null);
@@ -134,7 +131,6 @@ export function ChatThread({
               </div>
             );
           })}
-          {footer}
           {/* Anchor the auto-scroll: scrolls the thread (md+) or the page
               (mobile) so the latest turn stays in view while streaming. */}
           <div ref={endRef} aria-hidden />

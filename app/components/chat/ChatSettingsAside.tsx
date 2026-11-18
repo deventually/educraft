@@ -55,7 +55,7 @@ export function ChatSettingsAside({
   return (
     <aside
       aria-labelledby="chat-settings-heading"
-      className="flex-none rounded-2xl border border-slate-200 bg-white p-4 md:order-last md:w-72 md:overflow-y-auto"
+      className="rounded-2xl border border-slate-200 bg-white p-4"
     >
       <h2
         id="chat-settings-heading"

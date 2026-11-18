@@ -90,7 +90,7 @@ export function RehearsalFeedback(props: Props) {
       </div>
       {feedback.overall && (
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">{t.summary}</h3>
+          <h2 className="text-sm font-semibold text-slate-900">{t.summary}</h2>
           <p className="mt-1 text-sm text-slate-700">{feedback.overall}</p>
         </div>
       )}

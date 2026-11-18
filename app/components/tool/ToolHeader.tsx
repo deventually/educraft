@@ -28,7 +28,8 @@ type Verbatim = { name: LocalizedText; text: string }[];
  * Compact "command bar" header (design: Direction A — Compacte commandobalk).
  * Orient + start sit on two lines; the research provenance (theory, source,
  * adapted notice, original prompt, how-to-use) collapses behind one disclosure
- * so it never pushes the workspace down.
+ * so it never pushes the workspace down. A workspace that fills the page height
+ * (a chat) gets the slimmest bar: one line, the tagline inside the disclosure.
  */
 export function ToolHeader({
   tool,
@@ -45,13 +46,21 @@ export function ToolHeader({
 }) {
   const [open, setOpen] = useState(false);
   const a = tool.attribution;
-  const kind = modeOf(tool).kind;
+  const mode = modeOf(tool);
+
+  // A chat fills the page height, so its header shrinks to one slim bar: every line spent
+  // here is a line less of conversation. The tagline then waits in the provenance panel.
+  const compact = mode.fillsHeight;
+  const tagline = loc(tool.tagline, locale);
 
   return (
-    <div className="mb-6">
+    <div className={compact ? "mb-3" : "mb-6"}>
       <nav
         aria-label={t.tool.breadcrumb}
-        className="mb-3 flex items-center gap-1.5 text-[13px] text-slate-500"
+        className={cn(
+          "flex items-center gap-1.5 text-[13px] text-slate-500",
+          compact ? "mb-1.5" : "mb-3",
+        )}
       >
         <Link to="/tools" className="transition-colors hover:text-violet-600">
           {t.nav.tools}
@@ -60,33 +69,67 @@ export function ToolHeader({
         <span className="truncate font-medium text-slate-700">{loc(tool.name, locale)}</span>
       </nav>
 
-      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:gap-5 sm:p-5">
-        <div className="flex min-w-0 items-center gap-3.5">
-          <span className="grid size-[52px] shrink-0 place-items-center rounded-[14px] bg-violet-50 text-violet-600">
-            <ToolIcon name={tool.icon} className="size-6" />
+      <div
+        className={cn(
+          "flex rounded-2xl border border-slate-200 bg-white shadow-sm",
+          compact
+            ? "flex-wrap items-center justify-between gap-x-4 gap-y-2 px-3 py-2 sm:px-4"
+            : "flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-5 sm:p-5",
+        )}
+      >
+        <div className={cn("flex min-w-0 items-center", compact ? "gap-2.5" : "gap-3.5")}>
+          <span
+            className={cn(
+              "grid shrink-0 place-items-center bg-violet-50 text-violet-600",
+              compact ? "size-9 rounded-[10px]" : "size-[52px] rounded-[14px]",
+            )}
+          >
+            <ToolIcon name={tool.icon} className={compact ? "size-5" : "size-6"} />
           </span>
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="font-display text-2xl font-medium tracking-tight text-slate-900">
+            <div
+              className={cn(
+                "flex flex-wrap items-center",
+                compact ? "gap-x-2 gap-y-0.5" : "gap-2.5",
+              )}
+            >
+              <h1
+                className={cn(
+                  "font-display font-medium tracking-tight text-slate-900",
+                  compact ? "text-lg leading-tight" : "text-2xl",
+                )}
+              >
                 {loc(tool.name, locale)}
               </h1>
-              <KindPill kind={kind} stages={tool.stages.length} t={t} />
+              <KindPill kind={mode.kind} stages={tool.stages.length} t={t} />
             </div>
-            <ToolSubtitle subtitle={tool.subtitle} locale={locale} className="mt-0.5" />
-            <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-slate-600 sm:line-clamp-1">
-              {loc(tool.tagline, locale)}
-            </p>
+            <ToolSubtitle
+              subtitle={tool.subtitle}
+              locale={locale}
+              className={compact ? "truncate" : "mt-0.5"}
+            />
+            {!compact && (
+              <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-slate-600 sm:line-clamp-1">
+                {tagline}
+              </p>
+            )}
           </div>
         </div>
 
-        <div className="flex w-full shrink-0 flex-col-reverse items-stretch gap-2.5 sm:w-auto sm:flex-row sm:items-center">
+        <div
+          className={cn(
+            "flex shrink-0 items-stretch gap-2.5",
+            compact ? "ml-auto" : "w-full flex-col-reverse sm:w-auto sm:flex-row sm:items-center",
+          )}
+        >
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
             aria-expanded={open}
             aria-controls="tool-provenance"
             className={cn(
-              "inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-[13px] font-medium transition-colors",
+              "inline-flex items-center justify-center gap-1.5 rounded-lg border font-medium transition-colors",
+              compact ? "px-2.5 py-1.5 text-xs" : "px-3 py-2 text-[13px]",
               open
                 ? "border-violet-200 bg-violet-50 text-violet-700"
                 : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900",
@@ -107,6 +150,7 @@ export function ToolHeader({
           id="tool-provenance"
           className="mt-2.5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
         >
+          {compact && <p className="mb-4 text-sm leading-relaxed text-slate-700">{tagline}</p>}
           <div className="grid gap-7 sm:grid-cols-[1.5fr_1fr]">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.09em] text-brass-600">
