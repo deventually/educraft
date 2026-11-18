@@ -55,6 +55,7 @@ import { PORTFOLIO_DRAFT_PROMPT_V3 } from "./portfolio-draft@v3.prompt";
 import { PORTFOLIO_DRAFT_PROMPT_V4 } from "./portfolio-draft@v4.prompt";
 import { PORTFOLIO_FOLLOWUP_PROMPT } from "./portfolio-followup@v1.prompt";
 import { PORTFOLIO_EVIDENCE_SORT_PROMPT } from "./portfolio-evidence-sort@v1.prompt";
+import { PORTFOLIO_QUOTES_PROMPT } from "./portfolio-quotes@v1.prompt";
 import { PORTFOLIO_FRAMEWORK_PROMPT } from "./portfolio-framework@v1.prompt";
 import { PORTFOLIO_FRAMEWORK_PROMPT_V2 } from "./portfolio-framework@v2.prompt";
 import { PORTFOLIO_PROOFREAD_PROMPT } from "./portfolio-proofread@v1.prompt";
@@ -154,6 +155,7 @@ const ALL: PromptDef[] = [
   PORTFOLIO_FRAMEWORK_PROMPT,
   PORTFOLIO_FRAMEWORK_PROMPT_V2,
   PORTFOLIO_EVIDENCE_SORT_PROMPT,
+  PORTFOLIO_QUOTES_PROMPT,
   PORTFOLIO_PROOFREAD_PROMPT,
   PORTFOLIO_QUESTIONS_PROMPT,
   PORTFOLIO_QUESTIONS_PROMPT_V2,
