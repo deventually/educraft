@@ -12,12 +12,19 @@ export const TeamSettingsSchema = z
     features: z.record(z.string(), choice).catch({}).default({}),
     tools: z.record(z.string(), choice).catch({}).default({}),
     models: z.array(z.string()).nullable().catch(null).default(null),
+    /** The model the team's tools start on (before the institution's); null = none. */
+    defaultModel: z.string().min(1).max(200).nullable().optional().catch(undefined),
   })
   .catch({ features: {}, tools: {}, models: null });
 
 export type TeamSettings = z.infer<typeof TeamSettingsSchema>;
 
-const NO_TEAM_SETTINGS: TeamSettings = { features: {}, tools: {}, models: null };
+const NO_TEAM_SETTINGS: TeamSettings = {
+  features: {},
+  tools: {},
+  models: null,
+  defaultModel: null,
+};
 
 export function parseTeamSettings(json: string | null | undefined): TeamSettings {
   try {

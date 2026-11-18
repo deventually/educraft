@@ -18,6 +18,13 @@ export const modelAdmin: Messages["modelAdmin"] = {
   clientSelectable: "Teachers may choose this model themselves",
   clientSelectableHint: "Off for an expensive model: then only a tool uses it as its default.",
   connected: "Connected",
+  defaultFallback:
+    "While you choose none, tools start on {model}, the fallback from the server settings.",
+  defaultHeading: "The institution's default model",
+  defaultIntro:
+    "Every tool starts on this one, unless a team or teacher has a default of their own. Teachers can pick another model each time.",
+  defaultLabel: "The institution's default model",
+  defaultNone: "None chosen",
   displayName: "Name in LimeOnIt",
   effort: "Reasoning level (effort)",
   effortDefault: "The provider's default",

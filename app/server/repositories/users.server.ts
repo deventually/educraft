@@ -264,9 +264,9 @@ export async function deleteUserCascade(id: string): Promise<void> {
     tx.delete(twoFactor).where(eq(twoFactor.userId, id)).run();
     tx.delete(privacyKeepWords).where(eq(privacyKeepWords.userId, id)).run();
     tx.delete(recoveryCodes).where(eq(recoveryCodes.userId, id)).run();
-    // The teacher's own model set lives in instance_settings.
+    // The teacher's own model set and own default model live in instance_settings.
     tx.delete(instanceSettings)
-      .where(eq(instanceSettings.key, `assignedModels:${id}`))
+      .where(inArray(instanceSettings.key, [`assignedModels:${id}`, `defaultModel:${id}`]))
       .run();
     tx.delete(users).where(eq(users.id, id)).run();
   });

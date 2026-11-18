@@ -5,6 +5,7 @@
  */
 import { ALL_TOOLS } from "~/lib/registry";
 import {
+  DEFAULT_MODEL,
   listModels,
   modelState,
   resolveModelInfo,
@@ -34,7 +35,12 @@ import type { ModelPrice } from "~/lib/ai/prices";
 import { localModelsEnabled, providerSetting } from "./env.server";
 import { getModelRegistry, saveModelRegistry } from "./modelRegistry.server";
 import { fullCatalog } from "./modelCatalog.server";
-import { getEnabledModels, setEnabledModels } from "./repositories/settings.server";
+import {
+  getDefaultModel,
+  getEnabledModels,
+  setEnabledModels,
+} from "./repositories/settings.server";
+import { saveInstanceDefaultModel } from "./instanceDefaultModelAdmin.server";
 import { countGenerationsByModel } from "./repositories/generations.server";
 import { listAssignedModelSets } from "./repositories/users.server";
 import { listTeams } from "./repositories/teams.server";
@@ -278,12 +284,16 @@ export async function modelAdminData() {
     models: await adminModelRows(),
     choices,
     local: await localOverview(),
+    // The institution's default model (BESLUIT-2026-11-18-4); while unset, the config's serves.
+    defaultModel: await getDefaultModel(),
+    fallbackModel: resolveModelInfo(DEFAULT_MODEL).displayName,
   };
 }
 
 /** The intents of the models part. */
 export const MODEL_INTENTS = [
   "models",
+  "defaultModel",
   "add",
   "upgrade",
   "finish",
@@ -339,6 +349,8 @@ export async function modelAdminAction(intent: ModelIntent, fd: FormData, actorU
       });
       return { saved: true as const };
     }
+    case "defaultModel":
+      return saveInstanceDefaultModel(fd, actorUserId);
     case "add": {
       const provider = text(fd, "provider");
       if (!isAddableProvider(provider)) return { error: "invalid" };

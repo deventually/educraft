@@ -7,7 +7,7 @@ import type { Route } from "./+types/portfolio.$id.rehearsal";
 import { loadDossier } from "~/server/portfolio.server";
 import { updateDossier } from "~/server/repositories/portfolio.server";
 import { getDefaultProfile } from "~/server/repositories/profiles.server";
-import { getSelectableModels } from "~/server/availability.server";
+import { getSelectableModels, withDefaultModelFor } from "~/server/availability.server";
 import { getLocale } from "~/lib/i18n/locale.server";
 import { getMessages } from "~/lib/i18n";
 import { privacyPageFor } from "~/server/privacyGate.server";
@@ -39,7 +39,8 @@ export function meta({ loaderData: data }: Route.MetaArgs) {
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { user, dossier } = await loadDossier(request, params.id);
   const d = dossier.data;
-  const tool = getToolBySlugOrThrow(TOOL_SLUG);
+  // The picker starts on this person's default model: own, team, institution, config.
+  const tool = await withDefaultModelFor(user, getToolBySlugOrThrow(TOOL_SLUG));
   const profile = await getDefaultProfile(user.id);
   return {
     id: dossier.id,

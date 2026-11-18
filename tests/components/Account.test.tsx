@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import type { ComponentProps } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { ToastProvider } from "~/components/Toast";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import Account from "~/routes/account";
@@ -13,17 +15,52 @@ function renderAccount(
   isOwner = false,
   teams: { id: string; name: string; isLead: boolean }[] = [],
   lostCourses = 0,
+  action: (args: { request: Request }) => unknown = () => null,
 ) {
   const props = {
-    loaderData: { user: { name: "Teacher T", email, role }, isOwner, teams, lostCourses },
+    loaderData: {
+      user: { name: "Teacher T", email, role },
+      isOwner,
+      teams,
+      lostCourses,
+      defaultModel: {
+        current: null,
+        options: [
+          { id: "claude-haiku-5-5", displayName: "Claude Haiku 5.5" },
+          { id: "minimax-m3", displayName: "MiniMax M3" },
+        ],
+      },
+    },
   } as unknown as ComponentProps<typeof Account>;
   const Stub = createRoutesStub([
-    { path: "/account", Component: () => <Account {...props} />, action: () => null },
+    {
+      path: "/account",
+      Component: () => (
+        <ToastProvider>
+          <Account {...props} />
+        </ToastProvider>
+      ),
+      action,
+    },
   ]);
   return render(<Stub initialEntries={["/account"]} />);
 }
 
 describe("Account page", () => {
+  it("lets me choose my own default model from the models I may use, and autosaves it", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderAccount("teacher@example.com", "teacher", false, [], 0, async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    const select = screen.getByRole("combobox", { name: /mijn standaardmodel/i });
+    expect(select).toHaveValue("");
+    await user.selectOptions(select, "minimax-m3");
+    await waitFor(() => expect(body?.get("intent")).toBe("defaultModel"));
+    expect(body?.get("defaultModel")).toBe("minimax-m3");
+  });
+
   it("offers a change-email form (new email + current password)", () => {
     renderAccount();
     expect(screen.getByLabelText(/nieuw e-mailadres|new email address/i)).toBeInTheDocument();

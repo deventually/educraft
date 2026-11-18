@@ -34,6 +34,10 @@ export const features = {
   standLabel: "Stand van {name}",
   stateOff: "Uit",
   stateOn: "Aan",
+  teamDefaultModel: "Standaardmodel van dit team",
+  teamDefaultModelHint:
+    "Hier starten de tools van dit team op. Een docent kan zelf een eigen standaard kiezen.",
+  teamDefaultModelNone: "Geen: het standaardmodel van de instelling",
   teamFeaturesHeading: "Onderdelen en tools",
   teamFeaturesIntro:
     "Kies per onderdeel of tool aan, uit of geen keuze. Wat de instantie uit heeft, staat hier niet. Zegt één van je teams aan, dan heeft een collega het.",

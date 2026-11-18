@@ -167,6 +167,38 @@ describe("admin.tools action", () => {
   });
 });
 
+describe("admin.tools — the institution's default model (BESLUIT-2026-11-18-4)", () => {
+  it("the loader says which one is set, and what serves while none is", async () => {
+    await settings.setDefaultModel("claude-haiku-4-5");
+    const data = (await toolsRoute.loader({
+      request: new Request("http://localhost/admin/tools?tab=models"),
+      params: {},
+      context: {},
+    } as never)) as { defaultModel: string | null; fallbackModel: string };
+    expect(data.defaultModel).toBe("claude-haiku-4-5");
+    expect(data.fallbackModel).toEqual(expect.any(String));
+    await settings.setDefaultModel(null);
+  });
+
+  it("stores a model the instance has on; empty clears it; anything else is refused", async () => {
+    await settings.setEnabledModels(["claude-haiku-4-5", "claude-sonnet-5-5"]);
+    const act = (defaultModel: string) =>
+      invoke(toolsRoute.action, post({ intent: "defaultModel", defaultModel })) as Promise<{
+        saved?: boolean;
+        error?: unknown;
+      }>;
+    expect((await act("claude-haiku-4-5")).saved).toBe(true);
+    expect(await settings.getDefaultModel()).toBe("claude-haiku-4-5");
+    // Switched off on the instance, or not a model at all.
+    expect((await act("claude-opus-5-5")).error).toBeTruthy();
+    expect((await act("no-such-model")).error).toBeTruthy();
+    expect(await settings.getDefaultModel()).toBe("claude-haiku-4-5");
+    expect((await act("")).saved).toBe(true);
+    expect(await settings.getDefaultModel()).toBeNull();
+    await settings.setEnabledModels(null);
+  });
+});
+
 describe("admin.tools action — instance models lockout guard", () => {
   it("refuses an empty selection and does not persist", async () => {
     const res = (await invoke(toolsRoute.action, post({ intent: "models" }))) as {
@@ -232,6 +264,34 @@ describe("admin.tools action — instance models lockout guard", () => {
     } finally {
       vi.unstubAllEnvs();
     }
+  });
+});
+
+describe("admin person page — a teacher's default model (BESLUIT-2026-11-18-4)", () => {
+  it("stores a catalogue model, clears with empty, refuses an unknown one, and shows it", async () => {
+    const teacher = await users.createUser({
+      name: "Default Teacher",
+      email: "default-teacher@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    const act = (defaultModel: string) =>
+      invoke(
+        personRoute.action,
+        post({ intent: "teacherDefaultModel", userId: teacher.id, defaultModel }),
+      ) as Promise<{ saved?: boolean; error?: unknown }>;
+    expect((await act("claude-haiku-4-5")).saved).toBe(true);
+    expect(await users.getUserDefaultModel(teacher.id)).toBe("claude-haiku-4-5");
+    const data = (await personRoute.loader({
+      request: new Request(`http://localhost/admin/users/${teacher.id}`),
+      params: { id: teacher.id },
+      context: {},
+    } as never)) as { models: { defaultModel: string | null } | null };
+    expect(data.models?.defaultModel).toBe("claude-haiku-4-5");
+    expect((await act("no-such-model")).error).toBeTruthy();
+    expect(await users.getUserDefaultModel(teacher.id)).toBe("claude-haiku-4-5");
+    expect((await act("")).saved).toBe(true);
+    expect(await users.getUserDefaultModel(teacher.id)).toBeNull();
   });
 });
 

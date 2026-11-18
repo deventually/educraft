@@ -18,9 +18,9 @@ import type { AvailabilityUser } from "./availability.server";
 import { localModelsEnabled } from "./env.server";
 import { log } from "./log.server";
 import { syncModelRegistry } from "./modelRegistry.server";
-import { getEnabledModels } from "./repositories/settings.server";
+import { getDefaultModel, getEnabledModels } from "./repositories/settings.server";
 import { listTeamSettingsForUser } from "./repositories/teams.server";
-import { getUserAssignedModels } from "./repositories/users.server";
+import { getUserAssignedModels, getUserDefaultModel } from "./repositories/users.server";
 
 /**
  * Whether a model id may exist for this process at all: resolvable, client-selectable
@@ -128,21 +128,42 @@ export async function getSelectableModelIds(user?: AvailabilityUser): Promise<Se
 }
 
 /**
+ * The chosen defaults that apply to `user`, most personal first: their own, then their
+ * teams' (by team name; teachers only, as the team layer for models), then the
+ * institution's. Each is only a wish: `effectiveDefaultModel` takes the first one the
+ * caller may actually use.
+ */
+async function chosenDefaults(user: AvailabilityUser): Promise<string[]> {
+  const own = await getUserDefaultModel(user.id);
+  const team =
+    user.role === "teacher"
+      ? (await listTeamSettingsForUser(user.id)).flatMap((t) =>
+          t.settings.defaultModel ? [t.settings.defaultModel] : [],
+        )
+      : [];
+  const institution = await getDefaultModel();
+  return [...(own ? [own] : []), ...team, ...(institution ? [institution] : [])];
+}
+
+/**
  * The model to serve when a request doesn't force a selectable one (Phase 14
  * bugfix). `preferred` is the intended fallback (a tool's `defaultModel`), upgraded
  * to its newest version; this returns it only when the caller may actually use it —
  * otherwise it substitutes a model the caller IS allowed, so a disabled/un-granted
- * frontier default can never leak past the teacher gate. Order: the preferred
- * default, then the caller's own set (this is where a local-only teacher's model
- * comes from), then any catalog model, then `DEFAULT_MODEL` as a last resort.
+ * frontier default can never leak past the teacher gate. Order: the chosen defaults
+ * (own, team, institution: `chosenDefaults`), then the preferred default, then the
+ * caller's own set (this is where a local-only teacher's model comes from), then any
+ * catalog model, then `DEFAULT_MODEL` as a last resort.
  */
 export async function effectiveDefaultModel(
   user: AvailabilityUser,
   preferred: string,
 ): Promise<string> {
   await syncModelRegistry();
-  const wanted = currentModelId(preferred);
-  if (await isModelSelectableForUser(user, wanted)) return wanted;
+  for (const id of [...(await chosenDefaults(user)), preferred]) {
+    const wanted = currentModelId(id);
+    if (await isModelSelectableForUser(user, wanted)) return wanted;
+  }
   const own = await userModelSet(user);
   if (own) {
     for (const id of own) {
@@ -151,6 +172,17 @@ export async function effectiveDefaultModel(
   }
   for (const id of await getSelectableModelIds(user)) return id;
   return currentModelId(DEFAULT_MODEL);
+}
+
+/**
+ * A tool as a page hands it to its picker: starting on this person's default model
+ * (`effectiveDefaultModel`) instead of the registry's.
+ */
+export async function withDefaultModelFor<T extends { defaultModel: string }>(
+  user: AvailabilityUser,
+  tool: T,
+): Promise<T> {
+  return { ...tool, defaultModel: await effectiveDefaultModel(user, tool.defaultModel) };
 }
 
 /**

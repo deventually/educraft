@@ -34,6 +34,10 @@ export const features = {
   standLabel: "Stand of {name}",
   stateOff: "Off",
   stateOn: "On",
+  teamDefaultModel: "This team's default model",
+  teamDefaultModelHint:
+    "The model this team's tools start on. A teacher can choose a default of their own.",
+  teamDefaultModelNone: "None: the institution's default model",
   teamFeaturesHeading: "Parts and tools",
   teamFeaturesIntro:
     "Choose on, off or no choice per part or tool. What the instance has off is not listed. If one of a colleague's teams says on, they have it.",

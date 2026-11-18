@@ -369,3 +369,6 @@ export async function setTrackRetentionDays(days: number): Promise<void> {
     .onConflictDoUpdate({ target: instanceSettings.key, set: { valueJson, updatedAt: new Date() } })
     .run();
 }
+
+// The institution's default model has its own file (keeps this one short).
+export * from "./instanceDefaultModel.server";

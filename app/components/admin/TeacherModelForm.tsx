@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
+import { Label, Select } from "~/components/ui";
+import { useT } from "~/lib/i18n/useT";
 import { cn } from "~/lib/utils";
 
 export type ModelBox = { id: string; displayName: string };
@@ -109,6 +111,52 @@ export function TeacherModelForm({
           disabled={mode === "inherit"}
         />
       </fieldset>
+    </AutoSaveForm>
+  );
+}
+
+/**
+ * A teacher's own default model (BESLUIT-2026-11-18-4): the model their tools start on,
+ * before their team's and the institution's. "" = none. Saves itself.
+ */
+export function TeacherDefaultModelForm({
+  teacherId,
+  base,
+  defaultModel,
+  errorMessage,
+}: {
+  teacherId: string;
+  base: ModelBox[];
+  defaultModel: string | null;
+  errorMessage: (code: string | true) => string | undefined;
+}) {
+  const m = useT().admin.models;
+  const id = `teacher-${teacherId}-default-model`;
+  return (
+    <AutoSaveForm
+      intent="teacherDefaultModel"
+      hidden={{ userId: teacherId }}
+      errorMessage={errorMessage}
+      className="mt-4"
+    >
+      <Label htmlFor={id}>{m.teacherDefault}</Label>
+      <Select
+        id={id}
+        name="defaultModel"
+        defaultValue={defaultModel ?? ""}
+        aria-describedby={`${id}-hint`}
+        className="mt-1"
+      >
+        <option value="">{m.teacherDefaultNone}</option>
+        {base.map((b) => (
+          <option key={b.id} value={b.id}>
+            {b.displayName}
+          </option>
+        ))}
+      </Select>
+      <p id={`${id}-hint`} className="mt-1 text-xs text-slate-500">
+        {m.teacherDefaultHint}
+      </p>
     </AutoSaveForm>
   );
 }

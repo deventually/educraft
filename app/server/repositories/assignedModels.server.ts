@@ -90,3 +90,17 @@ export async function listAssignedModelSets(): Promise<string[][]> {
 export async function setUserAssignedModels(userId: string, ids: string[] | null): Promise<void> {
   return setAssignedList("assignedModels", userId, ids);
 }
+
+/**
+ * A person's own default model (`defaultModel:<userId>`, migration-free storage): the
+ * model their tools start on, before their team's and the institution's. Null = none.
+ */
+export async function getUserDefaultModel(userId: string): Promise<string | null> {
+  const list = await getAssignedList("defaultModel", userId);
+  return list ? ([...list][0] ?? null) : null;
+}
+
+/** Set (or clear, with null) a person's own default model. */
+export async function setUserDefaultModel(userId: string, id: string | null): Promise<void> {
+  return setAssignedList("defaultModel", userId, id ? [id] : null);
+}

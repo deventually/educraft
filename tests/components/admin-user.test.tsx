@@ -34,10 +34,11 @@ const loaderData = {
   // Production: the full password rule applies to the admin's forms.
   strictPasswords: true,
   person: teacher,
-  models: { base, mode: "own", models: ["claude-haiku-4-5"] } as {
+  models: { base, mode: "own", models: ["claude-haiku-4-5"], defaultModel: null } as {
     base: typeof base;
     mode: "own" | "inherit";
     models: string[];
+    defaultModel: string | null;
   } | null,
   features: [
     {
@@ -241,7 +242,7 @@ describe("Admin person page (P28.1)", () => {
   it("offers inherit/own models; the boxes are disabled while inheriting", async () => {
     const user = userEvent.setup();
     renderPage(undefined, {
-      models: { base, mode: "inherit", models: ["claude-sonnet-4-6"] },
+      models: { base, mode: "inherit", models: ["claude-sonnet-4-6"], defaultModel: null },
     });
     const group = screen.getByRole("group", { name: "Teacher T" });
     expect(within(group).getByRole("radio", { name: /volgt de instelling/i })).toBeChecked();
@@ -251,6 +252,21 @@ describe("Admin person page (P28.1)", () => {
     expect(within(group).getByLabelText("Ollama · gemma")).toBeInTheDocument();
     await user.click(within(group).getByRole("radio", { name: /eigen keuze/i }));
     expect(haiku.disabled).toBe(false);
+  });
+
+  it("chooses the teacher's own default model, or none (team or institution), and autosaves it", async () => {
+    const user = userEvent.setup();
+    let body: FormData | undefined;
+    renderPage(async ({ request }) => {
+      body = await request.formData();
+      return { saved: true };
+    });
+    const select = screen.getByRole("combobox", { name: /standaardmodel van deze docent/i });
+    expect(select).toHaveValue("");
+    await user.selectOptions(select, "claude-haiku-4-5");
+    await waitFor(() => expect(body?.get("intent")).toBe("teacherDefaultModel"));
+    expect(body?.get("defaultModel")).toBe("claude-haiku-4-5");
+    expect(body?.get("userId")).toBe("teacher-9");
   });
 
   it("has no models section for an admin", () => {

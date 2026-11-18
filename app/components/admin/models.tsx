@@ -232,20 +232,74 @@ function ModelAllowList({ choices }: { choices: ChoiceView[] }) {
   );
 }
 
+/**
+ * The institution's default model (BESLUIT-2026-11-18-4): what tools start on unless a team
+ * or a teacher has their own. Only a model that is on; while none is chosen, the config's.
+ */
+function InstanceDefaultModel({
+  choices,
+  defaultModel,
+  fallbackModel,
+}: {
+  choices: ChoiceView[];
+  defaultModel: string | null;
+  fallbackModel: string;
+}) {
+  const a = useT().modelAdmin;
+  const on = choices.filter((c) => c.checked);
+  return (
+    <section aria-labelledby="default-model-heading">
+      <h2 id="default-model-heading" className={sectionHeading}>
+        {a.defaultHeading}
+      </h2>
+      <p className="mt-1 max-w-2xl text-sm text-slate-600">{a.defaultIntro}</p>
+      <AutoSaveForm intent="defaultModel" className="mt-2 max-w-xl">
+        <Label htmlFor="instance-default-model">{a.defaultLabel}</Label>
+        <Select
+          id="instance-default-model"
+          name="defaultModel"
+          defaultValue={defaultModel ?? ""}
+          aria-describedby="instance-default-model-hint"
+          className="mt-1"
+        >
+          <option value="">{a.defaultNone}</option>
+          {on.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.displayName}
+            </option>
+          ))}
+        </Select>
+        <p id="instance-default-model-hint" className="mt-1 text-xs text-slate-500">
+          {fmt(a.defaultFallback, { model: fallbackModel })}
+        </p>
+      </AutoSaveForm>
+    </section>
+  );
+}
+
 /** The "Modellen" tab: every model (upgrade, phase out), what teachers may pick, adding one. */
 export function ModelsTab({
   providers,
   models,
   choices,
+  defaultModel,
+  fallbackModel,
 }: {
   providers: ProviderView[];
   models: ModelView[];
   choices: ChoiceView[];
+  defaultModel: string | null;
+  fallbackModel: string;
 }) {
   return (
     <>
       <ModelList models={models} />
       <ModelAllowList choices={choices} />
+      <InstanceDefaultModel
+        choices={choices}
+        defaultModel={defaultModel}
+        fallbackModel={fallbackModel}
+      />
       <AddModelForm providers={providers} />
     </>
   );

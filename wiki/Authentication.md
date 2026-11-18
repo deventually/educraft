@@ -131,7 +131,7 @@ effective = instance is Off              → off
   never counts (BESLUIT-2026-11-05-11). An admin's exception per teacher still applies.
 - **Storage:** the instance stand of a tool in `tool_settings.stand`, of a part in
   `instance_settings` (`featureStand:<id>`); a team's choices as JSON on `teams.settings_json`
-  (`features`, `tools`, `models`); a teacher's exceptions in `feature_exceptions`
+  (`features`, `tools`, `models`, and the team's `defaultModel`, BESLUIT-2026-11-18-4); a teacher's exceptions in `feature_exceptions`
   (`feature:<id>` / `tool:<slug>`). Migrations 0016/0017 carried every `enabled` flag and every
   P27.2 `portfolioEnabled:<id>` switch over.
 - **One deep module:** `availability.server.ts` (`effectiveFeatures`, `effectiveTools`,

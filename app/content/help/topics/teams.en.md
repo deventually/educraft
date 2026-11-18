@@ -53,6 +53,7 @@ If you are a team lead, you open your team under **Education › Teams**. There 
 - create an **invite link** for a new colleague, who then becomes a teacher and a member of your team;
 - remove anyone from the team with **Remove**, also another team lead (it asks first), or make a colleague team lead too;
 - link your team to programmes with **Add programme**, or take it off with **Remove**;
+- choose **this team's default model**: your members' tools start on it, unless a teacher has a default of their own. You choose from the models the institution has on;
 - stop being team lead yourself.
 
 You do not remove yourself; for that, choose **Stop being team lead**.

@@ -186,6 +186,16 @@ LimeOnIt is not tied to one model vendor.
   production they are not offered, not discovered and not executed. The pilot runs on
   `npm run dev`, so they work there; `npm start` and the Docker image do not have them.
   The gates only bound what an admin/teacher may *offer*.
+- **Default model in layers (BESLUIT-2026-11-18-4).** What a tool starts on is not
+  `default` in `config/models.json` (that is only the last resort for a fresh install) but
+  `effectiveDefaultModel` (`modelAvailability.server.ts`): the person's own default
+  (`defaultModel:<userId>` in `instance_settings`, set on `/account` or by the admin on the
+  person page), then their teams' (`TeamSettings.defaultModel`, first by team name; set by
+  the admin or the lead), then the institution's (`defaultModel`, Beheer → Modellen). Each
+  counts only when its model is selectable for that person, so a default never widens what
+  they may use. The tool page and the rehearsal hand the client a tool with that
+  `defaultModel` (`withDefaultModelFor`); `servedModelFor` uses it when a request names no
+  model; a stage pin still wins.
 
 - **Measuring AI use (usage dashboard, PR A).** Every adapter reports a call's tokens in one
   shape, `TokenUsage` (`input` uncached, `cacheRead`, `cacheWrite`, `output`, `reasoning`), via

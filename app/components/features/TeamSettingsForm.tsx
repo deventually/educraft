@@ -6,6 +6,7 @@ import { fmt } from "~/lib/i18n/format";
 import { useLocale, useT } from "~/lib/i18n/useT";
 import { AutoSaveForm } from "~/components/admin/AutoSaveForm";
 import { ModelCheckboxes } from "~/components/admin/TeacherModelForm";
+import { Label, Select } from "~/components/ui";
 import { ChoiceSelect } from "./selects";
 
 /** What the instance lets a team choose (`getTeamSettingsOffer`). */
@@ -20,6 +21,7 @@ export interface TeamOffer {
  * on, off or no choice, and the team's models (follows the instance, or an own set within
  * it). Two forms that save themselves, both with intent `settings`; each posts only its
  * own fields, so the other half is left alone. Only what the instance has not Off is shown.
+ * A third form picks the team's default model (BESLUIT-2026-11-18-4).
  */
 export function TeamSettingsForm({
   idPrefix,
@@ -116,6 +118,27 @@ export function TeamSettingsForm({
             disabled={mode === "inherit"}
           />
         </fieldset>
+      </AutoSaveForm>
+
+      <AutoSaveForm intent="settings" hidden={hidden} errorMessage={errorMessage}>
+        <Label htmlFor={`${idPrefix}-default-model`}>{f.teamDefaultModel}</Label>
+        <Select
+          id={`${idPrefix}-default-model`}
+          name="defaultModel"
+          defaultValue={settings.defaultModel ?? ""}
+          aria-describedby={`${idPrefix}-default-model-hint`}
+          className="mt-1"
+        >
+          <option value="">{f.teamDefaultModelNone}</option>
+          {offer.models.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.displayName}
+            </option>
+          ))}
+        </Select>
+        <p id={`${idPrefix}-default-model-hint`} className="mt-1 text-xs text-slate-500">
+          {f.teamDefaultModelHint}
+        </p>
       </AutoSaveForm>
     </div>
   );

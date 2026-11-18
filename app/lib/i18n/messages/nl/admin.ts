@@ -131,6 +131,10 @@ export const admin = {
     localGroup: "Lokaal (gevonden)",
     localGroupHint:
       "Alleen zichtbaar in ontwikkelmodus (npm run dev). In productie bestaan CLI-agents en lokale modellen niet. Gevonden modellen hangen af van wat er nu draait (Ollama/LM Studio).",
+    teacherDefault: "Standaardmodel van deze docent",
+    teacherDefaultHint:
+      "Telt alleen als de docent dit model mag gebruiken. Anders starten de tools op de standaard van het team of de instelling.",
+    teacherDefaultNone: "Geen: volgt team of instelling",
     teacherInherit: "Volgt de instelling",
     teacherIntro:
       "Een docent volgt de modellen van de instelling, of krijgt een eigen keuze. Een eigen keuze vervangt de instelling en mag ruimer zijn.",

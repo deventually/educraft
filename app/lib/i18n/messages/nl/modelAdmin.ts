@@ -16,6 +16,13 @@ export const modelAdmin = {
   clientSelectable: "Docenten mogen dit model zelf kiezen",
   clientSelectableHint: "Uit voor een duur model: dan gebruikt alleen een tool het als standaard.",
   connected: "Gekoppeld",
+  defaultFallback:
+    "Zolang je niets kiest, starten tools op {model}, het vangnet uit de serverinstellingen.",
+  defaultHeading: "Standaardmodel van de instelling",
+  defaultIntro:
+    "Hier starten alle tools op, tenzij een team of docent een eigen standaard heeft. Docenten kunnen per keer een ander model kiezen.",
+  defaultLabel: "Standaardmodel van de instelling",
+  defaultNone: "Niets gekozen",
   displayName: "Naam in LimeOnIt",
   effort: "Denkniveau (effort)",
   effortDefault: "Standaard van de aanbieder",

@@ -860,3 +860,17 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   de naam blijft in het dossier en wordt in het overzicht vóór versturen ook vervangen als hij in de
   feedback staat. Coach, vragen en opstellen krijgen de gekozen citaten met rol en datum.
   Bastiaan, 2026-11-18 (BDB-voorstel 3, "citaten uit feedback per criterium").
+- **BESLUIT-2026-11-18-4:** **Het standaardmodel is een keuze per instelling, team en docent, niet
+  Sonnet voor iedereen.** Een tool start op het eigen standaardmodel van de docent, anders op dat
+  van zijn team (bij meerdere teams het eerste op naam dat er een heeft), anders op dat van de
+  instelling. `default` in `config/models.json` is alleen nog het vangnet voor een nieuwe
+  installatie waar niemand iets koos. **Wie kiest:** beheer kiest de standaard van de instelling
+  (Beheer → Tools → Modellen) en kan die van elk team en elke docent zetten; de teamleider kiest
+  die van zijn team (teampagina); de docent kiest zijn eigen op `/account`. **De grens:** je kiest
+  alleen uit de modellen die je mag gebruiken, en een standaard telt alleen zolang dat zo is;
+  anders geldt de volgende laag. Een standaard maakt dus nooit een model beschikbaar, en de
+  limiet per maand blijft gelden. In een tool kiest de docent per keer nog steeds een ander model;
+  een vast model voor één stap van een tool blijft voorgaan. Geen migratie: alles staat in
+  `instance_settings` en de teaminstellingen. Bastiaan, 2026-11-18 ("Ik wil niet dat sonnet de
+  standaard is"; kaart "Beheer, teamleider en docent"). Dure modellen per team of docent
+  aanzetten (zodat ook Opus een standaard kan zijn) volgt in een eigen PR.

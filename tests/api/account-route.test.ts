@@ -237,3 +237,50 @@ describe("account deletion — courses (BESLUIT-2026-11-10-5)", () => {
     expect(loaded.lostCourses).toBe(1);
   });
 });
+
+describe("my own default model (BESLUIT-2026-11-18-4)", () => {
+  const post = (defaultModel: string) =>
+    route.action({
+      request: signedRequest("http://localhost/account", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ intent: "defaultModel", defaultModel }).toString(),
+      }),
+    } as Parameters<typeof route.action>[0]) as Promise<{ saved?: boolean; error?: unknown }>;
+  const load = () =>
+    route.loader({ request: signedRequest("http://localhost/account") } as Parameters<
+      typeof route.loader
+    >[0]) as Promise<{ defaultModel: { current: string | null; options: { id: string }[] } }>;
+
+  it("offers the models I may use, stores one of them, and clears with empty", async () => {
+    await users.createUser({
+      id: "acc-dm",
+      name: "DM",
+      passwordHash: "scrypt:x:y",
+      role: "teacher",
+    });
+    await actAs("acc-dm", "teacher");
+    const { options } = (await load()).defaultModel;
+    expect(options.length).toBeGreaterThan(0);
+    const pick = options[0]!.id;
+    expect((await post(pick)).saved).toBe(true);
+    expect((await load()).defaultModel.current).toBe(pick);
+    expect((await post("")).saved).toBe(true);
+    expect(await users.getUserDefaultModel("acc-dm")).toBeNull();
+  });
+
+  it("refuses a model I may not use, like an expensive one, and keeps the old choice", async () => {
+    await users.createUser({
+      id: "acc-dm2",
+      name: "DM2",
+      passwordHash: "scrypt:x:y",
+      role: "teacher",
+    });
+    await actAs("acc-dm2", "teacher");
+    const { options } = (await load()).defaultModel;
+    expect(options.map((o) => o.id)).not.toContain("claude-opus-5-5");
+    await post(options[0]!.id);
+    expect((await post("claude-opus-5-5")).error).toBeTruthy();
+    expect(await users.getUserDefaultModel("acc-dm2")).toBe(options[0]!.id);
+  });
+});

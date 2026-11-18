@@ -2,7 +2,11 @@ import { Link, useActionData } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import type { Route } from "./+types/admin.users.$id";
 import { isOwner, requireRole } from "~/server/auth.server";
-import { getUserAssignedModels, getUserById } from "~/server/repositories/users.server";
+import {
+  getUserAssignedModels,
+  getUserById,
+  getUserDefaultModel,
+} from "~/server/repositories/users.server";
 import { getLastActiveDay } from "~/server/repositories/usage.server";
 import { listTeams, listTeamsForUser } from "~/server/repositories/teams.server";
 import { teamPlaces } from "~/server/repositories/organisation.server";
@@ -22,7 +26,7 @@ import { isRole } from "~/lib/registry/access";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { useFormToast } from "~/components/Toast";
-import { TeacherModelForm } from "~/components/admin/TeacherModelForm";
+import { TeacherDefaultModelForm, TeacherModelForm } from "~/components/admin/TeacherModelForm";
 import { TeamsForm } from "~/components/admin/TeamsForm";
 import { PersonAccess } from "~/components/admin/PersonAccess";
 import { PersonCourses } from "~/components/admin/PersonCourses";
@@ -65,6 +69,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     base: { id: string; displayName: string }[];
     mode: "own" | "inherit";
     models: string[];
+    defaultModel: string | null;
   } | null = null;
   let features: FeatureRow[] | null = null;
   if (target.role === "teacher") {
@@ -82,9 +87,15 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     // whole catalogue. Following the instance shows the instance set (greyed out), so
     // that switching to "own" autosaves a sensible, non-empty starting selection.
     const base = catalog.map((m) => ({ id: m.id, displayName: m.displayName }));
+    const defaultModel = await getUserDefaultModel(target.id);
     models = own
-      ? { base, mode: "own", models: [...own] }
-      : { base, mode: "inherit", models: instanceModels ?? base.map((m) => m.id) };
+      ? { base, mode: "own", models: [...own], defaultModel }
+      : {
+          base,
+          mode: "inherit",
+          models: instanceModels ?? base.map((m) => m.id),
+          defaultModel,
+        };
     const row = (
       key: string,
       kind: FeatureRow["kind"],
@@ -299,6 +310,12 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
               errorMessage={autoSaveError}
               inheritLabel={t.admin.models.teacherInherit}
               ownLabel={t.admin.models.teacherOwn}
+            />
+            <TeacherDefaultModelForm
+              teacherId={person.id}
+              base={models.base}
+              defaultModel={models.defaultModel}
+              errorMessage={autoSaveError}
             />
           </div>
         </section>

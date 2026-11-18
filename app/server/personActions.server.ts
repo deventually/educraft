@@ -6,6 +6,7 @@ import {
   getUserByEmail,
   getUserById,
   setUserAssignedModels,
+  setUserDefaultModel,
   setUserDisabled,
   setUserRole,
   updateUserEmail,
@@ -92,6 +93,20 @@ export async function personAction(
       await setUserAssignedModels(userId, null);
       await audit("teacherModelsChanged", { models: null });
     }
+    return { saved: true as const };
+  }
+
+  // ── A teacher's own default model (BESLUIT-2026-11-18-4): "" = none ────────
+  if (intent === "teacherDefaultModel") {
+    const target = await getUserById(userId);
+    if (target?.role !== "teacher") throw new Response("Not found", { status: 404 });
+    const id = String(fd.get("defaultModel") ?? "").trim();
+    // Any catalogue model, like an own set; it only counts where the teacher may use it.
+    if (id && !(await fullCatalog()).some((m) => m.id === id)) {
+      return { error: "invalid" as const };
+    }
+    await setUserDefaultModel(userId, id || null);
+    await audit("teacherDefaultModelChanged", { models: id ? [id] : null });
     return { saved: true as const };
   }
 

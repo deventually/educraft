@@ -29,7 +29,7 @@ Zet een mededeling als balk boven elke pagina, voor iedereen, één team of éé
 ## Tools en modellen
 
 - **Tools:** zet elke tool op *Aan*, *Op aanvraag* of *Uit*. *Uit* is voor niemand; *Op aanvraag* alleen via een team of een uitzondering voor één docent.
-- **Modellen:** kies welke AI-modellen docenten zelf mogen kiezen. Een docent volgt die keuze, of krijgt een eigen keuze.
+- **Modellen:** kies welke AI-modellen docenten zelf mogen kiezen. Een docent volgt die keuze, of krijgt een eigen keuze. Kies hier ook het **standaardmodel van de instelling**: daar starten de tools op. Een team (op de teampagina) en een docent (op zijn accountpagina, of jij op de personenpagina) kunnen een eigen standaard kiezen, maar alleen uit de modellen die ze mogen gebruiken.
 - **Aanbieders:** de AI-diensten waar de modellen vandaan komen.
 
 Wat uit staat, verdwijnt echt: een docent kan zo'n tool ook niet via een link openen.

@@ -5,6 +5,11 @@ export const account = {
   dangerHeading: "Account en gegevens verwijderen",
   dangerIntro:
     "Dit verwijdert je account en al je gegevens (materialen, contextprofielen, feedback en gebruik) definitief. Dit kan niet ongedaan worden gemaakt.",
+  defaultModelHeading: "Mijn standaardmodel",
+  defaultModelIntro:
+    "Hier starten je tools op. In elke tool kun je per keer een ander model kiezen.",
+  defaultModelLabel: "Mijn standaardmodel",
+  defaultModelNone: "Geen: de standaard van mijn team of de instelling",
   deleteButton: "Verwijder mijn account en gegevens",
   email: "E-mailadres",
   emailHeading: "E-mailadres wijzigen",

@@ -161,6 +161,15 @@ describe("the audit log records every admin action that changes access", () => {
       detail: { models: ["claude-haiku-4-5"] },
     });
 
+    await call(tools.action, {
+      request: post({ intent: "defaultModel", defaultModel: "claude-haiku-4-5" }),
+    });
+    expect(await latest()).toMatchObject({
+      action: "instanceDefaultModelChanged",
+      targetUserId: null,
+      detail: { models: ["claude-haiku-4-5"] },
+    });
+
     const t = await mk("Model Docent");
     await onPerson(t.id, { intent: "teacherModels", mode: "own", models: ["claude-haiku-4-5"] });
     expect(await latest()).toMatchObject({
