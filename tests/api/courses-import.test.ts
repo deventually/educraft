@@ -253,3 +253,32 @@ describe("import-apply", () => {
     expect(generate).not.toHaveBeenCalled();
   });
 });
+
+describe("import-extract: nothing goes that the teacher did not see (anonymiseerpoort step 4)", () => {
+  const MAILED = `${DOC}\nVragen? Mail jan@school.nl.`;
+
+  it("without the overview's approval it sends nothing and lays the words before the teacher", async () => {
+    const course = await repo.createCourse("teacher-i", { name: "Unseen" });
+    const r = (await post(course.id, [
+      ["intent", "import-extract"],
+      ["documentText", MAILED],
+    ])) as Record<string, unknown>;
+    expect(generate).not.toHaveBeenCalled();
+    expect(r).toMatchObject({
+      ok: false,
+      intent: "import-extract",
+      privacyReview: [{ value: "jan@school.nl", code: "E-MAIL-1", kind: "email", count: 1 }],
+    });
+  });
+
+  it("with it, the gate replaces what the teacher saw", async () => {
+    const course = await repo.createCourse("teacher-i", { name: "Seen" });
+    generate.mockResolvedValueOnce({ text: answer });
+    await post(course.id, [
+      ["intent", "import-extract"],
+      ["documentText", MAILED],
+      ["privacy", JSON.stringify({ approved: ["jan@school.nl"], keep: [] })],
+    ]);
+    expect(generate.mock.calls[0]![0].messages[0].content).toContain("Mail [E-MAIL-1].");
+  });
+});

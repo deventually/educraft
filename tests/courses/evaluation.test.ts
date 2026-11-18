@@ -243,7 +243,7 @@ describe("the courses help topic (P33.3)", () => {
     expect(getTopic("courses", "nl")).toMatch(
       /## Verbeterpunten en de cursusevaluatie\n\n.*Cursusevaluatie verwerken/,
     );
-    expect(getTopic("courses", "nl")).toMatch(/namencheck/);
+    expect(getTopic("courses", "nl")).toMatch(/Kijk na wat er naar de AI gaat/);
     expect(getTopic("courses", "en")).toMatch(
       /## Improvements and the course evaluation\n\n.*Process course evaluation/,
     );

@@ -33,3 +33,28 @@ describe("help: what goes to the AI", () => {
     for (const p of patterns) expect(topic).toMatch(p);
   });
 });
+
+/** Anonymiseerpoort step 4: where you do not type, an overview per word comes before sending. */
+describe("help: the overview before sending", () => {
+  it.each([
+    [
+      "nl",
+      "using-tools",
+      /Kijk na wat er naar de AI gaat/,
+      /Bewijs in één keer/,
+      /bestands- en mapnamen/i,
+    ],
+    [
+      "en",
+      "using-tools",
+      /Check what goes to the AI/,
+      /evidence in one go/i,
+      /file and folder names/i,
+    ],
+    ["nl", "courses", /Kijk na wat er naar de AI gaat/, /Laat reviewen/, /Versturen/],
+    ["en", "courses", /Check what goes to the AI/, /Get a review/, /Send/],
+  ] as const)("in %s (%s)", (locale, topicId, ...patterns) => {
+    const topic = getTopic(topicId, locale);
+    for (const p of patterns) expect(topic).toMatch(p);
+  });
+});

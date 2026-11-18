@@ -38,6 +38,8 @@ A full name always goes. A single part of a name goes only when it starts with a
 
 Student names and what you fill in under *Names that must go* stay in your browser: the server only sees codes, and the result shows the names again. *Earlier work* then keeps the version with codes. For student work, nothing but the version with codes leaves your browser. Your own name and your colleagues' names are replaced on the server and put back there too, so *Earlier work* shows them as written. Note: figures and photos are not anonymised, and a misspelt name can slip through. So do check the text.
 
+Where you do not type, such as in **Evidence in one go**, the review team, importing from documents and processing a course evaluation, you see **Check what goes to the AI** before anything is sent: a list per word, with how often it occurs and where (for example *Jan de Vries (12×)* → `[COLLEGA-1]`), also in file and folder names. Per word you choose **Do not replace** or **Also replace**, and under *Replace another word* you add a word the list missed. Only after **Send** does anything go. Names in your course itself are replaced on the server; they come back as written in the result.
+
 Everything that goes to the AI also passes a check **on the server**. If it finds something you did not see, for example a colleague in your context or in an earlier step, it sends nothing and you see **Look first**: per word you choose *Replace* or *Do not replace*, and only after **Send** does anything go. Nothing is ever replaced silently.
 
 ## Read aloud and dictation

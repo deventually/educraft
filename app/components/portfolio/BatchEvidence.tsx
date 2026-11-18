@@ -1,11 +1,14 @@
-import { useId, useMemo, useRef, useState } from "react";
-import { Form, Link } from "react-router";
+import { useId, useRef, useState } from "react";
+import { Link } from "react-router";
 import { X } from "lucide-react";
-import { AiCallField } from "~/components/AiLeaveGuard";
 import { FileInput } from "~/components/FileInput";
+import { SendRound } from "~/components/privacy/SendRound";
 import { Button, Card, HelpText, Label, Textarea } from "~/components/ui";
 import { DOC_ACCEPT_ATTR, DOCX_MIME, fileToText, PDF_MIME } from "~/lib/documents/extract";
-import { BATCH_LIMITS, checkNames, type SortProposal } from "~/lib/portfolio/batch";
+import { BATCH_LIMITS, type SortProposal } from "~/lib/portfolio/batch";
+import { useSendRound } from "~/lib/hooks/useSendRound";
+import type { PrivacyPage } from "~/lib/privacy/live";
+import type { OverviewPart } from "~/lib/privacy/overview";
 import { LIMITS } from "~/lib/portfolio/schema";
 import type { Outcome } from "~/lib/portfolio/types";
 import { fmt } from "~/lib/i18n/format";
@@ -40,15 +43,18 @@ async function readFile(f: File): Promise<string | null> {
   }
 }
 
-const lines = (s: string) =>
-  s
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
+/** Each file's name and text as the overview shows them; student work, so all is replaced here. */
+function partsOf(files: readonly PickedFile[]): OverviewPart[] {
+  return files.flatMap((f) => [
+    { name: `${f.key}:name`, label: f.name, text: f.name, redact: true },
+    { name: `${f.key}:text`, label: f.name, text: f.raw, redact: true },
+  ]);
+}
 
 /**
- * Evidence in one go: choose many files (or a folder), run the name check per file in the
- * browser, ask for a proposal per file, then confirm in one list (`BatchEvidenceList`).
+ * Evidence in one go: choose many files (or a folder), see per word what is replaced in every
+ * name and text (the overview before sending, anonymiseerpoort step 4), ask for a proposal per
+ * file, then confirm in one list (`BatchEvidenceList`). Nothing leaves before Versturen.
  */
 export function BatchEvidence({
   dossierId = "",
@@ -56,6 +62,8 @@ export function BatchEvidence({
   room,
   confirmed,
   sorted,
+  answer,
+  privacy: page,
 }: {
   dossierId?: string;
   outcomes: OutcomeView[];
@@ -64,9 +72,14 @@ export function BatchEvidence({
   confirmed: boolean;
   /** The proposals of the last "Stel voor", by file key. */
   sorted?: SortProposal[];
+  /** The page's last action answer: it may carry the gate's question. */
+  answer?: unknown;
+  /** The names the gate knows and the teacher's never-list. */
+  privacy?: PrivacyPage;
 }) {
   const t = useT().portfolioBatch;
-  const [names, setNames] = useState("");
+  const round = useSendRound(page, answer, "proposeEvidence");
+  const { privacy } = round;
   const [files, setFiles] = useState<PickedFile[]>([]);
   const [skipped, setSkipped] = useState<string[]>([]);
   const [clipped, setClipped] = useState(false);
@@ -79,10 +92,10 @@ export function BatchEvidence({
     help: useId(),
   };
 
-  const checked = useMemo(() => {
-    const list = lines(names);
-    return files.map((f) => ({ ...f, ...checkNames(f.raw, list) }));
-  }, [files, names]);
+  // What is kept in the dossier is the text as it went: with codes for every name.
+  const parts = partsOf(files);
+  const replaced = sorted?.length ? privacy.prepareOverview(parts).values : {};
+  const checked = files.map((f) => ({ ...f, text: replaced[`${f.key}:text`] ?? f.raw }));
 
   if (!confirmed) {
     return (
@@ -123,9 +136,19 @@ export function BatchEvidence({
     setSkipped(skip);
   }
 
-  const sendable = JSON.stringify(
-    checked.map((f) => ({ key: f.key, name: f.name, text: f.text.slice(0, BATCH_LIMITS.excerpt) })),
-  );
+  function propose() {
+    const form = new FormData();
+    form.set("intent", "proposeEvidence");
+    round.start(form, parts, (values) => ({
+      files: JSON.stringify(
+        files.map((f) => ({
+          key: f.key,
+          name: (values[`${f.key}:name`] ?? f.name).slice(0, BATCH_LIMITS.name),
+          text: (values[`${f.key}:text`] ?? "").slice(0, BATCH_LIMITS.excerpt),
+        })),
+      ),
+    }));
+  }
   const folder = { webkitdirectory: "", directory: "" } as Record<string, string>;
 
   return (
@@ -137,9 +160,9 @@ export function BatchEvidence({
             <Textarea
               id={ids.names}
               rows={3}
-              value={names}
+              value={privacy.named.student}
               aria-describedby={ids.namesHelp}
-              onChange={(e) => setNames(e.target.value)}
+              onChange={(e) => privacy.setNamed({ ...privacy.named, student: e.target.value })}
             />
             <HelpText id={ids.namesHelp}>{t.namesHelp}</HelpText>
           </div>
@@ -179,25 +202,17 @@ export function BatchEvidence({
           <p className="mt-3 text-sm text-slate-700">{fmt(t.tooMany, { n: BATCH_LIMITS.files })}</p>
         )}
 
-        {checked.length > 0 && (
+        {files.length > 0 && (
           <>
             <ul aria-label={t.chosen} className="mt-4 space-y-2">
-              {checked.map((f) => (
+              {files.map((f) => (
                 <li
                   key={f.key}
                   className="flex items-start justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2"
                 >
                   <div className="min-w-0 text-sm">
                     <p className="break-all font-medium text-slate-900">{f.name}</p>
-                    <p className="text-slate-700">
-                      {f.unreadable
-                        ? t.unreadable
-                        : f.found.length > 0
-                          ? fmt(t.found, {
-                              items: f.found.map((x) => `${x.original} → [${x.code}]`).join(", "),
-                            })
-                          : t.clean}
-                    </p>
+                    {f.unreadable && <p className="text-slate-700">{t.unreadable}</p>}
                   </div>
                   <Button
                     type="button"
@@ -214,12 +229,10 @@ export function BatchEvidence({
             <p className="mt-3 text-sm text-slate-700">
               {room === 1 ? t.roomOne : fmt(t.room, { n: room })}
             </p>
-            <Form method="post" className="mt-3">
-              <input type="hidden" name="intent" value="proposeEvidence" />
-              <input type="hidden" name="files" value={sendable} />
-              <AiCallField />
-              <Button type="submit">{t.propose}</Button>
-            </Form>
+            <Button type="button" className="mt-3" onClick={propose}>
+              {t.propose}
+            </Button>
+            <SendRound round={round} />
           </>
         )}
       </Card>

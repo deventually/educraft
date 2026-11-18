@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import { CourseEvaluationPanel } from "~/components/courses/CourseEvaluationPanel";
@@ -8,14 +8,32 @@ import { ACT1, alignedCourse, TEST1 } from "../courses/fixtures";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
+const models = [
+  { id: "claude-sonnet-5-5", displayName: "Sonnet 5.5" },
+  { id: "claude-opus-5-5", displayName: "Opus 5.5" },
+];
+
 function renderPanel(result: CourseEvaluation | null = null) {
+  const posted: Record<string, string>[] = [];
+  const action = vi.fn(async ({ request }: { request: Request }) => {
+    posted.push(Object.fromEntries(await request.formData()) as Record<string, string>);
+    return { ok: true };
+  });
   const Stub = createRoutesStub([
     {
       path: "/",
-      Component: () => <CourseEvaluationPanel data={alignedCourse()} result={result} />,
+      action,
+      Component: () => (
+        <CourseEvaluationPanel
+          data={alignedCourse()}
+          result={result}
+          models={models}
+          privacy={{ known: { colleagues: [] }, never: [] }}
+        />
+      ),
     },
   ]);
-  return render(<Stub initialEntries={["/"]} />);
+  return { ...render(<Stub initialEntries={["/"]} />), posted };
 }
 
 const result: CourseEvaluation = {
@@ -37,8 +55,8 @@ const result: CourseEvaluation = {
 
 // Seam: the rendered forms; the name check runs in the browser before any text leaves.
 describe("CourseEvaluationPanel (P33.3)", () => {
-  it("asks for the answers and the respondents, and checks names before processing", async () => {
-    const { container } = renderPanel();
+  it("asks for the answers, then shows per word what is replaced, and sends only after Versturen", async () => {
+    const { container, posted } = renderPanel();
     const region = screen.getByRole("region", { name: "Cursusevaluatie verwerken" });
     expect(within(region).getByLabelText("Antwoorden van studenten")).toBeRequired();
     expect(within(region).getByLabelText("Of kies een CSV-bestand")).toHaveAttribute(
@@ -46,8 +64,6 @@ describe("CourseEvaluationPanel (P33.3)", () => {
       ".csv,.txt,text/csv,text/plain",
     );
     expect(within(region).getByLabelText("Aantal respondenten")).toHaveAttribute("type", "number");
-    // No way to process before the name check.
-    expect(within(region).queryByRole("button", { name: "Verwerken" })).toBeNull();
     expect((await axe(container, axeOpts)).violations).toEqual([]);
 
     fireEvent.change(within(region).getByLabelText("Antwoorden van studenten"), {
@@ -56,38 +72,29 @@ describe("CourseEvaluationPanel (P33.3)", () => {
     fireEvent.change(within(region).getByLabelText("Aantal respondenten"), {
       target: { value: "12" },
     });
+    fireEvent.change(within(region).getByLabelText("Model"), {
+      target: { value: "claude-opus-5-5" },
+    });
     fireEvent.click(within(region).getByRole("button", { name: "Namen controleren" }));
-    fireEvent.change(screen.getByLabelText("Andere woorden om weg te halen (één per regel)"), {
+    const overview = screen.getByRole("region", { name: "Kijk na wat er naar de AI gaat" });
+    expect(within(overview).getByRole("heading")).toHaveFocus();
+    fireEvent.change(within(overview).getByLabelText("Nog een woord vervangen"), {
       target: { value: "Jansen" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /Verstuur geanonimiseerd/ }));
-
-    const process = screen.getByRole("button", { name: "Verwerken" });
-    const form = process.closest("form") as HTMLFormElement;
-    expect(form.querySelector('input[name="intent"]')).toHaveValue("evaluate-course");
-    expect(form.querySelector('input[name="respondents"]')).toHaveValue("12");
-    const sent = (form.querySelector('input[name="evaluation"]') as HTMLInputElement).value;
-    expect(sent).not.toContain("Jansen");
-    expect(sent).toContain("Normaliseren ging te snel.");
+    fireEvent.click(within(overview).getByRole("button", { name: "Ook vervangen" }));
+    expect(within(overview).getByText("Jansen (1×)")).toBeInTheDocument();
+    expect(posted).toHaveLength(0);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
-  });
 
-  it("moves focus into each new step, so a keyboard user does not land on the page top", () => {
-    renderPanel();
-    const region = screen.getByRole("region", { name: "Cursusevaluatie verwerken" });
-    fireEvent.change(within(region).getByLabelText("Antwoorden van studenten"), {
-      target: { value: "Normaliseren ging te snel." },
+    fireEvent.click(within(overview).getByRole("button", { name: "Versturen" }));
+    await waitFor(() => expect(posted).toHaveLength(1));
+    expect(posted[0]).toMatchObject({
+      intent: "evaluate-course",
+      respondents: "12",
+      model: "claude-opus-5-5",
+      evaluation: "[ANDER-1] legde te snel uit.\nNormaliseren ging te snel.",
     });
-    fireEvent.change(within(region).getByLabelText("Aantal respondenten"), {
-      target: { value: "12" },
-    });
-    fireEvent.click(within(region).getByRole("button", { name: "Namen controleren" }));
-    expect(document.activeElement).not.toBe(document.body);
-    expect(region.contains(document.activeElement)).toBe(true);
-    fireEvent.click(screen.getByRole("button", { name: /Verstuur geanonimiseerd/ }));
-    expect(screen.getByRole("button", { name: "Verwerken" }).closest("form")).toContainElement(
-      document.activeElement as HTMLElement,
-    );
+    expect(posted[0]?.course).toBeUndefined();
   });
 
   it("fills the answers and the respondents from a CSV", async () => {

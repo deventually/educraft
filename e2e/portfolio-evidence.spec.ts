@@ -12,7 +12,8 @@ const file = (name: string, text: string) => ({
 });
 
 /**
- * Evidence in one go: two files with the name check per file, a proposal per file (without a
+ * Evidence in one go: two files, the overview per word before sending (anonymiseerpoort step 4,
+ * focus on its heading), a proposal per file (without a
  * model in the browser tests every row falls back to "Controleren"), then one list the teacher
  * fills in and confirms by keyboard. axe finds nothing and nothing scrolls sideways at 320px.
  */
@@ -32,10 +33,16 @@ test("adds several files as evidence in one list, by keyboard", async ({ page })
       file("notities.txt", "Losse notities."),
     ]);
   const chosen = page.getByRole("list", { name: "Gekozen bestanden" });
-  await expect(chosen.getByRole("listitem").first()).toContainText("Noor Jansen → [STUDENT]");
-  await expectNoAxeViolations(page);
+  await expect(chosen.getByRole("listitem")).toHaveCount(2);
 
   await page.getByRole("button", { name: "Stel voor waar ze horen" }).click();
+  const overview = page.getByRole("region", { name: "Kijk na wat er naar de AI gaat" });
+  await expect(
+    overview.getByRole("heading", { name: "Kijk na wat er naar de AI gaat" }),
+  ).toBeFocused();
+  await expect(overview.getByRole("listitem").first()).toContainText("Noor Jansen (1×) [STUDENT]");
+  await expectNoAxeViolations(page);
+  await overview.getByRole("button", { name: "Versturen" }).click();
   const row = page.getByRole("group", { name: "lesplan.txt" });
   await expect(row).toContainText("Controleren");
 

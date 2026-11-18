@@ -5,7 +5,6 @@ import {
   BatchFilesSchema,
   BatchItemsSchema,
   buildSortMessage,
-  checkNames,
   parseSortAnswer,
   SORT_PROMPT_ID,
 } from "~/lib/portfolio/batch";
@@ -220,33 +219,6 @@ describe("parseSortAnswer (the AI's proposal, checked in code)", () => {
   });
 });
 
-describe("checkNames (the name check, per file, in the browser)", () => {
-  it("replaces the student names the teacher listed and patterns such as an e-mail address", () => {
-    const r = checkNames("Noor Jansen mailde noor@school.nl over de les. Noor deed mee.", [
-      "Noor Jansen",
-    ]);
-    expect(r.text).not.toMatch(/Noor|noor@/);
-    expect(r.text).toContain("[STUDENT]");
-    expect(r.found.map((f) => f.original)).toEqual(
-      expect.arrayContaining(["Noor Jansen", "noor@school.nl"]),
-    );
-  });
-
-  it("numbers several students apart and leaves a clean text alone", () => {
-    const r = checkNames("Sam en Lisa werkten samen.", ["Sam Bakker", "Lisa de Vries"]);
-    expect(r.text).toBe("[STUDENT-1] en [STUDENT-2] werkten samen.");
-    expect(checkNames("Een les zonder namen.", [])).toEqual({
-      text: "Een les zonder namen.",
-      found: [],
-    });
-  });
-
-  it("lists each finding once", () => {
-    const r = checkNames("Sam, Sam en nog eens Sam.", ["Sam"]);
-    expect(r.found).toEqual([{ code: "STUDENT", original: "Sam" }]);
-  });
-});
-
 describe("BatchFilesSchema and BatchItemsSchema (the form boundary)", () => {
   it("accepts up to the file limit and refuses more", () => {
     const files = Array.from({ length: BATCH_LIMITS.files }, (_, i) => ({ ...file, key: `f${i}` }));
@@ -318,15 +290,5 @@ describe("addEvidenceBatch (only what the teacher ticked)", () => {
 
   it("uses its own prompt id", () => {
     expect(SORT_PROMPT_ID).toBe("portfolio-evidence-sort@v1");
-  });
-});
-
-describe("checkNames uses the privacy pack", () => {
-  it("keeps a researcher and an ordinary word that a student's name shares", () => {
-    const r = checkNames("Lisa werkte met de taxonomie van Bloom; een roos.", [
-      "Lisa Bloom",
-      "Roos Kok",
-    ]);
-    expect(r.text).toBe("[STUDENT-1] werkte met de taxonomie van Bloom; een roos.");
   });
 });

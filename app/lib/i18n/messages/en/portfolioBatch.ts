@@ -8,7 +8,6 @@ export const portfolioBatch = {
   back: "Back to your dossier",
   check: "Check",
   chosen: "Chosen files",
-  clean: "No names or numbers found",
   criteria: "Criteria",
   errors: {
     "not-confirmed": "Confirm the framework first; the proposals are about your learning outcomes.",
@@ -19,7 +18,6 @@ export const portfolioBatch = {
     "PDF, Word or text, at most {n} at once. The files stay on your computer; only the text goes along, with codes instead of names.",
   filesLabel: "Choose files",
   folderLabel: "Or choose a folder",
-  found: "Replaced: {items}",
   frameworkLink: "To your framework",
   intro:
     "Choose all your evidence at once, for example a folder with a subfolder per learning outcome. LimeOnIt proposes for each file the learning outcome, the kind, the criteria and the line of the required evidence. You confirm everything in one list.",

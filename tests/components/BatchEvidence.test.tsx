@@ -63,7 +63,14 @@ function renderPage({ confirmed = true, room = 99 } = {}) {
   function Page() {
     const data = useActionData() as { sorted?: SortProposal[] } | undefined;
     return (
-      <BatchEvidence outcomes={outcomes} room={room} confirmed={confirmed} sorted={data?.sorted} />
+      <BatchEvidence
+        outcomes={outcomes}
+        room={room}
+        confirmed={confirmed}
+        sorted={data?.sorted}
+        answer={data}
+        privacy={{ known: { colleagues: ["Jan de Vries"] }, never: [] }}
+      />
     );
   }
   const Stub = createRoutesStub([{ path: "/", Component: Page, action }]);
@@ -71,6 +78,12 @@ function renderPage({ confirmed = true, room = 99 } = {}) {
 }
 
 const txt = (name: string, text: string) => new File([text], name, { type: "text/plain" });
+
+/** "Stel voor" opens the overview; only Versturen sends. */
+async function proposeNow() {
+  await userEvent.click(screen.getByRole("button", { name: "Stel voor waar ze horen" }));
+  await userEvent.click(screen.getByRole("button", { name: "Versturen" }));
+}
 
 async function pickTwo() {
   await userEvent.upload(screen.getByLabelText("Kies bestanden"), [
@@ -81,42 +94,55 @@ async function pickTwo() {
 }
 
 describe("BatchEvidence (adding evidence in one go)", () => {
-  it("reads several files in the browser and runs the name check per file", async () => {
-    const { container } = renderPage();
+  it("reads several files in the browser, and lists every replacement per word before sending", async () => {
+    const { container, posted } = renderPage();
     await userEvent.type(
       screen.getByLabelText("Namen van studenten om te vervangen (één per regel)"),
       "Noor Jansen",
     );
     await pickTwo();
-    const files = screen.getByRole("list", { name: "Gekozen bestanden" });
-    const [first, second] = within(files).getAllByRole("listitem");
-    expect(first).toHaveTextContent(
-      "Vervangen: Noor Jansen → [STUDENT], noor@school.nl → [E-MAIL-1]",
-    );
-    expect(second).toHaveTextContent("Geen namen of nummers gevonden");
+    expect(
+      within(screen.getByRole("list", { name: "Gekozen bestanden" })).getAllByRole("listitem"),
+    ).toHaveLength(2);
+    await userEvent.click(screen.getByRole("button", { name: "Stel voor waar ze horen" }));
+    const overview = screen.getByRole("region", { name: "Kijk na wat er naar de AI gaat" });
+    const words = within(overview).getAllByRole("listitem");
+    expect(words.map((w) => w.textContent)).toEqual([
+      expect.stringContaining("Noor Jansen (1×) [STUDENT]"),
+      expect.stringContaining("noor@school.nl (1×) [E-MAIL-1]"),
+    ]);
+    expect(posted).toHaveLength(0);
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 
-  it("sends only the texts with codes for a proposal, never the names", async () => {
+  it("sends only the names and texts with codes, also in file and folder names, after Versturen", async () => {
     const { posted } = renderPage();
     await userEvent.type(
       screen.getByLabelText("Namen van studenten om te vervangen (één per regel)"),
       "Noor Jansen",
     );
-    await pickTwo();
-    await userEvent.click(screen.getByRole("button", { name: "Stel voor waar ze horen" }));
+    await userEvent.upload(screen.getByLabelText("Kies bestanden"), [
+      txt("Feedback Noor Jansen.txt", "Noor Jansen hielp mee, noor@school.nl. Jan de Vries keek."),
+    ]);
+    await screen.findByRole("list", { name: "Gekozen bestanden" });
+    await proposeNow();
     await waitFor(() => expect(posted).toHaveLength(1));
     expect(posted[0]?.intent).toBe("proposeEvidence");
     const sent = JSON.parse(posted[0]?.files ?? "[]") as { name: string; text: string }[];
-    expect(sent.map((f) => f.name)).toEqual(["lesplan.txt", "notities.txt"]);
-    expect(sent[0]?.text).toContain("[STUDENT]");
-    expect(JSON.stringify(sent)).not.toMatch(/Noor|noor@/);
+    expect(sent).toEqual([
+      {
+        key: expect.any(String),
+        name: "Feedback [STUDENT].txt",
+        text: "[STUDENT] hielp mee, [E-MAIL-1]. [COLLEGA-1] keek.",
+      },
+    ]);
+    expect(JSON.parse(posted[0]?.privacy ?? "{}")).toMatchObject({ approved: [], keep: [] });
   });
 
   it("shows the proposals in one list, with 'Controleren' for doubt and nothing ticked", async () => {
     const { container } = renderPage();
     await pickTwo();
-    await userEvent.click(screen.getByRole("button", { name: "Stel voor waar ze horen" }));
+    await proposeNow();
     const lesplan = await screen.findByRole("group", { name: "lesplan.txt" });
     const notes = screen.getByRole("group", { name: "notities.txt" });
     expect(lesplan).toHaveTextContent("Voorstel");
@@ -135,7 +161,7 @@ describe("BatchEvidence (adding evidence in one go)", () => {
   it("ticks only the sure proposals in one press, and adds just what is ticked", async () => {
     const { posted } = renderPage();
     await pickTwo();
-    await userEvent.click(screen.getByRole("button", { name: "Stel voor waar ze horen" }));
+    await proposeNow();
     await screen.findByRole("group", { name: "lesplan.txt" });
     await userEvent.click(
       screen.getByRole("button", { name: "Vink de voorstellen zonder twijfel aan" }),
@@ -161,7 +187,7 @@ describe("BatchEvidence (adding evidence in one go)", () => {
   it("choosing another outcome shows its criteria and lines and clears the old ones", async () => {
     renderPage();
     await pickTwo();
-    await userEvent.click(screen.getByRole("button", { name: "Stel voor waar ze horen" }));
+    await proposeNow();
     const lesplan = await screen.findByRole("group", { name: "lesplan.txt" });
     await userEvent.selectOptions(within(lesplan).getByLabelText("Leeruitkomst"), LU2);
     expect(within(lesplan).getByRole("checkbox", { name: "1. Valide toets." })).not.toBeChecked();

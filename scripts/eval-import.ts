@@ -6,6 +6,7 @@
  *   ANTHROPIC_API_KEY=… npm run eval:import                 # every case once
  *   ANTHROPIC_API_KEY=… npm run eval:import -- --repeat 3   # final measurement
  *   npm run eval:import -- --dry-run                        # build messages only
+ *   npm run eval:import -- --privacy-gate --label poort     # through the anonymiseerpoort
  *
  * Costs well under €1 per run (BESLUIT-2026-11-04-18). Never part of CI.
  */
@@ -22,6 +23,7 @@ import {
   importReportMarkdown,
   scoreImportCase,
 } from "./eval-import-helpers";
+import { EVAL_CIRCLE, privacyGated } from "./eval-privacy-helpers";
 
 const EVALS_DIR = join(process.cwd(), "evals");
 const PROMPT_ID = "course-import@v3";
@@ -37,6 +39,7 @@ async function main() {
   const model = arg("model") ?? DEFAULT_MODEL;
   const label = arg("label") ?? "";
   const only = arg("case");
+  const gate = process.argv.includes("--privacy-gate");
   const cases = (
     JSON.parse(readFileSync(join(EVALS_DIR, "course-import", "cases.json"), "utf8"))
       .cases as ImportCase[]
@@ -54,7 +57,10 @@ async function main() {
     }
     for (let i = 0; i < repeat; i++) {
       // The app's own budget and temperature (app/server/courseImport.server.ts).
-      const { text } = await providerForModel(model).generate({
+      const provider = gate
+        ? privacyGated(providerForModel(model), c.privacyKnown ?? EVAL_CIRCLE, c.locale)
+        : providerForModel(model);
+      const { text } = await provider.generate({
         model,
         system: getRuntimePrompt(PROMPT_ID, c.locale),
         messages: [{ role: "user", content: message }],
@@ -73,7 +79,7 @@ async function main() {
   const reports = join(EVALS_DIR, "reports");
   mkdirSync(reports, { recursive: true });
   const file = join(reports, `${date}${label}-course-import.md`);
-  writeFileSync(file, importReportMarkdown({ date, model, repeat, rows }));
+  writeFileSync(file, importReportMarkdown({ date, model: gate ? `${model} + anonimiseerpoort` : model, repeat, rows }));
   console.log(`Report: ${file}`);
 }
 

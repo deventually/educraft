@@ -7,11 +7,14 @@
 import { type BloomLevel, bloomRank } from "../app/lib/courses/bloom";
 import type { ImportParseResult } from "../app/lib/courses/import";
 import type { ImportModule } from "../app/lib/courses/importExtras";
+import type { KnownPeople } from "../app/lib/privacy/gate";
 import type { AssessmentKind, Grading } from "../app/lib/courses/types";
 import { normalizeForMatch } from "../app/lib/documents/locate";
 
 export interface ImportCase {
   id: string;
+  /** The circle the anonymiseerpoort knows for this case (`--privacy-gate`), else `EVAL_CIRCLE`. */
+  privacyKnown?: KnownPeople;
   locale: "nl" | "en";
   description?: string;
   courseName?: string;

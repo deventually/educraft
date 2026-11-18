@@ -20,7 +20,8 @@ import type { DossierData } from "~/lib/portfolio/types";
 import { buildJevRequest, parseJevAnswer } from "~/lib/portfolio/sortJev";
 import { getMessages, type Locale } from "~/lib/i18n";
 import { currentAiSignal } from "./aiCalls.server";
-import { gatedDecisions } from "./privacyGate.server";
+import { gatedDecisions, withPrivacyRound } from "./privacyGate.server";
+import type { ReviewItem } from "~/lib/privacy/gate";
 import type { User } from "./auth.server";
 import { jevAccess } from "./jev.server";
 import { callPortfolioModel, quotaGate } from "./portfolioAi.server";
@@ -106,7 +107,8 @@ async function proposeEvidence(
 export type BatchActionResult =
   | { ok: true; intent: "proposeEvidence"; sorted: SortProposal[] }
   | { ok: true; intent: "addEvidenceBatch"; added: number }
-  | { ok: false; error: string };
+  /** `privacyReview`: the gate found words the teacher did not see; nothing went (step 4). */
+  | { ok: false; error: string; intent?: "proposeEvidence"; privacyReview?: ReviewItem[] };
 
 /** `proposeEvidence` and `addEvidenceBatch`; `null` for any other intent. */
 export async function runBatchIntent(
@@ -120,7 +122,13 @@ export async function runBatchIntent(
   if (intent === "proposeEvidence") {
     const files = BatchFilesSchema.safeParse(fd.get("files"));
     if (!files.success) return { ok: false, error: m.portfolio.errorInvalid };
-    const r = await proposeEvidence(user, dossier.data, files.data, locale);
+    // One round with the overview the teacher saw: nothing unseen goes (anonymiseerpoort step 4).
+    const round = await withPrivacyRound(fd.get("privacy"), () =>
+      proposeEvidence(user, dossier.data, files.data, locale),
+    );
+    if (round.review)
+      return { ok: false, intent, error: m.privacy.askTitle, privacyReview: round.review };
+    const r = round.value;
     if (!r.ok) return { ok: false, error: m.portfolioBatch.errors[r.error] };
     return { ok: true, intent, sorted: r.proposals };
   }

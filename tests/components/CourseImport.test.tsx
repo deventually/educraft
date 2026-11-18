@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import { expectAiCallId } from "../helpers/aiCall";
@@ -9,20 +10,27 @@ import type { ImportProposal } from "~/lib/courses/import";
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
 function renderImport(proposal: ImportProposal | null, startOpen = true, notes?: string) {
+  const posted: Record<string, string>[] = [];
+  const action = vi.fn(async ({ request }: { request: Request }) => {
+    posted.push(Object.fromEntries(await request.formData()) as Record<string, string>);
+    return { ok: true };
+  });
   const Stub = createRoutesStub([
     {
       path: "/",
+      action,
       Component: () => (
         <CourseImport
           courseName="Databases"
           startOpen={startOpen}
           proposal={proposal}
           notes={notes}
+          privacy={{ known: { colleagues: ["Jan de Vries"] }, never: [] }}
         />
       ),
     },
   ]);
-  return render(<Stub initialEntries={["/"]} />);
+  return { ...render(<Stub initialEntries={["/"]} />), posted };
 }
 
 const proposal: ImportProposal = {
@@ -80,6 +88,30 @@ describe("CourseImport", () => {
   it("sends a call id with the proposal request, so leaving can stop it", async () => {
     renderImport(null);
     await expectAiCallId(screen.getByRole("button", { name: "Voorstel maken" }));
+  });
+
+  it("shows per word what is replaced first, and sends only after Versturen", async () => {
+    const { container, posted } = renderImport(null);
+    await userEvent.type(
+      screen.getByLabelText("Tekst van het document"),
+      "Docent: Jan de Vries. Vragen: jan@school.nl",
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Voorstel maken" }));
+    const overview = screen.getByRole("region", { name: "Kijk na wat er naar de AI gaat" });
+    expect(within(overview).getAllByRole("listitem")).toHaveLength(2);
+    expect(posted).toHaveLength(0);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    await userEvent.click(within(overview).getByRole("button", { name: "Versturen" }));
+    await waitFor(() => expect(posted).toHaveLength(1));
+    expect(posted[0]).toMatchObject({
+      intent: "import-extract",
+      documentText: "Docent: Jan de Vries. Vragen: jan@school.nl",
+      courseName: "Databases",
+    });
+    expect(JSON.parse(posted[0]?.privacy ?? "{}").approved).toEqual([
+      "Jan de Vries",
+      "jan@school.nl",
+    ]);
   });
 
   it("shows the proposal: verbatim items ticked, the rest marked and off", async () => {

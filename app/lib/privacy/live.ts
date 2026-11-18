@@ -20,6 +20,7 @@ import {
 
 /** What the teacher names in the preview; page memory only (BESLUIT-2026-11-04-20). */
 export interface NamedPeople {
+  /** One per line when there are several (Bewijs in één keer). */
   student: string;
   studentNumber: string;
   company: string;
@@ -78,6 +79,8 @@ export interface PrivacyApproval {
   approved: string[];
   keep: string[];
   studentNumberExample?: string;
+  /** Words the teacher also replaces in text the server holds (`prepareOverview`). */
+  replace?: string[];
 }
 
 /** The gate's caps (`PrivacyApprovalSchema`). */
@@ -103,7 +106,7 @@ function kindOf(span: RedactSpan): LiveKind {
 
 function namedEntries(n: NamedPeople): RedactEntry[] {
   return [
-    { kind: "student" as const, value: n.student },
+    ...lines(n.student).map((value) => ({ kind: "student" as const, value })),
     { kind: "studentNumber" as const, value: n.studentNumber },
     { kind: "company" as const, value: n.company, description: n.companyDescription },
     ...lines(n.supervisors).map((value) => ({ kind: "supervisor" as const, value })),

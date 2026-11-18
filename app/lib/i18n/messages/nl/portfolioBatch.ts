@@ -8,7 +8,6 @@ export const portfolioBatch = {
   back: "Terug naar je dossier",
   check: "Controleren",
   chosen: "Gekozen bestanden",
-  clean: "Geen namen of nummers gevonden",
   criteria: "Criteria",
   errors: {
     "not-confirmed": "Bevestig eerst het kader; de voorstellen gaan over jouw leeruitkomsten.",
@@ -19,7 +18,6 @@ export const portfolioBatch = {
     "PDF, Word of tekst, hoogstens {n} tegelijk. De bestanden blijven op je computer; alleen de tekst gaat mee, met codes in plaats van namen.",
   filesLabel: "Kies bestanden",
   folderLabel: "Of kies een map",
-  found: "Vervangen: {items}",
   frameworkLink: "Naar je kader",
   intro:
     "Kies al je bewijs in één keer, bijvoorbeeld een map met een submap per leeruitkomst. LimeOnIt stelt per bestand de leeruitkomst, de soort, de criteria en de regel uit het verplicht bewijs voor. Jij bevestigt alles in één lijst.",

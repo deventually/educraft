@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 import { createRoutesStub } from "react-router";
 import { expectAiCallId } from "../helpers/aiCall";
@@ -86,13 +87,22 @@ function renderPanel(
   linkedTests = 0,
   withTools?: CourseTools,
   choices = choicesFor(agents),
+  data = alignedCourse(),
 ) {
+  const posted: Record<string, string | string[]>[] = [];
+  const action = vi.fn(async ({ request }: { request: Request }) => {
+    const fd = await request.formData();
+    posted.push({ ...Object.fromEntries(fd), agent: fd.getAll("agent").map(String) });
+    return { ok: true };
+  });
   const Stub = createRoutesStub([
     {
       path: "/",
+      action,
       Component: () => (
         <CourseReviewPanel
-          data={alignedCourse()}
+          privacy={{ known: { colleagues: ["Jan de Vries"] }, never: [] }}
+          data={data}
           agents={agents}
           choices={choices}
           models={models}
@@ -104,10 +114,34 @@ function renderPanel(
       ),
     },
   ]);
-  return render(<Stub initialEntries={["/"]} />);
+  return { ...render(<Stub initialEntries={["/"]} />), posted };
 }
 
 describe("CourseReviewPanel", () => {
+  it("shows per word what the gate replaces in the course before any hat runs", async () => {
+    const data = alignedCourse();
+    data.outcomes[0] = { ...data.outcomes[0]!, text: "Afgestemd met Jan de Vries." };
+    const { container, posted } = renderPanel(notYet, 0, undefined, choicesFor(notYet), data);
+    await userEvent.click(screen.getByRole("button", { name: "Laat reviewen" }));
+    const overview = screen.getByRole("region", { name: "Kijk na wat er naar de AI gaat" });
+    expect(within(overview).getByRole("listitem")).toHaveTextContent(
+      "Jan de Vries (1×) [COLLEGA-1]",
+    );
+    expect(within(overview).getByRole("listitem")).toHaveTextContent("in Je cursus");
+    expect(posted).toHaveLength(0);
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+    await userEvent.click(within(overview).getByRole("button", { name: "Versturen" }));
+    await waitFor(() => expect(posted).toHaveLength(1));
+    expect(posted[0]).toMatchObject({
+      intent: "review",
+      agentsChosen: "1",
+      agent: ["assessment-expert", "designer"],
+      model: "claude-sonnet-5-5",
+    });
+    expect(posted[0]?.course).toBeUndefined();
+    expect(JSON.parse(String(posted[0]?.privacy)).approved).toEqual(["Jan de Vries"]);
+  });
+
   it("names the hats that are on in its intro (an admin can switch one off)", () => {
     renderPanel(notYet);
     expect(

@@ -36,6 +36,11 @@ export interface GatePolicy {
   keep?: readonly string[];
   /** One student number the teacher typed; the format is learnt from it (`studentNumberFormat`). */
   studentNumberExample?: string;
+  /**
+   * Words the teacher chose to replace in text the server already holds (a course; step 4): they
+   * are replaced like a name (`[ANDER-n]`) and need no approval. Never counted per kind.
+   */
+  replace?: readonly string[];
 }
 
 export type GateKind = "teacher" | "colleague" | "email" | "iban" | "phone" | "postcode" | "number";
@@ -153,7 +158,8 @@ export function gateTexts(texts: readonly string[], policy: GatePolicy): GateRes
   const joined = texts.join(SEPARATOR);
   const keep = new Set((policy.keep ?? []).map(norm));
   const options = redactOptions({ studentNumberExample: policy.studentNumberExample });
-  const found = findRedactions(joined, knownEntries(policy.known), [], {
+  const replace = policy.replace ?? [];
+  const found = findRedactions(joined, knownEntries(policy.known), [...replace], {
     ...options,
     keep: [...(options.keep ?? []), ...(policy.keep ?? [])],
   }).filter((s) => !keep.has(norm(s.value)) && !keep.has(norm(s.original)));
@@ -162,7 +168,7 @@ export function gateTexts(texts: readonly string[], policy: GatePolicy): GateRes
 
   if (policy.mode === "count") return { send: true, texts: [...texts], codes: {}, counts };
   if (policy.mode === "review") {
-    const approved = new Set((policy.approved ?? []).map(norm));
+    const approved = new Set([...(policy.approved ?? []), ...replace].map(norm));
     const unseen = spans.filter((s) => !approved.has(norm(s.value)));
     if (unseen.length > 0) return { send: false, review: reviewOf(unseen), counts };
   }

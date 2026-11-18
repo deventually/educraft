@@ -7,6 +7,8 @@ import { requireRole, type User } from "./auth.server";
 import { runAiCall } from "./aiCalls.server";
 import { isFeatureOn, requireFeature } from "./availability.server";
 import { decideOnFinding, reviewCourse } from "./agentReview.server";
+import { withPrivacyRound } from "./privacyGate.server";
+import type { ReviewItem } from "~/lib/privacy/gate";
 import {
   type Course,
   getCourse,
@@ -70,7 +72,22 @@ export type CourseActionResult =
   | { ok: true; intent: "import-blueprint"; added: number }
   | { ok: true; intent: "use-as-evidence" }
   | { ok: true; intent: "review" | "decide"; message: string; partial?: boolean }
-  | { ok: false; error: string; intent?: string; notes?: string };
+  | {
+      ok: false;
+      error: string;
+      intent?: string;
+      notes?: string;
+      /** The gate found words the teacher did not see; nothing went (anonymiseerpoort step 4). */
+      privacyReview?: ReviewItem[];
+    };
+
+/** The gate's question for the page: nothing went yet (anonymiseerpoort step 4). */
+const privacyAsk = (intent: string, locale: Locale, review: ReviewItem[]): CourseActionResult => ({
+  ok: false,
+  intent,
+  error: getMessages(locale).privacy.askTitle,
+  privacyReview: review,
+});
 
 export async function requireCourseUser(request: Request): Promise<User> {
   const user = await requireRole(request, "teacher", "admin");
@@ -123,13 +140,14 @@ async function runCourseIntent(
   if (intent === "import-extract") {
     const documentText = String(fd.get("documentText") ?? "").slice(0, IMPORT_DOCUMENT_MAX);
     const courseName = String(fd.get("courseName") ?? course.name);
-    const result = await extractCourseImport(
-      user,
-      course.data,
-      documentText,
-      courseName,
-      locale,
-    ).catch((): CourseImportResult => ({ ok: false, error: "failed" }));
+    // One round with the overview the teacher saw: nothing unseen goes (anonymiseerpoort step 4).
+    const round = await withPrivacyRound(fd.get("privacy"), () =>
+      extractCourseImport(user, course.data, documentText, courseName, locale).catch(
+        (): CourseImportResult => ({ ok: false, error: "failed" }),
+      ),
+    );
+    if (round.review) return privacyAsk(intent, locale, round.review);
+    const result = round.value;
     if (!result.ok)
       return {
         ok: false,
@@ -193,15 +211,19 @@ async function runCourseIntent(
         error: r.error === "invalid" ? a.decide.invalid : a.decide.notFound,
       };
     }
-    const r = await reviewCourse(
-      user,
-      course,
-      String(fd.get("model") ?? "") || null,
-      locale,
-      fd.get("includeLinked") === "1",
-      // The panel's boxes come with a marker, so "none ticked" differs from "no boxes".
-      fd.get("agentsChosen") === "1" ? fd.getAll("agent").map(String) : undefined,
+    const round = await withPrivacyRound(fd.get("privacy"), () =>
+      reviewCourse(
+        user,
+        course,
+        String(fd.get("model") ?? "") || null,
+        locale,
+        fd.get("includeLinked") === "1",
+        // The panel's boxes come with a marker, so "none ticked" differs from "no boxes".
+        fd.get("agentsChosen") === "1" ? fd.getAll("agent").map(String) : undefined,
+      ),
     );
+    if (round.review) return privacyAsk(intent, locale, round.review);
+    const r = round.value;
     if (!r.ok) return { ok: false, intent, error: a.review[r.error] };
     if (r.failed.length === 0) return { ok: true, intent, message: a.review.done };
     const names = r.failed.map((agent) => loc(agent.role, locale)).join(", ");

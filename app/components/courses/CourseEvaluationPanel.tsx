@@ -1,13 +1,11 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Form } from "react-router";
 import { ShieldCheck } from "lucide-react";
-import {
-  emptyRedactDraft,
-  RedactReview,
-  type RedactDraft,
-} from "~/components/privacy/RedactReview";
-import { AiCallField } from "~/components/AiLeaveGuard";
 import { FileInput } from "~/components/FileInput";
+import { SendRound } from "~/components/privacy/SendRound";
+import { useSendRound } from "~/lib/hooks/useSendRound";
+import type { PrivacyPage } from "~/lib/privacy/live";
+import { textOf } from "~/lib/privacy/overview";
 import { Button, Card, HelpText, Input, Label, Select, Textarea } from "~/components/ui";
 import { type CourseEvaluation, EVALUATION_LIMITS, readSurveyCsv } from "~/lib/courses/evaluation";
 import type { CourseData } from "~/lib/courses/types";
@@ -17,22 +15,22 @@ import { placeText } from "./CourseImprovements";
 
 type Messages = ReturnType<typeof useT>["courseEvaluation"];
 
-/** The input step: paste or a CSV, the respondents, then the name check. */
-const FOCUSABLE = 'textarea, select, button, input:not([type="hidden"]), [tabindex="0"]';
-
+/** The input step: paste or a CSV, the respondents and the model, then the overview. */
 function SurveyInput({
   text,
   respondents,
   onText,
   onRespondents,
   onCheck,
+  models,
   m,
 }: {
   text: string;
   respondents: string;
   onText: (v: string) => void;
   onRespondents: (v: string) => void;
-  onCheck: () => void;
+  onCheck: (model: string) => void;
+  models: { id: string; displayName: string }[];
   m: Messages;
 }) {
   const id = useId();
@@ -47,7 +45,7 @@ function SurveyInput({
       className="mt-4 space-y-3"
       onSubmit={(e) => {
         e.preventDefault();
-        onCheck();
+        onCheck(String(new FormData(e.currentTarget).get("model") ?? ""));
       }}
     >
       <div>
@@ -92,6 +90,18 @@ function SurveyInput({
           <HelpText id={`${id}-n-hint`}>{m.respondentsHint}</HelpText>
         </div>
       </div>
+      {models.length > 1 && (
+        <div className="max-w-xs">
+          <Label htmlFor={`${id}-model`}>{m.model}</Label>
+          <Select id={`${id}-model`} name="model" className="mt-1">
+            {models.map((x) => (
+              <option key={x.id} value={x.id}>
+                {x.displayName}
+              </option>
+            ))}
+          </Select>
+        </div>
+      )}
       <Button type="submit" size="sm" variant="secondary">
         <ShieldCheck className="size-4" aria-hidden /> {m.check}
       </Button>
@@ -246,47 +256,56 @@ function EvaluationResult({ data, result }: { data: CourseData; result: CourseEv
 
 /**
  * "Cursusevaluatie verwerken" on the Controle tab (brief P33.3): the survey is pasted or read
- * from a CSV in the browser, goes through the name check (`RedactReview`) before anything leaves,
- * and is processed by `evaluate-course`. The result is advice: only an improvement the teacher
- * accepts reaches the course. The page's toast announces the processing and the saves.
+ * from a CSV in the browser, the overview shows per word what is replaced in it and in the course
+ * (anonymiseerpoort step 4), and only Versturen posts `evaluate-course`. The result is advice: only
+ * an improvement the teacher accepts reaches the course. The page's toast announces the processing
+ * and the saves.
  */
 export function CourseEvaluationPanel({
   data,
   result,
   models = [],
+  answer,
+  privacy,
 }: {
   data: CourseData;
   /** The last processed evaluation from the page's action, if any. */
   result: CourseEvaluation | null;
   /** The models the teacher may choose; a choice is offered with more than one. */
   models?: { id: string; displayName: string }[];
+  /** The page's last action answer: it may carry the gate's question. */
+  answer?: unknown;
+  /** The names the gate knows and the teacher's never-list. */
+  privacy?: PrivacyPage;
 }) {
-  const m = useT().courseEvaluation;
+  const t = useT();
+  const m = t.courseEvaluation;
   const id = useId();
+  const round = useSendRound(privacy, answer, "evaluate-course");
   const [text, setText] = useState("");
   const [respondents, setRespondents] = useState("");
-  const [step, setStep] = useState<"input" | "check" | "ready">("input");
-  // A step replaces the button that led to it: move focus to the new step's first control.
-  const stepRef = useRef<HTMLDivElement>(null);
-  const shownStep = useRef(step);
-  useEffect(() => {
-    if (shownStep.current === step) return;
-    shownStep.current = step;
-    stepRef.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
-  }, [step]);
-  const [draft, setDraft] = useState<RedactDraft>(emptyRedactDraft);
-  const [redacted, setRedacted] = useState("");
   // The result stays while the teacher accepts points (each accept is a new action).
   const [shown, setShown] = useState(result);
   const [last, setLast] = useState(result);
   // Each new result starts with no decisions taken.
-  const [round, setRound] = useState(0);
+  const [version, setVersion] = useState(0);
   if (result !== last) {
     setLast(result);
     if (result) {
       setShown(result);
-      setRound((n) => n + 1);
+      setVersion((n) => n + 1);
     }
+  }
+
+  function check(model: string) {
+    const form = new FormData();
+    form.set("intent", "evaluate-course");
+    form.set("respondents", respondents);
+    if (model) form.set("model", model);
+    round.start(form, [
+      { name: "evaluation", label: m.answers, text },
+      { name: "course", label: t.privacy.overviewCourse, text: textOf(data), held: true },
+    ]);
   }
 
   return (
@@ -296,69 +315,17 @@ export function CourseEvaluationPanel({
       </h2>
       <Card className="mt-3 p-4">
         <p className="max-w-[65ch] text-sm text-slate-600">{m.intro}</p>
-        <div ref={stepRef}>
-          {step === "input" && (
-            <SurveyInput
-              text={text}
-              respondents={respondents}
-              onText={setText}
-              onRespondents={setRespondents}
-              onCheck={() => setStep("check")}
-              m={m}
-            />
-          )}
-          {step === "check" && (
-            <div className="mt-4">
-              <RedactReview
-                fields={[{ name: "evaluation", label: m.field, text }]}
-                draft={draft}
-                onDraft={setDraft}
-                onConfirm={(r) => {
-                  setRedacted(r.values.evaluation ?? "");
-                  setStep("ready");
-                }}
-                onCancel={() => setStep("input")}
-              />
-            </div>
-          )}
-          {step === "ready" && (
-            <Form method="post" className="mt-4 space-y-3">
-              <p className="flex items-center gap-2 text-sm text-slate-700">
-                <ShieldCheck className="size-4 text-violet-700" aria-hidden /> {m.checked}
-              </p>
-              <input type="hidden" name="intent" value="evaluate-course" />
-              <AiCallField />
-              <input type="hidden" name="evaluation" value={redacted} />
-              <input type="hidden" name="respondents" value={respondents} />
-              {models.length > 1 && (
-                <div className="max-w-xs">
-                  <Label htmlFor={`${id}-model`}>{m.model}</Label>
-                  <Select id={`${id}-model`} name="model" className="mt-1">
-                    {models.map((x) => (
-                      <option key={x.id} value={x.id}>
-                        {x.displayName}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-              )}
-              <div className="flex flex-wrap gap-2">
-                <Button type="submit" size="sm">
-                  {m.process}
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => setStep("input")}
-                >
-                  {m.edit}
-                </Button>
-              </div>
-            </Form>
-          )}
-        </div>
-        {shown && <EvaluationResult key={round} data={data} result={shown} />}
+        <SurveyInput
+          text={text}
+          respondents={respondents}
+          onText={setText}
+          onRespondents={setRespondents}
+          onCheck={check}
+          models={models}
+          m={m}
+        />
+        <SendRound round={round} />
+        {shown && <EvaluationResult key={version} data={data} result={shown} />}
       </Card>
     </section>
   );

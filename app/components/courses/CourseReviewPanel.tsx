@@ -15,6 +15,10 @@ import { Button, Input, Label, Select } from "~/components/ui";
 import { type CourseTools, findingItemId, itemKind } from "~/lib/registry/courseActions";
 import { SolveWith } from "./ItemTools";
 import { AiCallField } from "~/components/AiLeaveGuard";
+import { SendRound } from "~/components/privacy/SendRound";
+import { useSendRound } from "~/lib/hooks/useSendRound";
+import type { PrivacyPage } from "~/lib/privacy/live";
+import { textOf } from "~/lib/privacy/overview";
 
 export type { ReviewPanelAgent, ReviewPanelChoice };
 
@@ -31,6 +35,7 @@ function itemLabel(data: CourseData, id: string): string | null {
  * "Beoordeling" on the course page (brief P21, 21.5): the role agents' advice per hat, with
  * Akkoord / Niet akkoord per finding. Plain forms, so it works without JS; the toast reports
  * the result, so there is no extra live region. Hats advise; nothing here changes the course.
+ * "Laat reviewen" first shows what the gate replaces in the course (anonymiseerpoort step 4).
  */
 export function CourseReviewPanel({
   data,
@@ -41,6 +46,8 @@ export function CourseReviewPanel({
   linkedTests = 0,
   courseId,
   tools,
+  answer,
+  privacy,
 }: {
   data: CourseData;
   /** The reviews of the hats the teacher chose. */
@@ -54,8 +61,14 @@ export function CourseReviewPanel({
   /** With both, an open finding about an item gets "Los op met…" (P27.4). */
   courseId?: string;
   tools?: CourseTools;
+  /** The page's last action answer: it may carry the gate's question. */
+  answer?: unknown;
+  /** The names the gate knows and the teacher's never-list. */
+  privacy?: PrivacyPage;
 }) {
-  const p = useT().agents.panel;
+  const t = useT();
+  const p = t.agents.panel;
+  const round = useSendRound(privacy, answer, "review");
   const locale = useLocale();
   const id = useId();
   const [ticked, setTicked] = useState(
@@ -82,7 +95,18 @@ export function CourseReviewPanel({
               ),
             })}
       </p>
-      <Form method="post" className="mt-3 flex flex-wrap items-end gap-3">
+      <Form
+        method="post"
+        className="mt-3 flex flex-wrap items-end gap-3"
+        onSubmit={(e) => {
+          // Nothing goes before the overview: Versturen posts it (`useSendRound`).
+          e.preventDefault();
+          const form = new FormData(e.currentTarget);
+          form.set("intent", "review");
+          const course = { name: "course", label: t.privacy.overviewCourse, text: textOf(data) };
+          round.start(form, [{ ...course, held: true }]);
+        }}
+      >
         <input type="hidden" name="agentsChosen" value="1" />
         <AiCallField />
         <fieldset className="basis-full">
@@ -139,6 +163,7 @@ export function CourseReviewPanel({
         </Button>
         {ticked.size === 0 && <p className="basis-full text-sm text-slate-700">{p.chooseNone}</p>}
       </Form>
+      <SendRound round={round} />
       <div className="mt-4 space-y-6">
         {agents.map((agent) => (
           <AgentReview

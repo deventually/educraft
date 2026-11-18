@@ -10,6 +10,7 @@ import {
   type PrivacyPage,
   prepareSend,
 } from "~/lib/privacy/live";
+import { type OverviewPart, overviewWords, prepareOverview } from "~/lib/privacy/overview";
 import type { PrivacyReviewItem } from "~/lib/streamClient";
 import type { InputField } from "~/lib/registry/types";
 import type { FormValues } from "~/lib/forms/values";
@@ -166,6 +167,10 @@ export function usePrivacy(page: PrivacyPage | undefined) {
     preview: <F extends LiveField>(fields: readonly F[]) => livePreview(fields, known, choices),
     prepare: (input: Parameters<typeof prepareSend>[0]) =>
       prepareSend(input, known, latest.current),
+    /** The overview before sending (step 4): every replacement per word. */
+    overview: (parts: readonly OverviewPart[]) => overviewWords(parts, known, choices),
+    prepareOverview: (parts: readonly OverviewPart[]) =>
+      prepareOverview(parts, known, latest.current),
   };
 }
 

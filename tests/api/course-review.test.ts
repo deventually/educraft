@@ -192,6 +192,42 @@ describe("review intent", () => {
   });
 });
 
+describe("review intent: nothing goes that the teacher did not see (anonymiseerpoort step 4)", () => {
+  const mailed = () => {
+    const data = alignedCourse();
+    const [first, ...rest] = data.assessments;
+    return {
+      ...data,
+      assessments: [{ ...first!, title: "Tentamen, vragen: piet@school.nl" }, ...rest],
+    };
+  };
+
+  it("asks about the words in the course first, without a single hat being called", async () => {
+    const c = await courses.createCourse("teacher-r", { name: "Mailed", data: mailed() });
+    const r = await post(c.id, [["intent", "review"]]);
+    expect(generate).not.toHaveBeenCalled();
+    expect(r).toMatchObject({
+      ok: false,
+      intent: "review",
+      privacyReview: [{ value: "piet@school.nl", kind: "email" }],
+    });
+  });
+
+  it("runs every hat with the words replaced once the teacher approved them", async () => {
+    const c = await courses.createCourse("teacher-r", { name: "Mailed", data: mailed() });
+    generate.mockResolvedValueOnce(GOOD).mockResolvedValueOnce(DESIGN);
+    const r = await post(c.id, [
+      ["intent", "review"],
+      ["privacy", JSON.stringify({ approved: ["piet@school.nl"], keep: [] })],
+    ]);
+    expect(r).toMatchObject({ ok: true, intent: "review" });
+    for (const [req] of generate.mock.calls) {
+      expect(req.messages[0].content).toContain("vragen: [E-MAIL-1]");
+      expect(req.messages[0].content).not.toContain("piet@");
+    }
+  });
+});
+
 describe("decide intent", () => {
   async function reviewed() {
     const c = await newCourse();
