@@ -82,6 +82,7 @@ export const portfolioRoute = {
     perCriterionTitle: "Evidence per criterion",
     review: "Assessment",
     statusTitle: "Your judgement per criterion",
+    write: "Write",
   },
   title: "Progress",
 };

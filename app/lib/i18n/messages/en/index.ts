@@ -49,6 +49,7 @@ import { portfolio } from "./portfolio";
 import { portfolioBatch } from "./portfolioBatch";
 import { portfolioExport } from "./portfolioExport";
 import { portfolioFacts } from "./portfolioFacts";
+import { portfolioGrill } from "./portfolioGrill";
 import { portfolioGuided } from "./portfolioGuided";
 import { portfolioOutline } from "./portfolioOutline";
 import { portfolioPlan } from "./portfolioPlan";
@@ -134,6 +135,7 @@ export const en: Messages = {
   portfolioBatch,
   portfolioExport,
   portfolioFacts,
+  portfolioGrill,
   portfolioGuided,
   portfolioOutline,
   portfolioPlan,

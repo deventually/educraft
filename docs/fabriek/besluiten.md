@@ -840,6 +840,17 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   browser vervangen, en de vervangen tekst komt in het dossier, zoals bij de oude naamcheck. De
   losse namencheck (`RedactReview`, `checkNames`) is weg. Bastiaan, 2026-11-17 (ontwerp "Eén
   anonimiseerpoort", stap 4; principe "niets gaat weg zonder dat de docent het zag").
+- **BESLUIT-2026-11-18-1:** **Grill me kan ook over het hele dossier, en per onderdeel passen
+  tien vragen.** Op het tabblad *Schrijven* van een dossier draait één knop Grill me over alle
+  leeruitkomsten tegelijk; de vragen staan in één lijst per leeruitkomst, en in de stand
+  "alinea's laten opstellen" stelt één knop daarna alle hoofdstukken op. Grill me per
+  leeruitkomst (tabblad Hoofdstuk) blijft. Beide werken op dezelfde opgeslagen vragen en
+  antwoorden, dus ze mogen door elkaar en zo vaak als de docent wil: een tweede ronde vraagt
+  alleen door waar iets vaag of open is, en een vraag komt nooit twee keer. De grens per onderdeel
+  gaat van 6 naar 10 vragen (`GUIDED_LIMITS.total`): een eerste ronde van vier plus drie rondes van
+  twee vervolgvragen; geen migratie nodig. "Andere vragen" blijft zoals hij is (alleen zolang er
+  niets is ingevuld) en er komt geen resetknop. Bastiaan, 2026-11-18 ("1, 2 en 3"; over de grens:
+  "Doe maar wat jou goed lijkt").
 - **BESLUIT-2026-11-18-3:** **Citaten uit feedback zijn letterlijk, gekozen door de kandidaat, en
   de naam van de feedbackgever gaat niet naar de AI.** Een feedbackstuk (soort Feedback) krijgt
   naam, rol en datum van de gever (`EvidenceItem.feedback`). De AI (`portfolio-quotes@v1`) stelt

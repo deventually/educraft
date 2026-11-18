@@ -50,8 +50,11 @@ await createAnnouncement({
 // A dossier with guided writing for the admin (portfolio-guided.spec.ts), anchored to a lesson.
 const { createDossier } = await import("../app/server/repositories/portfolio.server");
 const { createCourse } = await import("../app/server/repositories/courses.server");
-const { E2E_DOSSIER, anchoredCourse, guidedDossier } = await import("./seedDossier");
+const { E2E_DOSSIER, E2E_GRILL_DOSSIER, anchoredCourse, guidedDossier } = await import(
+  "./seedDossier"
+);
 const adminId = (await getUserByEmail(USERS.admin.email))?.id ?? "";
 const anchored = await createCourse(adminId, { name: "Rekenen (e2e)", data: anchoredCourse() });
 await createDossier(adminId, E2E_DOSSIER, guidedDossier(anchored.id));
+await createDossier(adminId, E2E_GRILL_DOSSIER, guidedDossier(anchored.id));
 console.log(`✓ e2e database seeded: ${DB_PATH}`);

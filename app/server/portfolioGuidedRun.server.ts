@@ -107,7 +107,7 @@ export async function followUp(
  * questions; 0 means every answer is concrete enough to draft from. Run it again after
  * answering, until it asks nothing more.
  */
-export async function grillChapter(
+export function grillChapter(
   user: User,
   d: DossierData,
   outcomeId: string,
@@ -115,26 +115,48 @@ export async function grillChapter(
   now = Date.now(),
   course = "",
 ): Promise<GuidedResult> {
+  return grillOutcomes(user, d, [outcomeId], locale, now, { [outcomeId]: course });
+}
+
+/**
+ * One "Grill me" round over the chapters of `outcomeIds`, a few parts at a time over all of
+ * them. It works on the stored questions and answers, so a round per chapter and a round over
+ * the dossier can follow each other in any order: a part already asked and not yet answered
+ * waits for its answer, and a follow-up never repeats a question asked before.
+ * `courses`: per outcome, what its anchor's course already says.
+ */
+export async function grillOutcomes(
+  user: User,
+  d: DossierData,
+  outcomeIds: string[],
+  locale: Locale,
+  now: number,
+  courses: Record<string, string>,
+): Promise<GuidedResult> {
   if (d.framework.confirmedAt === undefined) return { ok: false, error: "not-confirmed" };
   const blocked = await quotaGate(user);
   if (blocked) return { ok: false, error: blocked };
-  const work = sectionsOf(d, outcomeId).flatMap((s) => {
-    const saved = d.guided?.[outcomeId]?.[s.id];
-    if (!saved?.questions.length) return [{ id: s.id, first: true }];
-    return canFollowUp(saved) ? [{ id: s.id, first: false }] : [];
-  });
+  const work = outcomeIds.flatMap((outcomeId) =>
+    sectionsOf(d, outcomeId).flatMap((s) => {
+      const saved = d.guided?.[outcomeId]?.[s.id];
+      if (!saved?.questions.length) return [{ outcomeId, id: s.id, first: true }];
+      return canFollowUp(saved) ? [{ outcomeId, id: s.id, first: false }] : [];
+    }),
+  );
   let data = d;
   let added = 0;
   let failed = 0;
   for (let i = 0; i < work.length; i += PARALLEL) {
     const batch = work.slice(i, i + PARALLEL);
     const asked = await Promise.all(
-      batch.map((w) =>
-        (w.first
-          ? questionsFor(user, d, outcomeId, w.id, locale, course)
-          : followUpsFor(user, d, outcomeId, w.id, locale, course)
-        ).catch(() => null),
-      ),
+      batch.map((w) => {
+        const course = courses[w.outcomeId] ?? "";
+        return (
+          w.first
+            ? questionsFor(user, d, w.outcomeId, w.id, locale, course)
+            : followUpsFor(user, d, w.outcomeId, w.id, locale, course)
+        ).catch(() => null);
+      }),
     );
     asked.forEach((a, j) => {
       const w = batch[j];
@@ -143,8 +165,8 @@ export async function grillChapter(
         return;
       }
       data = w.first
-        ? withQuestions(data, outcomeId, w.id, a, now)
-        : withLoggedFollowUps(data, outcomeId, w.id, a, now);
+        ? withQuestions(data, w.outcomeId, w.id, a, now)
+        : withLoggedFollowUps(data, w.outcomeId, w.id, a, now);
       added += a.questions.length;
     });
   }
@@ -155,12 +177,15 @@ export async function grillChapter(
 const SectionId = z.string().min(1).max(LIMITS.id);
 const AnswerList = z.array(z.string().max(GUIDED_LIMITS.answer)).max(GUIDED_LIMITS.total);
 
-/** The answers typed beside the chapter: `answer:<sectionId>`, one field per question. */
-export function answersFromForm(fd: FormData): Record<string, string[]> {
+/**
+ * The answers typed beside the chapter: `answer:<sectionId>`, one field per question. On the
+ * dossier page the fields carry the outcome too (`prefix` = `answer:<outcomeId>:`).
+ */
+export function answersFromForm(fd: FormData, prefix = "answer:"): Record<string, string[]> {
   const out: Record<string, string[]> = {};
   for (const key of new Set(fd.keys())) {
-    if (!key.startsWith("answer:")) continue;
-    const id = SectionId.safeParse(key.slice("answer:".length));
+    if (!key.startsWith(prefix)) continue;
+    const id = SectionId.safeParse(key.slice(prefix.length));
     const list = AnswerList.safeParse(fd.getAll(key).filter((v) => typeof v === "string"));
     if (id.success && list.success) out[id.data] = list.data;
   }

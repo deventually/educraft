@@ -17,6 +17,8 @@ import { DOSSIER_TABS, dossierHref, dossierTab } from "~/lib/portfolio/tabs";
 import { ReadinessCheck } from "~/components/portfolio/ReadinessCheck";
 import { DossierExport, PartExport } from "~/components/portfolio/DossierExport";
 import { DossierReviewPanel } from "~/components/portfolio/DossierReviewPanel";
+import { DossierGrill, grillDone, grillPending } from "~/components/portfolio/DossierGrill";
+import { dossierGrillView } from "~/lib/portfolio/dossierGrill";
 import { readinessCheck } from "~/lib/portfolio/readiness";
 import { openSpots } from "~/lib/portfolio/openSpots";
 import { dossierPart } from "~/lib/portfolio/dossierPart";
@@ -92,6 +94,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     // Back from Word compares the file with these, in the browser.
     chapters: d.chapters.map(({ outcomeId, text }) => ({ outcomeId, text })),
     coachMode: d.coachMode,
+    grill: dossierGrillView(d),
     aiUsed: d.aiLog.length > 0,
     aiRequired: !!d.framework.requirements.aiDisclosureRequired,
   };
@@ -108,13 +111,18 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
   const hours = useHours();
   const tr = t.portfolio.dossierReview;
   useFormToast(actionData, {
-    pending: (fd) =>
-      fd?.get("intent") === "reviewAll"
-        ? { variant: "pending", message: tr.pending }
-        : { variant: "pending", message: t.toast.saving },
+    pending: (fd) => {
+      const intent = String(fd?.get("intent") ?? "");
+      const message = intent === "reviewAll" ? tr.pending : grillPending(intent, t.portfolioGrill);
+      return { variant: "pending", message: message ?? t.toast.saving };
+    },
     result: (r) => {
       if (!r) return null;
       if (!r.ok) return { variant: "error", message: r.error };
+      if (/^(grillDossier|draftDossier|saveDossierAnswers)$/.test(r.intent)) {
+        const message = grillDone(r, t.portfolioGrill, t.portfolioGuided);
+        return { variant: r.failed ? "error" : "success", message };
+      }
       if (r.intent !== "reviewAll") return { variant: "success", message: t.portfolio.toastSaved };
       return r.failed
         ? {
@@ -133,6 +141,7 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
     references,
     chapters,
     coachMode,
+    grill,
     aiUsed,
     aiRequired,
     nextTools,
@@ -315,6 +324,18 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
             </section>
           )}
         </>
+      )}
+
+      {tab === "write" && (
+        <DossierGrill
+          // New questions or drafted parts remount it, so the answers show what was saved.
+          key={grill.map((o) => o.sections.map((s) => `${s.questions.length}${s.drafted}`)).join()}
+          dossierId={id}
+          outcomes={grill}
+          confirmed={framework.confirmedAt !== undefined}
+          draftMode={coachMode === "draft"}
+          focusAfter={actionData?.ok ? actionData.intent : undefined}
+        />
       )}
 
       {tab === "finish" && (

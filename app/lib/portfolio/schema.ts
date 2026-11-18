@@ -69,8 +69,8 @@ export const GUIDED_LIMITS = {
   questions: 4,
   /** Follow-up questions per round, on vague or missing answers. */
   followUps: 2,
-  /** Questions a section holds: the first round plus follow-ups. */
-  total: 6,
+  /** Questions a section holds: a full first round plus three rounds of follow-ups. */
+  total: 10,
   question: 300,
   answer: 3_000,
 } as const;

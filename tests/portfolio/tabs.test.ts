@@ -10,7 +10,7 @@ import {
 
 describe("dossier and outcome tabs", () => {
   it("names the tabs in order", () => {
-    expect(DOSSIER_TABS).toEqual(["overview", "finish"]);
+    expect(DOSSIER_TABS).toEqual(["overview", "write", "finish"]);
     expect(OUTCOME_TABS).toEqual(["overview", "evidence", "chapter", "review"]);
   });
 
