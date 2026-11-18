@@ -3,7 +3,7 @@
  * holds one task, so the teacher sees a few blocks at a time. The tab lives in the URL
  * (`?tab=`), so every tab can be linked to and a form posts back to the tab it was on.
  */
-export const DOSSIER_TABS = ["overview", "finish"] as const;
+export const DOSSIER_TABS = ["overview", "write", "finish"] as const;
 export type DossierTab = (typeof DOSSIER_TABS)[number];
 
 export const OUTCOME_TABS = ["overview", "evidence", "chapter", "review"] as const;
