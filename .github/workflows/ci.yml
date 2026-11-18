@@ -15,14 +15,16 @@ jobs:
       - run: npm run check
   audit:
     # Known vulnerabilities in dependencies. Production must be clean from moderate up; the whole
-    # tree (dev tools too) blocks from high. npm audit reads the lockfile only, no install needed.
+    # tree (dev tools too) blocks from high, apart from a dated exception in
+    # config/audit-exceptions.json (BESLUIT-2026-11-17-7). npm audit reads the lockfile only, and
+    # scripts/audit.ts is plain Node, so no install is needed.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with: { node-version: "26.13.0" }
       - run: npm audit --omit=dev --audit-level=moderate
-      - run: npm audit --audit-level=high
+      - run: node scripts/audit.ts
   e2e:
     # Browser tests: the production build in Chromium, with axe (WCAG 2.2 AA) and CSP checks.
     # Runs on every PR (BESLUIT-2026-11-12-1). Emergency switch: the repository variable

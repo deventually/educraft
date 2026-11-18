@@ -797,3 +797,16 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   alleen woorden, nooit iets met een cijfer of `@`; de poort leest die lijst zelf ook. Bastiaan,
   2026-11-17 (ontwerp "Eén anonimiseerpoort", stap 3; principe "niets gaat weg zonder dat de
   docent het zag").
+- **BESLUIT-2026-11-17-7:** **Een hoog advies zonder oplossing in ontwikkelgereedschap mag
+  tijdelijk door de audit, met reden en einddatum.** Aanleiding: GHSA-fc5q-39xc-vjpf (ReDoS in
+  picomatch, alle versies t/m 4.0.7, nog geen oplossing) maakte de verplichte check `audit` rood op
+  `main` en op elke PR. Alleen vite, vitest, knip en `@react-router/dev` gebruiken picomatch, met
+  patronen uit onze eigen configuratie, nooit invoer van een gebruiker. De audit van de
+  productie-afhankelijkheden (vanaf *moderate*) blijft ongewijzigd en kent geen uitzonderingen.
+  De audit van de hele boom (vanaf *high*) loopt nu via `scripts/audit.ts` en laat alleen door wat
+  in `config/audit-exceptions.json` staat: één advies in één pakket, met reden, en hooguit drie
+  maanden (`tests/scripts/audit.test.ts`). Na de einddatum is de check weer rood; een uitzondering
+  die niet meer nodig is, noemt het script, en het onderhoud haalt hem weg. De picomatch-uitzondering
+  loopt tot en met 2026-12-31. Gekozen boven `--omit=dev` voor alles (dan ziet niemand nog een
+  nieuw hoog advies in ontwikkelgereedschap) en boven een `overrides` (er is geen veilige versie).
+  Bastiaan, 2026-11-17 ("het is verplicht op github"; de check moet weer groen).

@@ -137,3 +137,11 @@ rekent er de kosten mee uit. Een beheerder kan in **Tools en modellen** een eige
 
 Nodig zodra een model een prijs in `USD` heeft: `usdToEur` (bijvoorbeeld `0,86` als `0.86`),
 met `checked` en `source` (de referentiekoers van de ECB).
+
+## `audit-exceptions.json`: tijdelijke uitzonderingen op de audit
+
+De CI-check `audit` is rood bij een hoog of kritiek beveiligingsadvies in een afhankelijkheid. Heeft
+zo'n advies nog geen oplossing en raakt het alleen ontwikkelgereedschap, dan mag het hier tijdelijk
+op de lijst: het advies (`GHSA-…`), het pakket, waarom het geen gevaar is, de dag van toevoegen en
+de laatste dag dat de uitzondering geldt (hooguit drie maanden later). Daarna is de check vanzelf
+weer rood. Afhankelijkheden van de app zelf krijgen nooit een uitzondering (BESLUIT-2026-11-17-7).
