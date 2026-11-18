@@ -840,3 +840,12 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   browser vervangen, en de vervangen tekst komt in het dossier, zoals bij de oude naamcheck. De
   losse namencheck (`RedactReview`, `checkNames`) is weg. Bastiaan, 2026-11-17 (ontwerp "Eén
   anonimiseerpoort", stap 4; principe "niets gaat weg zonder dat de docent het zag").
+- **BESLUIT-2026-11-18-3:** **Citaten uit feedback zijn letterlijk, gekozen door de kandidaat, en
+  de naam van de feedbackgever gaat niet naar de AI.** Een feedbackstuk (soort Feedback) krijgt
+  naam, rol en datum van de gever (`EvidenceItem.feedback`). De AI (`portfolio-quotes@v1`) stelt
+  per criterium zinnen voor; de code houdt alleen een zin die woord voor woord in de feedback staat
+  (zonder weglating, minstens drie woorden) en bewaart hem in de woorden van de feedback, niet die
+  van het model. Niets wordt bewaard zonder vinkje van de kandidaat. De AI ziet alleen de rol;
+  de naam blijft in het dossier en wordt in het overzicht vóór versturen ook vervangen als hij in de
+  feedback staat. Coach, vragen en opstellen krijgen de gekozen citaten met rol en datum.
+  Bastiaan, 2026-11-18 (BDB-voorstel 3, "citaten uit feedback per criterium").

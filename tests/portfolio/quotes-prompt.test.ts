@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { getPrompt } from "~/lib/prompts";
 import { QUOTES_PROMPT_ID } from "~/lib/portfolio/quotes";
@@ -29,5 +31,15 @@ describe("portfolio-quotes@v1 prompt (quotes from feedback per criterion)", () =
   it("only proposes and gives no verdict", () => {
     expect(p.runtime.nl).toMatch(/alleen een voorstel/i);
     expect(p.runtime.en).toMatch(/only a proposal/i);
+  });
+});
+
+describe("the help topic bdb-bke explains quotes from feedback", () => {
+  const read = (l: string) =>
+    readFileSync(join(process.cwd(), "app/content/help/topics", `bdb-bke.${l}.md`), "utf8");
+
+  it("names the screen, the verbatim check and that the name stays out of the AI", () => {
+    expect(read("nl")).toMatch(/\*\*Citaten uit feedback:\*\*.*letterlijk.*naam/s);
+    expect(read("en")).toMatch(/\*\*Quotes from feedback:\*\*.*word for word.*name/s);
   });
 });

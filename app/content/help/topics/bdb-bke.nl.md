@@ -45,6 +45,7 @@ Ander bewijs dat je al hebt:
 - **Mijn werk:** alles wat je eerder in LimeOnIt maakte, met *Toevoegen aan dossier*.
 - **Een cursus:** je toetsmatrijs of dekkingsmatrix, via *Gebruik als bewijs in BDB/BKE* op de cursuspagina. Dat is een momentopname; met *Opnieuw ophalen* werk je hem bij.
 - **Dit heb je misschien al:** bij een criterium stelt LimeOnIt eerder gemaakt werk voor dat past. Vink aan wat je wilt gebruiken.
+- **Citaten uit feedback:** zet de antwoorden op je feedbackvragen (van je werkplekbegeleider, een medecursist, een deskundige, je 4-ogencollega of medekandidaten) als bewijs met de soort *Feedback*. Open daarna *Citaten uit feedback* op je dossier en vul in van wie de feedback is: naam, rol en datum. Met *Stel citaten voor* zoekt LimeOnIt per criterium zinnen die je letterlijk kunt citeren; vage lof zoals "Goede les!" laat het weg, en een zin die niet letterlijk in de feedback staat, haalt LimeOnIt er zelf uit. Jij vinkt aan welke citaten je bewaart. De naam van de feedbackgever blijft in je dossier en gaat niet naar de AI; bij het opstellen van je hoofdstuk citeert LimeOnIt de gekozen zinnen letterlijk, met rol en datum.
 
 **Klaar als:** elk criterium minstens één gekoppeld bewijsstuk heeft.
 
