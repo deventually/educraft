@@ -17,10 +17,15 @@ import {
 import type { AvailabilityUser } from "./availability.server";
 import { localModelsEnabled } from "./env.server";
 import { log } from "./log.server";
+import { isGrantable } from "./modelCatalog.server";
 import { syncModelRegistry } from "./modelRegistry.server";
 import { getDefaultModel, getEnabledModels } from "./repositories/settings.server";
 import { listTeamSettingsForUser } from "./repositories/teams.server";
-import { getUserAssignedModels, getUserDefaultModel } from "./repositories/users.server";
+import {
+  getUserAssignedModels,
+  getUserDefaultModel,
+  getUserExtraModels,
+} from "./repositories/users.server";
 
 /**
  * Whether a model id may exist for this process at all: resolvable, client-selectable
@@ -96,6 +101,19 @@ async function teamModelSet(user?: AvailabilityUser): Promise<Set<string> | null
   return inside.length > 0 ? new Set(inside) : null;
 }
 
+/**
+ * The expensive models switched on for `user`: their own and their teams', upgraded, only
+ * grantable ones. Teachers only; an admin's own requests stay on the instance set.
+ */
+async function grantedSet(user?: AvailabilityUser): Promise<Set<string>> {
+  if (user?.role !== "teacher") return new Set();
+  const own = (await getUserExtraModels(user.id)) ?? [];
+  const teams = (await listTeamSettingsForUser(user.id)).flatMap(
+    (t) => t.settings.extraModels ?? [],
+  );
+  return new Set([...upgraded([...own, ...teams])].filter(isGrantable));
+}
+
 /** The set that decides for `user`: own set, else the team union, else null (the instance). */
 async function userModelSet(user?: AvailabilityUser): Promise<Set<string> | null> {
   await syncModelRegistry();
@@ -114,11 +132,13 @@ async function userModelSet(user?: AvailabilityUser): Promise<Set<string> | null
  * disabled frontier default would be re-offered (the P14 bug).
  */
 export async function getSelectableModelIds(user?: AvailabilityUser): Promise<Set<string>> {
+  // Expensive models switched on for this person come on top (BESLUIT-2026-11-18-5).
+  const granted = [...(await grantedSet(user))].filter((id) => modelState(id) === "active");
   const own = await userModelSet(user);
   if (own) {
-    return new Set(activeCatalogIds().filter((id) => own.has(id)));
+    return new Set([...activeCatalogIds().filter((id) => own.has(id)), ...granted]);
   }
-  const ids = await selectableCatalogIds();
+  const ids = new Set([...(await selectableCatalogIds()), ...granted]);
   if (ids.size === 0) {
     const fallback = currentModelId(DEFAULT_MODEL);
     log("availability_no_selectable_models", { fallback });
@@ -231,8 +251,10 @@ export async function isModelSelectableForUser(
   id: string,
 ): Promise<boolean> {
   await syncModelRegistry();
-  if (!isAllowedHere(id)) return false;
   const effective = currentModelId(id);
+  // An expensive model counts only where the admin switched it on (BESLUIT-2026-11-18-5).
+  if (isGrantable(id)) return isGrantable(effective) && (await grantedSet(user)).has(effective);
+  if (!isAllowedHere(id)) return false;
   if (effective !== id && !isAllowedHere(effective)) return false;
   const own = await userModelSet(user);
   if (own) return own.has(effective);

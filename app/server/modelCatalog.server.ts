@@ -1,4 +1,4 @@
-import { listModels, modelState } from "~/lib/ai/models";
+import { isResolvableModel, listModels, modelState, resolveModelInfo } from "~/lib/ai/models";
 import { syncModelRegistry } from "./modelRegistry.server";
 import { discoverLocalModels } from "~/lib/ai/discover.server";
 import { localModelsEnabled } from "~/server/env.server";
@@ -33,4 +33,22 @@ export async function fullCatalog(): Promise<CatalogModel[]> {
       }))
     : [];
   return [...staticModels, ...discovered];
+}
+
+/**
+ * An expensive model the admin may switch on per team or teacher (BESLUIT-2026-11-18-5):
+ * an API model teachers may not pick themselves (not client-selectable), not retired.
+ */
+export function isGrantable(id: string): boolean {
+  if (!isResolvableModel(id) || modelState(id) === "retired") return false;
+  const info = resolveModelInfo(id);
+  return !info.clientSelectable && !info.local;
+}
+
+/** The expensive models to offer the admin per team or teacher: grantable and active. */
+export async function expensiveCatalog(): Promise<{ id: string; displayName: string }[]> {
+  await syncModelRegistry();
+  return listModels()
+    .filter((m) => isGrantable(m.id) && modelState(m.id) === "active")
+    .map((m) => ({ id: m.id as string, displayName: m.displayName }));
 }

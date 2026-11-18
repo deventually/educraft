@@ -347,6 +347,21 @@ describe("/teams/:id for an admin", () => {
     expect(bodies[0]!.has("modelMode")).toBe(false);
   });
 
+  it("lets the admin switch an expensive model on for the team (BESLUIT-2026-11-18-5)", async () => {
+    const user = userEvent.setup();
+    const { bodies, action } = recorder();
+    const opus = { id: "claude-opus-5-5", displayName: "Claude Opus 5.5" };
+    page(action, { ...data, offer: { ...offer, expensive: [opus], teamExtras: [opus] } });
+    const group = screen.getByRole("group", { name: /dure modellen voor dit team/i });
+    await user.click(within(group).getByRole("checkbox", { name: "Claude Opus 5.5" }));
+    await waitFor(() => expect(bodies).toHaveLength(1));
+    expect(bodies[0]!.get("intent")).toBe("teamExtraModels");
+    expect(bodies[0]!.getAll("extraModels")).toEqual(["claude-opus-5-5"]);
+    // Switched on, it may be the team's default too.
+    const select = screen.getByRole("combobox", { name: /standaardmodel van dit team/i });
+    expect(within(select).getByRole("option", { name: "Claude Opus 5.5" })).toBeInTheDocument();
+  });
+
   it("deletes the team only after a confirmation", async () => {
     const user = userEvent.setup();
     const { bodies, action } = recorder();

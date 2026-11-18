@@ -8,7 +8,12 @@
  */
 import { requireRole, requireUser } from "./auth.server";
 import { redirectWithFlash } from "./flash.server";
-import { applyTeamSettingsForm, getTeamSettingsOffer } from "./teamSettings.server";
+import { resolveModelInfo } from "~/lib/ai/models";
+import {
+  applyTeamExtraModels,
+  applyTeamSettingsForm,
+  getTeamSettingsOffer,
+} from "./teamSettings.server";
 import {
   addMember,
   deleteTeam,
@@ -64,6 +69,11 @@ async function standing(request: Request, teamId: string) {
   return read ? { role: "member" as const, user, team: read } : null;
 }
 
+/** Ids with their display names (an unknown id keeps its id). */
+function namesOf(ids: string[] | undefined): { id: string; displayName: string }[] {
+  return (ids ?? []).map((id) => ({ id, displayName: resolveModelInfo(id).displayName }));
+}
+
 export async function loadTeamPage(request: Request, teamId: string) {
   const s = await standing(request, teamId);
   if (!s) throw notFound();
@@ -74,7 +84,7 @@ export async function loadTeamPage(request: Request, teamId: string) {
     .map(({ id, name }) => ({ id, name }));
   const admin = role === "admin";
   const [offer, divisions, divisionId, kind] = await Promise.all([
-    manages ? getTeamSettingsOffer() : null,
+    manages ? getTeamSettingsOffer(admin) : null,
     admin ? listDivisions() : [],
     admin ? teamDivisionId(team.id) : null,
     getDivisionKind(),
@@ -86,7 +96,11 @@ export async function loadTeamPage(request: Request, teamId: string) {
     candidates: admin
       ? await adminCandidates(team)
       : ((await leadCandidates(user.id, team.id)) ?? []),
-    offer,
+    // The team's own expensive models may be its default too (BESLUIT-2026-11-18-5).
+    offer:
+      offer && "settings" in team
+        ? { ...offer, teamExtras: namesOf(team.settings.extraModels) }
+        : offer,
     programmes,
     // The programmes this team may still join (BESLUIT-2026-11-16-4); none for a member.
     programmeChoices: manages ? await programmeChoices(user, team.id) : [],
@@ -160,6 +174,11 @@ export async function teamPageAction(request: Request, teamId: string): Promise<
     return { saved: true };
   }
   if (role === "lead") return leadOnly(request, intent, user.id, team.id, fd, userId);
+  // Expensive models for this team (BESLUIT-2026-11-18-5): the admin's alone.
+  if (intent === "teamExtraModels" && "settings" in team) {
+    await setTeamSettings(team.id, applyTeamExtraModels(team.settings, fd));
+    return { saved: true };
+  }
   return adminOnly(intent, user, team.id, fd, userId);
 }
 

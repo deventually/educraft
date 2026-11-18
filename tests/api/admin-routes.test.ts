@@ -295,6 +295,53 @@ describe("admin person page — a teacher's default model (BESLUIT-2026-11-18-4)
   });
 });
 
+describe("admin person page — expensive models for one teacher (BESLUIT-2026-11-18-5)", () => {
+  it("switches an expensive model on, only expensive ones, and offers it as their default", async () => {
+    const OPUS = "claude-opus-5-5";
+    const teacher = await users.createUser({
+      name: "Extra Teacher",
+      email: "extra-teacher@example.com",
+      passwordHash: "scrypt:a:b",
+      role: "teacher",
+    });
+    const load = async () =>
+      (await personRoute.loader({
+        request: new Request(`http://localhost/admin/users/${teacher.id}`),
+        params: { id: teacher.id },
+        context: {},
+      } as never)) as {
+        models: {
+          expensive: { id: string }[];
+          extraModels: string[];
+          defaultChoices: { id: string }[];
+        } | null;
+      };
+    expect((await load()).models?.expensive.map((m) => m.id)).toContain(OPUS);
+    const res = (await invoke(
+      personRoute.action,
+      post({
+        intent: "teacherExtraModels",
+        userId: teacher.id,
+        extraModels: [OPUS, "claude-haiku-4-5"],
+      }),
+    )) as { saved?: boolean };
+    expect(res.saved).toBe(true);
+    expect(await users.getUserExtraModels(teacher.id)).toEqual([OPUS]);
+    expect((await load()).models?.extraModels).toEqual([OPUS]);
+    expect((await load()).models?.defaultChoices.map((m) => m.id)).toContain(OPUS);
+    expect(
+      (
+        (await invoke(
+          personRoute.action,
+          post({ intent: "teacherDefaultModel", userId: teacher.id, defaultModel: OPUS }),
+        )) as { saved?: boolean }
+      ).saved,
+    ).toBe(true);
+    await invoke(personRoute.action, post({ intent: "teacherExtraModels", userId: teacher.id }));
+    expect(await users.getUserExtraModels(teacher.id)).toBeNull();
+  });
+});
+
 describe("admin.users action — teacherModels override (P18)", () => {
   async function newTeacher(tag: string) {
     return users.createUser({

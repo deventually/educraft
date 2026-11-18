@@ -874,3 +874,12 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   `instance_settings` en de teaminstellingen. Bastiaan, 2026-11-18 ("Ik wil niet dat sonnet de
   standaard is"; kaart "Beheer, teamleider en docent"). Dure modellen per team of docent
   aanzetten (zodat ook Opus een standaard kan zijn) volgt in een eigen PR.
+- **BESLUIT-2026-11-18-5:** **Beheer zet een duur model aan per team of per docent.** Een model
+  dat docenten niet zelf mogen kiezen (zoals Opus) staat nooit in de keuze van de instelling. De
+  beheerder kan het wel aanzetten voor één team (teampagina) of één docent (personenpagina).
+  Dan komt het bovenop wat dat team of die docent al mocht: ze kunnen het kiezen in een tool en
+  ook als standaard (BESLUIT-2026-11-18-4). Alleen de beheerder doet dit; een teamleider ziet het
+  niet en zijn opslaan laat het staan. Voor alle anderen blijft het model dicht, en de limiet
+  per maand blijft de rem. Bastiaan, 2026-11-18 ("Als beheer opus aanzet voor een team of docent,
+  dan moet het team of de docent ook dit dure model als standaard kunnen instellen. Quota's zijn
+  enorm belangrijk dus"; "Ok akkoord" op het voorstel voor een aparte PR).

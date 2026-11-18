@@ -6,6 +6,7 @@ import {
   getUserAssignedModels,
   getUserById,
   getUserDefaultModel,
+  getUserExtraModels,
 } from "~/server/repositories/users.server";
 import { getLastActiveDay } from "~/server/repositories/usage.server";
 import { listTeams, listTeamsForUser } from "~/server/repositories/teams.server";
@@ -16,7 +17,7 @@ import { effectiveFeatures, effectiveTools } from "~/server/availability.server"
 import { featureKey, getExceptions, toolKey } from "~/server/repositories/exceptions.server";
 import { FEATURES } from "~/lib/features";
 import { ALL_TOOLS } from "~/lib/registry";
-import { fullCatalog } from "~/server/modelCatalog.server";
+import { expensiveCatalog, fullCatalog } from "~/server/modelCatalog.server";
 import { mayManage } from "~/server/userAdmin.server";
 import { personAction } from "~/server/personActions.server";
 import { strictAdminPasswords } from "~/server/password.server";
@@ -26,7 +27,11 @@ import { isRole } from "~/lib/registry/access";
 import { useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { useFormToast } from "~/components/Toast";
-import { TeacherDefaultModelForm, TeacherModelForm } from "~/components/admin/TeacherModelForm";
+import {
+  ExtraModelsForm,
+  TeacherDefaultModelForm,
+  TeacherModelForm,
+} from "~/components/admin/TeacherModelForm";
 import { TeamsForm } from "~/components/admin/TeamsForm";
 import { PersonAccess } from "~/components/admin/PersonAccess";
 import { PersonCourses } from "~/components/admin/PersonCourses";
@@ -70,6 +75,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     mode: "own" | "inherit";
     models: string[];
     defaultModel: string | null;
+    /** Expensive models the admin may switch on for this teacher (BESLUIT-2026-11-18-5). */
+    expensive: { id: string; displayName: string }[];
+    extraModels: string[];
+    defaultChoices: { id: string; displayName: string }[];
   } | null = null;
   let features: FeatureRow[] | null = null;
   if (target.role === "teacher") {
@@ -87,15 +96,16 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     // whole catalogue. Following the instance shows the instance set (greyed out), so
     // that switching to "own" autosaves a sensible, non-empty starting selection.
     const base = catalog.map((m) => ({ id: m.id, displayName: m.displayName }));
-    const defaultModel = await getUserDefaultModel(target.id);
+    const expensive = await expensiveCatalog();
+    const extras = {
+      defaultModel: await getUserDefaultModel(target.id),
+      expensive,
+      extraModels: (await getUserExtraModels(target.id)) ?? [],
+      defaultChoices: [...base, ...expensive],
+    };
     models = own
-      ? { base, mode: "own", models: [...own], defaultModel }
-      : {
-          base,
-          mode: "inherit",
-          models: instanceModels ?? base.map((m) => m.id),
-          defaultModel,
-        };
+      ? { base, mode: "own", models: [...own], ...extras }
+      : { base, mode: "inherit", models: instanceModels ?? base.map((m) => m.id), ...extras };
     const row = (
       key: string,
       kind: FeatureRow["kind"],
@@ -311,9 +321,20 @@ export default function AdminUser({ loaderData }: Route.ComponentProps) {
               inheritLabel={t.admin.models.teacherInherit}
               ownLabel={t.admin.models.teacherOwn}
             />
+            {models.expensive.length > 0 && (
+              <ExtraModelsForm
+                intent="teacherExtraModels"
+                idPrefix={`teacher-${person.id}-extra`}
+                hidden={{ userId: person.id }}
+                expensive={models.expensive}
+                checkedIds={models.extraModels}
+                legend={t.admin.models.extraTeacher}
+                errorMessage={autoSaveError}
+              />
+            )}
             <TeacherDefaultModelForm
               teacherId={person.id}
-              base={models.base}
+              base={models.defaultChoices}
               defaultModel={models.defaultModel}
               errorMessage={autoSaveError}
             />

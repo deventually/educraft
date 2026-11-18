@@ -7,6 +7,7 @@ import {
   getUserById,
   setUserAssignedModels,
   setUserDefaultModel,
+  setUserExtraModels,
   setUserDisabled,
   setUserRole,
   updateUserEmail,
@@ -15,7 +16,7 @@ import {
 } from "~/server/repositories/users.server";
 import { setUserTeams } from "~/server/repositories/teams.server";
 import { featureKey, setException, toolKey } from "~/server/repositories/exceptions.server";
-import { fullCatalog } from "~/server/modelCatalog.server";
+import { expensiveCatalog, fullCatalog, isGrantable } from "~/server/modelCatalog.server";
 import { mayManage } from "~/server/userAdmin.server";
 import { redirectWithFlash } from "~/server/flash.server";
 import { recordAdminAction } from "~/server/repositories/auditLog.server";
@@ -101,12 +102,24 @@ export async function personAction(
     const target = await getUserById(userId);
     if (target?.role !== "teacher") throw new Response("Not found", { status: 404 });
     const id = String(fd.get("defaultModel") ?? "").trim();
-    // Any catalogue model, like an own set; it only counts where the teacher may use it.
-    if (id && !(await fullCatalog()).some((m) => m.id === id)) {
+    // Any catalogue model, like an own set, or an expensive one; it only counts where the
+    // teacher may use it.
+    const choices = [...(await fullCatalog()), ...(await expensiveCatalog())];
+    if (id && !choices.some((m) => m.id === id)) {
       return { error: "invalid" as const };
     }
     await setUserDefaultModel(userId, id || null);
     await audit("teacherDefaultModelChanged", { models: id ? [id] : null });
+    return { saved: true as const };
+  }
+
+  // ── Expensive models for one teacher (BESLUIT-2026-11-18-5): only grantable ones ──
+  if (intent === "teacherExtraModels") {
+    const target = await getUserById(userId);
+    if (target?.role !== "teacher") throw new Response("Not found", { status: 404 });
+    const chosen = [...new Set(fd.getAll("extraModels").map(String))].filter(isGrantable);
+    await setUserExtraModels(userId, chosen.length > 0 ? chosen : null);
+    await audit("teacherExtraModelsChanged", { models: chosen.length > 0 ? chosen : null });
     return { saved: true as const };
   }
 
