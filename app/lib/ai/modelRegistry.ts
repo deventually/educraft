@@ -6,7 +6,8 @@
  *
  * Life of a model: active → retiring (upgraded: new work goes to the successor, a
  * running conversation may finish on the old one) → retired (every call goes to the
- * successor). A model is never deleted: old results keep their model's name.
+ * successor). An added model can be edited, and removed only while nothing has used or
+ * names it (checked on the server): a used model is phased out, so old results keep its name.
  *
  * An admin can also add a provider (an API at an address). Its key still lives on the
  * server: the id and a fresh key setting (`<ID>_API_KEY`) are derived from its name, so
@@ -330,4 +331,36 @@ export function cancelUpgrade(registry: ModelRegistry, id: string): Result<"notR
   if (!registry.lifecycle[id]) return { ok: false, error: "notRetiring" };
   const { [id]: _gone, ...rest } = registry.lifecycle;
   return { ok: true, registry: { ...registry, lifecycle: rest } };
+}
+
+/** What the admin can change on an added model: everything but its provider and API id. */
+export type EditModelInput = Omit<AddedModel, "id" | "provider" | "apiId">;
+
+/** Change an added model's name, switches and settings; its id stays, so history follows. */
+export function editModel(
+  registry: ModelRegistry,
+  id: string,
+  input: EditModelInput,
+): Result<"unknown" | "invalid"> {
+  const current = registry.added.find((m) => m.id === id);
+  if (!current) return { ok: false, error: "unknown" };
+  const { settings: _old, ...base } = current;
+  const parsed = AddedModelSchema.safeParse({ ...base, ...input });
+  if (!parsed.success) return { ok: false, error: "invalid" };
+  return {
+    ok: true,
+    registry: {
+      ...registry,
+      added: registry.added.map((m) => (m.id === id ? (parsed.data as AddedModel) : m)),
+    },
+  };
+}
+
+/** Remove an added model, never while it is part of an upgrade (either side). */
+export function removeModel(registry: ModelRegistry, id: string): Result<"unknown" | "upgrading"> {
+  if (!registry.added.some((m) => m.id === id)) return { ok: false, error: "unknown" };
+  const inUpgrade =
+    id in registry.lifecycle || Object.values(registry.lifecycle).some((e) => e.successor === id);
+  if (inUpgrade) return { ok: false, error: "upgrading" };
+  return { ok: true, registry: { ...registry, added: registry.added.filter((m) => m.id !== id) } };
 }

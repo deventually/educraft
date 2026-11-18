@@ -10,7 +10,6 @@ import {
   modelState,
   resolveModelInfo,
   type ModelInfo,
-  type ModelSettings,
 } from "~/lib/ai/models";
 import { discoverLocalModels } from "~/lib/ai/discover.server";
 import {
@@ -22,6 +21,7 @@ import {
   startUpgrade,
   type AddModelInput,
   type AddProviderInput,
+  type AddedModel,
   type ModelState,
 } from "~/lib/ai/modelRegistry";
 import {
@@ -47,6 +47,12 @@ import { listTeams } from "./repositories/teams.server";
 import { recordAdminAction } from "./repositories/auditLog.server";
 import { getModelPrices } from "./repositories/modelPrices.server";
 import { priceModel, priceView } from "./modelPriceAdmin.server";
+import {
+  editAdminModel,
+  formSettings,
+  formSwitches,
+  removeAdminModel,
+} from "./modelEditAdmin.server";
 
 export interface ProviderStatus {
   id: string;
@@ -85,6 +91,8 @@ export interface AdminModelRow {
   priceFrom: "admin" | "catalog" | null;
   /** The day the catalog price was looked up. */
   priceChecked?: string;
+  /** An added model's switches and settings, for its edit form. */
+  config?: Pick<AddedModel, "supportsImages" | "alwaysThinks" | "clientSelectable" | "settings">;
 }
 
 /** The setting a provider still needs: its address (own endpoint) first, then its key. */
@@ -138,10 +146,11 @@ async function adminModelRows(): Promise<AdminModelRow[]> {
   for (const tool of ALL_TOOLS) {
     tally([tool.defaultModel, ...tool.stages.flatMap((s) => (s.model ? [s.model] : []))], tools);
   }
-  const added = new Set(registry.added.map((m) => m.id));
+  const added = new Map(registry.added.map((m) => [m.id, m]));
   const prices = await getModelPrices();
   return apiModels().map((m) => {
     const entry = registry.lifecycle[m.id];
+    const own = added.get(m.id);
     return {
       id: m.id,
       displayName: m.displayName,
@@ -158,6 +167,16 @@ async function adminModelRows(): Promise<AdminModelRow[]> {
         tools: tools.get(m.id) ?? 0,
       },
       ...priceView(m.id, prices),
+      ...(own
+        ? {
+            config: {
+              supportsImages: own.supportsImages,
+              alwaysThinks: own.alwaysThinks,
+              clientSelectable: own.clientSelectable,
+              ...(own.settings ? { settings: own.settings } : {}),
+            },
+          }
+        : {}),
     };
   });
 }
@@ -301,6 +320,8 @@ export const MODEL_INTENTS = [
   "addProvider",
   "removeProvider",
   "price",
+  "edit",
+  "remove",
 ] as const;
 export type ModelIntent = (typeof MODEL_INTENTS)[number];
 
@@ -309,24 +330,6 @@ export function isModelIntent(intent: string): intent is ModelIntent {
 }
 
 const text = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim();
-
-const EFFORTS = ["none", "low", "medium", "high", "xhigh", "max"] as const;
-
-/** Effort and temperature from the add form; empty = the provider's default. */
-function addedSettings(fd: FormData): { settings?: ModelSettings } {
-  const settings: ModelSettings = {};
-  const effort = text(fd, "effort");
-  if ((EFFORTS as readonly string[]).includes(effort)) {
-    settings.effort = effort as ModelSettings["effort"];
-  }
-  const temp = text(fd, "temperature").replace(",", ".");
-  if (temp !== "") {
-    const n = Number(temp);
-    // Out of range is refused by the registry's own check (an "invalid" toast).
-    settings.temperature = Number.isFinite(n) ? n : -1;
-  }
-  return Object.keys(settings).length ? { settings } : {};
-}
 
 /**
  * Run one models intent from the admin page's form data (the caller checked the role). A change
@@ -358,10 +361,8 @@ export async function modelAdminAction(intent: ModelIntent, fd: FormData, actorU
         provider,
         apiId: text(fd, "apiId"),
         displayName: text(fd, "displayName"),
-        supportsImages: fd.get("supportsImages") === "on",
-        alwaysThinks: fd.get("alwaysThinks") === "on",
-        clientSelectable: fd.get("clientSelectable") === "on",
-        ...addedSettings(fd),
+        ...formSwitches(fd),
+        ...formSettings(fd),
       });
     }
     case "upgrade":
@@ -385,5 +386,9 @@ export async function modelAdminAction(intent: ModelIntent, fd: FormData, actorU
       return removeAdminProvider(text(fd, "id"));
     case "price":
       return priceModel(apiModels(), text(fd, "id"), fd, actorUserId);
+    case "edit":
+      return editAdminModel(text(fd, "id"), fd, actorUserId);
+    case "remove":
+      return removeAdminModel(text(fd, "id"), actorUserId);
   }
 }
