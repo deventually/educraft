@@ -104,7 +104,9 @@ function normalised(s: string): { text: string; at: number[] } {
  * is not in it word for word (a paraphrase, an elision) or is too short to be a quote.
  */
 export function verbatimSpan(quote: string, source: string): string | null {
-  const q = normalised(quote.trim()).text.replace(/^"+|"+$/g, "").trim();
+  const q = normalised(quote.trim())
+    .text.replace(/^"+|"+$/g, "")
+    .trim();
   if (q.split(" ").length < MIN_WORDS) return null;
   const hay = normalised(source);
   const from = hay.text.indexOf(q);

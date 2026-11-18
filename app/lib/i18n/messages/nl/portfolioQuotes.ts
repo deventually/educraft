@@ -25,10 +25,11 @@ export const portfolioQuotes = {
     "De antwoorden op je feedbackvragen zijn bewijs. LimeOnIt stelt per criterium zinnen voor die je letterlijk kunt citeren, en laat vage lof weg. Jij kiest welke erin komen. Bij het opstellen van je hoofdstuk citeert LimeOnIt de gekozen zinnen letterlijk, met rol en datum.",
   noneFound:
     'Geen zin was concreet genoeg om te citeren. Vage lof ("Goede les!") telt niet als bewijs; vraag de feedbackgever eventueel om een voorbeeld.',
+  openHint: "Feedback van een ander gekregen? Kies er citaten uit per criterium:",
   pending: "LimeOnIt zoekt citaten…",
   propose: "Stel citaten voor",
-  proposed: "De voorstellen staan klaar. Kies welke citaten je bewaart.",
   proposeAgain: "Stel opnieuw voor",
+  proposed: "De voorstellen staan klaar. Kies welke citaten je bewaart.",
   quotesLegend: "Citaten per criterium",
   role: "Rol",
   roles: {

@@ -11,7 +11,8 @@ describe("portfolio-quotes@v1 prompt (quotes from feedback per criterion)", () =
     for (const lang of ["nl", "en"] as const) {
       expect(p.runtime[lang]).toContain("Voice & Bounds");
       expect(p.runtime[lang]).not.toMatch(/\{\{/);
-      for (const key of ['"quotes"', '"criterion"', '"quote"']) expect(p.runtime[lang]).toContain(key);
+      for (const key of ['"quotes"', '"criterion"', '"quote"'])
+        expect(p.runtime[lang]).toContain(key);
     }
     expect(headings(p.runtime.nl)).toBe(headings(p.runtime.en));
   });

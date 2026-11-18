@@ -84,7 +84,10 @@ describe("Stel citaten voor", () => {
     generate.mockResolvedValue({
       text: JSON.stringify({
         quotes: [
-          { criterion: "U1.C2", quote: "je tekende het op het bord en vroeg twee studenten het na te doen" },
+          {
+            criterion: "U1.C2",
+            quote: "je tekende het op het bord en vroeg twee studenten het na te doen",
+          },
           { criterion: "U1.C1", quote: "Je les was perfect opgebouwd." },
         ],
       }),
@@ -100,13 +103,18 @@ describe("Stel citaten voor", () => {
       intent: "proposeQuotes",
       evidenceId: EV,
       quotes: [
-        { criterionId: C2, text: "je tekende het op het bord en vroeg twee studenten het na te doen" },
+        {
+          criterionId: C2,
+          text: "je tekende het op het bord en vroeg twee studenten het na te doen",
+        },
       ],
       dropped: 1,
     });
     const sent = generate.mock.calls[0]![0];
     expect(sent.messages[0].content).toContain('<feedback role="Werkplekbegeleider">');
-    expect((await repo.getDossier("teacher-q", mine.id))?.data.evidence[0]?.feedback).toBeUndefined();
+    expect(
+      (await repo.getDossier("teacher-q", mine.id))?.data.evidence[0]?.feedback,
+    ).toBeUndefined();
   });
 
   it("asks the teacher first when the gate finds a word they did not see", async () => {
@@ -119,7 +127,11 @@ describe("Stel citaten voor", () => {
       ["role", "workplace-supervisor"],
     ]);
     expect(generate).not.toHaveBeenCalled();
-    expect(r).toMatchObject({ ok: false, intent: "proposeQuotes", privacyReview: [{ kind: "email" }] });
+    expect(r).toMatchObject({
+      ok: false,
+      intent: "proposeQuotes",
+      privacyReview: [{ kind: "email" }],
+    });
   });
 
   it("says so when the answer could not be read", async () => {
@@ -180,6 +192,8 @@ describe("Bewaar citaten", () => {
       ["quotes", JSON.stringify([{ criterionId: C2, text: "Je bent de beste docent ooit." }])],
     ]);
     expect(r).toMatchObject({ ok: false });
-    expect((await repo.getDossier("teacher-q", mine.id))?.data.evidence[0]?.feedback).toBeUndefined();
+    expect(
+      (await repo.getDossier("teacher-q", mine.id))?.data.evidence[0]?.feedback,
+    ).toBeUndefined();
   });
 });

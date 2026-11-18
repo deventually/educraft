@@ -228,6 +228,13 @@ export default function PortfolioOverview({ loaderData }: Route.ComponentProps) 
               className="font-medium text-violet-700 underline underline-offset-2"
             >
               {t.portfolioBatch.open}
+            </Link>{" "}
+            ·{" "}
+            <Link
+              to={`/portfolio/${id}/quotes`}
+              className="font-medium text-violet-700 underline underline-offset-2"
+            >
+              {t.portfolioQuotes.title}
             </Link>
           </p>
           {deadline && daysLeft !== undefined && (

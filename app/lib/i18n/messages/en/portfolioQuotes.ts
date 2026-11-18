@@ -25,10 +25,11 @@ export const portfolioQuotes = {
     "The answers to your feedback questions are evidence. LimeOnIt proposes, per criterion, sentences you can quote word for word, and leaves out vague praise. You choose which go in. When your chapter is drafted, LimeOnIt quotes the chosen sentences word for word, with role and date.",
   noneFound:
     'No sentence was concrete enough to quote. Vague praise ("Good lesson!") does not count as evidence; you could ask the feedback giver for an example.',
+  openHint: "Feedback from someone else? Choose quotes from it per criterion:",
   pending: "LimeOnIt is looking for quotes…",
   propose: "Propose quotes",
-  proposed: "The proposals are ready. Choose which quotes to keep.",
   proposeAgain: "Propose again",
+  proposed: "The proposals are ready. Choose which quotes to keep.",
   quotesLegend: "Quotes per criterion",
   role: "Role",
   roles: {

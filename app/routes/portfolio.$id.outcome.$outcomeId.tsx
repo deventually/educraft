@@ -298,6 +298,13 @@ export default function PortfolioOutcome({ loaderData }: Route.ComponentProps) {
                 className="font-medium text-violet-700 underline underline-offset-2"
               >
                 {t.portfolioBatch.open}
+              </Link>{" "}
+              {t.portfolioQuotes.openHint}{" "}
+              <Link
+                to={`/portfolio/${id}/quotes`}
+                className="font-medium text-violet-700 underline underline-offset-2"
+              >
+                {t.portfolioQuotes.title}
               </Link>
             </p>
             {!evidenceFull && (

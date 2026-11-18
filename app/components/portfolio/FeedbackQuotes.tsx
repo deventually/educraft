@@ -58,7 +58,10 @@ export function FeedbackQuotes({
   const [date, setDate] = useState(item.feedback?.date ?? "");
   const chosen = item.feedback?.quotes ?? [];
   // The chosen quotes first, then the proposals that are new; the chosen ones stay ticked.
-  const shown = [...chosen, ...(proposal?.quotes ?? []).filter((q) => !chosen.some((c) => same(c, q)))];
+  const shown = [
+    ...chosen,
+    ...(proposal?.quotes ?? []).filter((q) => !chosen.some((c) => same(c, q))),
+  ];
   const [ticked, setTicked] = useState<FeedbackQuote[]>(chosen);
   const isTicked = (q: FeedbackQuote) => ticked.some((x) => same(x, q));
   const toggle = (q: FeedbackQuote, on: boolean) =>
@@ -71,7 +74,9 @@ export function FeedbackQuotes({
     form.set("role", role);
     // The giver's name is replaced too, also where it stands in the feedback itself.
     if (giver.trim()) round.privacy.alsoReplace(giver);
-    round.start(form, [{ name: `feedback:${item.id}`, label: item.title, text: item.text, held: true }]);
+    round.start(form, [
+      { name: `feedback:${item.id}`, label: item.title, text: item.text, held: true },
+    ]);
   }
 
   const groups = outcomes.flatMap((o) =>

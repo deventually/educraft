@@ -89,7 +89,11 @@ describe("FeedbackQuotes", () => {
     expect(screen.getAllByText(/Marieke de Groot/).length).toBeGreaterThan(0);
     await userEvent.click(screen.getByRole("button", { name: "Versturen" }));
     await screen.findByRole("group", { name: "Citaten per criterium" });
-    expect(posted[0]).toMatchObject({ intent: "proposeQuotes", evidenceId: "fb-1", role: "workplace-supervisor" });
+    expect(posted[0]).toMatchObject({
+      intent: "proposeQuotes",
+      evidenceId: "fb-1",
+      role: "workplace-supervisor",
+    });
     expect(Object.values(posted[0]!).join(" ")).not.toContain("iedereen dacht mee");
     expect(JSON.parse(posted[0]!.privacy!).replace).toEqual(["Marieke de Groot"]);
   });
@@ -110,7 +114,11 @@ describe("FeedbackQuotes", () => {
     await userEvent.type(screen.getByLabelText("Naam"), "M. de Groot");
     await userEvent.click(screen.getByRole("button", { name: "Bewaar" }));
     const saved = posted.at(-1)!;
-    expect(saved).toMatchObject({ intent: "chooseQuotes", giver: "M. de Groot", role: "workplace-supervisor" });
+    expect(saved).toMatchObject({
+      intent: "chooseQuotes",
+      giver: "M. de Groot",
+      role: "workplace-supervisor",
+    });
     expect(JSON.parse(saved.quotes!)).toEqual([
       { criterionId: C2, text: "Je kwam terug op de fouten van vorige week." },
     ]);

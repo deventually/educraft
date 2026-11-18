@@ -57,7 +57,7 @@ async function propose(
   if (!input.success) return { ok: false, error: m.portfolio.errorInvalid };
   const d = dossier.data;
   const item = d.evidence.find((e) => e.id === input.data.evidenceId);
-  if (!item || item.kind !== "feedback") return { ok: false, error: t.notFeedback };
+  if (item?.kind !== "feedback") return { ok: false, error: t.notFeedback };
   if (!item.text.trim()) return { ok: false, error: t.empty };
   if (d.framework.confirmedAt === undefined) return { ok: false, error: t.notConfirmed };
   if (await quotaGate(user)) return { ok: false, error: m.portfolioBatch.errors.quota };

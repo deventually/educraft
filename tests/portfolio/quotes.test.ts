@@ -53,8 +53,12 @@ describe("buildQuotesMessage (the feedback against the whole framework)", () => 
     const m = buildQuotesMessage(dossier(), item(), "workplace-supervisor", "nl");
     expect(QUOTES_PROMPT_ID).toBe("portfolio-quotes@v1");
     expect(m).toContain('<outcome key="U1">LU1 Doceren');
-    expect(m).toContain('<criterion key="U1.C2">De les sluit aan bij de beginsituatie.</criterion>');
-    expect(m).toContain('<criterion key="U2.C1">De docent construeert een valide toets.</criterion>');
+    expect(m).toContain(
+      '<criterion key="U1.C2">De les sluit aan bij de beginsituatie.</criterion>',
+    );
+    expect(m).toContain(
+      '<criterion key="U2.C1">De docent construeert een valide toets.</criterion>',
+    );
     expect(m).toContain('<feedback role="Werkplekbegeleider">');
     expect(m).toContain("dosering van paracetamol");
     expect(m.indexOf("<framework>")).toBeLessThan(m.indexOf("<feedback "));
@@ -96,8 +100,15 @@ describe("parseQuotesAnswer (only verbatim sentences under a known criterion)", 
   it("maps keys back to criteria and keeps the source's own words", () => {
     const r = parseQuotesAnswer(
       answer([
-        { criterion: "U1.C1", quote: "De start was sterk: je opende met een vraag over de dosering van paracetamol en iedereen dacht mee." },
-        { criterion: "U1.C2", quote: "je terugkwam op wat ze vorige week fout deden, dat sloot mooi aan" },
+        {
+          criterion: "U1.C1",
+          quote:
+            "De start was sterk: je opende met een vraag over de dosering van paracetamol en iedereen dacht mee.",
+        },
+        {
+          criterion: "U1.C2",
+          quote: "je terugkwam op wat ze vorige week fout deden, dat sloot mooi aan",
+        },
       ]),
       dossier(),
       FEEDBACK,
@@ -180,10 +191,16 @@ describe("setFeedbackQuotes (what the candidate chose, with name, role and date)
   it("refuses a quote that is not in the feedback, an unknown criterion or item", () => {
     const d = dossier();
     expect(() =>
-      setFeedbackQuotes(d, EV, { ...chosen, quotes: [{ criterionId: C2, text: "Je bent geweldig." }] }),
+      setFeedbackQuotes(d, EV, {
+        ...chosen,
+        quotes: [{ criterionId: C2, text: "Je bent geweldig." }],
+      }),
     ).toThrow();
     expect(() =>
-      setFeedbackQuotes(d, EV, { ...chosen, quotes: [{ criterionId: "nope", text: "dat sloot mooi aan" }] }),
+      setFeedbackQuotes(d, EV, {
+        ...chosen,
+        quotes: [{ criterionId: "nope", text: "dat sloot mooi aan" }],
+      }),
     ).toThrow();
     expect(() => setFeedbackQuotes(d, "nope", chosen)).toThrow();
   });
