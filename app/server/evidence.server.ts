@@ -10,6 +10,7 @@ import { getGeneration } from "./repositories/generations.server";
 import { getDossier, updateDossier } from "./repositories/portfolio.server";
 import { addEvidence, updateEvidence } from "~/lib/portfolio/edit";
 import { DossierDataSchema, LIMITS } from "~/lib/portfolio/schema";
+import type { EvidenceKind } from "~/lib/portfolio/types";
 import { getToolBySlug } from "~/lib/registry";
 import { getMessages, type Locale } from "~/lib/i18n";
 import { loc } from "~/lib/i18n/localized";
@@ -61,5 +62,40 @@ export async function addGenerationToDossier(
   }
   if (!DossierDataSchema.safeParse(next).success) return { ok: false, error: m.errorInvalid };
   if (next !== dossier.data) await updateDossier(userId, dossier.id, { data: next });
+  return { ok: true };
+}
+
+export interface TextEvidenceInput {
+  dossierId: string;
+  title: string;
+  kind: EvidenceKind;
+  text: string;
+  criterionIds: string[];
+}
+
+/**
+ * A text that was never a saved generation as evidence (P34.3, a calibration summary): the
+ * dossier must be the caller's (a foreign or unknown one is a 404, nothing written) and each
+ * criterion must be in it. The caller builds the text; this path only stores it.
+ */
+export async function addTextToDossier(
+  user: { id: string; role: string },
+  input: TextEvidenceInput,
+): Promise<{ ok: true } | { ok: false; error: "criterion" | "invalid" }> {
+  const dossier = (await portfolioAccess(user)) ? await getDossier(user.id, input.dossierId) : null;
+  if (!dossier) throw new Response("Not Found", { status: 404 });
+  const known = new Set(
+    dossier.data.framework.outcomes.flatMap((o) => o.criteria.map((c) => c.id)),
+  );
+  const criterionIds = [...new Set(input.criterionIds)];
+  if (criterionIds.some((id) => !known.has(id))) return { ok: false, error: "criterion" };
+  const next = addEvidence(dossier.data, {
+    title: input.title.slice(0, LIMITS.title),
+    kind: input.kind,
+    text: input.text.slice(0, LIMITS.documentText),
+    criterionIds,
+  });
+  if (!DossierDataSchema.safeParse(next).success) return { ok: false, error: "invalid" };
+  await updateDossier(user.id, dossier.id, { data: next });
   return { ok: true };
 }
