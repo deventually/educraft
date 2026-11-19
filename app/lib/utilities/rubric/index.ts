@@ -5,3 +5,4 @@ export * from "./score";
 export * from "./calibrate";
 export * from "./calibrateInput";
 export * from "./groupSummary";
+export * from "./calibrateEvidence";

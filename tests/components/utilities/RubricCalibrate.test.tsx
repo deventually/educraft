@@ -10,14 +10,36 @@ import { sampleRubric } from "../../utilities/fixtures";
 
 const axeOpts = { rules: { "color-contrast": { enabled: false } } };
 
-function renderCalibrate(locale: "nl" | "en" = "nl") {
+const DOSSIERS = [
+  {
+    id: "dossier-1",
+    name: "Mijn BKE",
+    outcomes: [
+      {
+        code: "LU4",
+        title: "Toetsen",
+        criteria: [{ id: "crit-1", text: "Je beoordeelt betrouwbaar." }],
+      },
+    ],
+  },
+];
+
+function renderCalibrate(
+  locale: "nl" | "en" = "nl",
+  dossiers: typeof DOSSIERS = [],
+  onPost: (fd: FormData) => void = () => {},
+) {
   const rubric = { id: "rubric-cal-1", name: "Eindwerk", data: sampleRubric() };
   const Stub = createRoutesStub([
     {
       id: "root",
       path: "/",
       loader: () => ({ locale }),
-      Component: () => <RubricCalibrate rubric={rubric} />,
+      action: async ({ request }) => {
+        onPost(await request.formData());
+        return { ok: true };
+      },
+      Component: () => <RubricCalibrate rubric={rubric} dossiers={dossiers} today="2026-11-19" />,
     },
   ]);
   return { ...render(<Stub initialEntries={["/"]} />), rubric };
@@ -120,6 +142,42 @@ describe("RubricCalibrate", () => {
     ).toBeInTheDocument();
   });
 
+  it("offers no evidence without a dossier", async () => {
+    const user = userEvent.setup();
+    renderCalibrate();
+    await paste(user, 1, "A1\tGoed\tAanwezig");
+    await paste(user, 2, "A1\tVoldoende\tAanwezig");
+    expect(screen.queryByText("Gebruik als bewijs")).not.toBeInTheDocument();
+  });
+
+  it("shows the summary without codes before it is sent, and posts only the summary", async () => {
+    const user = userEvent.setup();
+    const posted: FormData[] = [];
+    renderCalibrate("nl", DOSSIERS, (fd) => posted.push(fd));
+    await paste(user, 1, "JAN-01\tGoed\tAanwezig\nFATIMA-02\tVoldoende\tAanwezig");
+    await paste(user, 2, "JAN-01\tVoldoende\tAanwezig\nFATIMA-02\tVoldoende\tAanwezig");
+
+    await user.click(screen.getByText("Gebruik als bewijs"));
+    const preview = screen.getByRole("region", { name: "Dit gaat naar je dossier" });
+    expect(preview).toHaveTextContent("Kalibreren met een collega");
+    expect(preview).toHaveTextContent("19 november 2026");
+    expect(preview).toHaveTextContent("Analyse");
+    expect(preview).not.toHaveTextContent("JAN-01");
+    expect(preview).not.toHaveTextContent("FATIMA-02");
+
+    await user.click(screen.getByRole("checkbox", { name: "Je beoordeelt betrouwbaar." }));
+    await user.click(screen.getByRole("button", { name: "Toevoegen aan dossier" }));
+    await vi.waitFor(() => expect(posted).toHaveLength(1));
+    const fd = posted[0]!;
+    expect(fd.get("intent")).toBe("use-as-evidence");
+    expect(fd.get("dossierId")).toBe("dossier-1");
+    expect(fd.getAll("criterionIds")).toEqual(["crit-1"]);
+    const all = [...fd.values()].map(String).join(" ");
+    expect(all).not.toContain("JAN-01");
+    expect(all).not.toContain("FATIMA-02");
+    expect(JSON.parse(String(fd.get("summary")))).toMatchObject({ works: 2 });
+  });
+
   it("has no axe violations, empty and with a result", async () => {
     const user = userEvent.setup();
     const { container } = renderCalibrate();
@@ -127,6 +185,15 @@ describe("RubricCalibrate", () => {
     expect((await axe(container, axeOpts)).violations).toEqual([]);
     await paste(user, 1, "A1\tGoed\tAanwezig\nA2\tPrima\tAanwezig");
     await paste(user, 2, "A1\tVoldoende\tAanwezig");
+    expect((await axe(container, axeOpts)).violations).toEqual([]);
+  });
+
+  it("has no axe violations with the evidence form open", async () => {
+    const user = userEvent.setup();
+    const { container } = renderCalibrate("nl", DOSSIERS);
+    await paste(user, 1, "A1\tGoed\tAanwezig");
+    await paste(user, 2, "A1\tVoldoende\tAanwezig");
+    await user.click(screen.getByText("Gebruik als bewijs"));
     expect((await axe(container, axeOpts)).violations).toEqual([]);
   });
 });
