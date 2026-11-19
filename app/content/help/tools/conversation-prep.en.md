@@ -12,7 +12,7 @@ Use this tool as a study career coach to **prepare a conversation**: a starting 
 
 - **Does:** questions in plain spoken language that suit the programme in your teaching context.
 - **Does not:** advise on the decision about a study advice. The programme takes that decision.
-- **Does not:** name a counter. Which counter it is at your institution, your administrator or your programme knows.
+- **Does not:** name a counter. Your institution's counters are under the result: the referral guide your administrator fills in. If it is still empty, ask your administrator or your programme.
 
 ## Tips
 

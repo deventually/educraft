@@ -4,7 +4,7 @@
  */
 import type { ExportDoc } from "./doc";
 import { DOCX_TYPE, exportDocToDocx } from "./docx";
-import { type ExportFormat, isExportFormat } from "./formats";
+import { type ExportFormat, isExportFormat, XLSX_TYPE } from "./formats";
 import { exportDocToMarkdown, MARKDOWN_TYPE } from "./md";
 import { exportDocToPptx, PPTX_TYPE } from "./pptx";
 
@@ -16,6 +16,8 @@ interface FileWriter {
 
 const WRITERS: Partial<Record<ExportFormat, FileWriter>> = {
   docx: { type: DOCX_TYPE, write: exportDocToDocx },
+  // Loaded when used: the browser loads the same module only on "Download als Excel" (P30.3).
+  xlsx: { type: XLSX_TYPE, write: async (doc) => (await import("./xlsx")).exportDocToXlsx(doc) },
   pptx: { type: PPTX_TYPE, write: (doc, options) => exportDocToPptx(doc, options?.template) },
   md: { type: MARKDOWN_TYPE, write: exportDocToMarkdown },
 };

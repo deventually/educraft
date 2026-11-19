@@ -46,6 +46,7 @@ export const conversationPrep: Tool = {
   defaultMaxTokens: 3072,
   defaultTemperature: 0.4,
   next: ["difficult-conversation"],
+  showsReferralGuide: true,
   enabled: true,
   phase: 1,
   inputs: [

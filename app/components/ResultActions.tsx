@@ -18,6 +18,8 @@ import { LINKED_WORK_ANCHOR, courseTabHref } from "~/lib/courses/tabs";
 import { fmt } from "~/lib/i18n/format";
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
 import { useLocale, useT } from "~/lib/i18n/useT";
+import type { ReferralGuide } from "~/lib/referrals/guide";
+import { ReferralGuideList } from "./referrals/ReferralGuideList";
 
 export interface ResultActionsProps {
   /** The saved work; null while nothing is saved (then only the next steps show). */
@@ -45,6 +47,8 @@ export interface ResultActionsProps {
   exportWith?: string[];
   /** The result can become a lesson of the course it is kept at (`Stage.courseExport`). */
   asLesson?: boolean;
+  /** P39.4: the institution's counters, for a tool that refers on (`Tool.showsReferralGuide`). */
+  referralGuide?: ReferralGuide | null;
 }
 
 /** What the tool page passes down to every result surface (P27.1). */
@@ -75,6 +79,7 @@ export function ResultActions({
   forTrack = null,
   exportWith = [],
   asLesson = false,
+  referralGuide = null,
 }: ResultActionsProps) {
   const t = useT();
   const m = t.resultActions;
@@ -128,7 +133,7 @@ export function ResultActions({
   const showEvidence = canKeep && !showCriterion && dossiers.length > 0;
   // Saved work can always be exported (P30.1).
   const hasActions = nextTools.length > 0 || canKeep;
-  if (!hasActions && !generationId) return null;
+  if (!hasActions && !generationId && !referralGuide) return null;
 
   const query = courseId
     ? `?course=${encodeURIComponent(courseId)}${itemId ? `&item=${encodeURIComponent(itemId)}` : ""}`
@@ -154,6 +159,7 @@ export function ResultActions({
 
   return (
     <div className="space-y-3">
+      {referralGuide && <ReferralGuideList guide={referralGuide} headingLevel={2} />}
       {hasActions && (
         <section
           aria-labelledby={headingId}

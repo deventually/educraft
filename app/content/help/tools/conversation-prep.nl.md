@@ -12,7 +12,7 @@ Gebruik deze tool als studieloopbaanbegeleider (SLB'er) om een **gesprek voor te
 
 - **Wel:** vragen in gewone spreektaal die passen bij de opleiding uit je onderwijscontext.
 - **Niet:** advies over het besluit over een studieadvies. Dat besluit neemt de opleiding.
-- **Niet:** een loket bij naam noemen. Welk loket bij jouw instelling hoort, weet je beheerder of je opleiding.
+- **Niet:** een loket bij naam noemen. Welke loketten je instelling heeft, staat onder het resultaat: de wegwijzer die je beheerder invult. Is die nog leeg, vraag het dan je beheerder of je opleiding.
 
 ## Tips
 

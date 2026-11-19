@@ -4,6 +4,8 @@ import { useT } from "~/lib/i18n/useT";
 import { calibrate, calibrationTemplate, type RubricData } from "~/lib/utilities/rubric";
 import { CalibrateRater, type RaterRow } from "./CalibrateRater";
 import { CalibrationResult } from "./CalibrationResult";
+import { CalibrationEvidence } from "./CalibrationEvidence";
+import type { DossierTarget } from "~/components/courses/CourseEvidence";
 
 export interface CalibratableRubric {
   id: string;
@@ -12,10 +14,19 @@ export interface CalibratableRubric {
 }
 
 /**
- * Calibrating with a second rater (P34.2). Everything stays in this browser: no post, no
- * storage. Only the rubric itself came from the server.
+ * Calibrating with a second rater (P34.2). The scores stay in this browser: no post, no
+ * storage. Only the rubric itself came from the server; "Gebruik als bewijs" (P34.3) posts a
+ * summary without codes, and only when the teacher asks.
  */
-export function RubricCalibrate({ rubric }: { rubric: CalibratableRubric }) {
+export function RubricCalibrate({
+  rubric,
+  dossiers,
+  today,
+}: {
+  rubric: CalibratableRubric;
+  dossiers: DossierTarget[];
+  today: string;
+}) {
   const t = useT();
   const s = t.rubricCalibrate;
   const { data } = rubric;
@@ -44,6 +55,11 @@ export function RubricCalibrate({ rubric }: { rubric: CalibratableRubric }) {
         <CalibrateRater n={2} data={data} rows={b} onChange={setB} />
       </div>
       {started && <CalibrationResult data={data} result={result} />}
+      {result.works.length > 0 && (
+        <div className="mt-6">
+          <CalibrationEvidence rubric={rubric} result={result} dossiers={dossiers} today={today} />
+        </div>
+      )}
       <p className="mt-8 text-sm font-medium text-slate-700">{s.nothingKept}</p>
     </div>
   );
