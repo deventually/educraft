@@ -61,6 +61,7 @@ import { portfolioVoice } from "./portfolioVoice";
 import { privacy } from "./privacy";
 import { programmes } from "./programmes";
 import { projects } from "./projects";
+import { referrals } from "./referrals";
 import { resultActions } from "./resultActions";
 import { rubricCalibrate } from "./rubricCalibrate";
 import { rubricGroup } from "./rubricGroup";
@@ -155,6 +156,7 @@ export const nl = {
   privacy,
   programmes,
   projects,
+  referrals,
   resultActions,
   rubricCalibrate,
   rubricGroup,

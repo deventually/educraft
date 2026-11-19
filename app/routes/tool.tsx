@@ -40,6 +40,7 @@ import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
 import { addGenerationToTrack, forTrack } from "~/server/tracks.server";
 import { TrackBar } from "~/components/tracks/TrackBar";
 import { privacyPageFor } from "~/server/privacyGate.server";
+import { getReferralGuide } from "~/server/repositories/referralGuide.server";
 
 /** A lesson or test as the tool page needs it: no plan details, no questions. */
 function courseItem(
@@ -174,6 +175,8 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     assessmentModels,
     // The live preview knows the names the gate knows, and the teacher's never-list (PR 3).
     privacy: await privacyPageFor(user),
+    // P39.4: the institution's counters under the result, for a tool that refers on.
+    referralGuide: tool.showsReferralGuide ? await getReferralGuide() : null,
   };
 }
 
@@ -295,8 +298,16 @@ export default function ToolPage({ loaderData }: Route.ComponentProps) {
     assessmentModels,
     aiLimit,
     privacy,
+    referralGuide,
   } = loaderData;
-  const resultContext = { nextTools, linkTargets, dossiers, forCriterion, forTrack };
+  const resultContext = {
+    nextTools,
+    linkTargets,
+    dossiers,
+    forCriterion,
+    forTrack,
+    referralGuide,
+  };
   const mode = modeOf(tool);
 
   return (

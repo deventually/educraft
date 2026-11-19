@@ -22,6 +22,10 @@ Create teams of colleagues and appoint team leads. Per team you can switch on fe
 
 Choose what your institution calls the layer between institution and programme and create those parts, for example with **New faculty**. You delete an empty faculty after a confirmation. Where a programme belongs is chosen in the programme's **Details**; click its name on Organisation to get there. You create a programme under **Programmes**, in the **Education** menu. See also [Programmes](/help/programmes).
 
+## Referral guide
+
+At the bottom of **Organisation** you fill in the referral guide: per kind of question (study delay and rules, mental health, disability, unwanted behaviour, money) the counter, a short description and a link (https:// or mailto:). Leave a kind of question empty if your institution has no counter for it. Teachers see the guide in the help on [study career coaching](/help/slb) and under the result of *Prepare a conversation*. Preferably name a counter or role rather than a person.
+
 ## Announcements
 
 Put an announcement as a bar above every page, for everyone, one team or one person. Choose *Announcement* or *Warning* (for example during an outage). Everyone can close the bar for themselves. If you want it to come back, fill in after how many days (1 to 30). With a last day it disappears by itself; without one it stays until you remove it.

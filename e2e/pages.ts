@@ -19,6 +19,7 @@ export const PAGES: E2EPage[] = [
   { path: "/projects", as: "teacher" },
   { path: "/utilities", as: "teacher" },
   { path: "/help", as: "teacher" },
+  { path: "/help/slb", as: "teacher" },
   { path: "/about", as: "teacher" },
   { path: "/account", as: "teacher" },
   { path: "/account/2fa", as: "teacher" },

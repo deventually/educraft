@@ -31,6 +31,7 @@ const data = {
     },
     { id: "p-2", name: "Pabo", kindLabel: "hbo", teamName: "Team Pabo", divisionId: null },
   ],
+  referralGuide: [{ kind: "money", counter: "Studentenloket", description: "", link: "" }],
 };
 
 function page(loaderData: unknown = data, action = () => ({ ok: "create" })) {
@@ -163,6 +164,13 @@ describe("/admin/organisation", () => {
   it("uses a neutral word before a kind is chosen", async () => {
     page({ ...data, kind: null });
     expect(await screen.findByRole("button", { name: "Nieuw onderdeel" })).toBeInTheDocument();
+  });
+
+  it("ends with the referral guide, filled with what is saved (P39.4)", async () => {
+    page();
+    const guide = await screen.findByRole("region", { name: "Wegwijzer naar het loket" });
+    expect(within(guide).getByRole("group", { name: "Geld" })).toBeVisible();
+    expect(within(guide).getAllByLabelText("Loket")[4]).toHaveValue("Studentenloket");
   });
 
   it("has no a11y violations", async () => {

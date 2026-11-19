@@ -40,6 +40,7 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
       "week",
       "review-team",
       "supervision-track",
+      "slb",
     ],
   },
   { id: "together", title: { nl: "Samenwerken", en: "Working together" }, topics: ["teams"] },
@@ -61,6 +62,9 @@ export const HELP_SECTIONS: readonly HelpSection[] = [
     requires: "isAdmin",
   },
 ];
+
+/** Topics that end with the institution's referral guide, admin data (P39.4). */
+export const TOPICS_WITH_REFERRAL_GUIDE: readonly string[] = ["slb"];
 
 const sectionVisible = (s: HelpSection, access: HelpAccess) =>
   s.requires === undefined || access[s.requires];

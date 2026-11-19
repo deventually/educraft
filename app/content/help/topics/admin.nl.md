@@ -22,6 +22,10 @@ Maak teams van collega's en wijs teamleiders aan. Per team kun je onderdelen, to
 
 Kies hoe je instelling de laag tussen instelling en opleiding noemt en maak die onderdelen aan, bijvoorbeeld met **Nieuwe faculteit**. Een lege faculteit verwijder je na een bevestiging. Waar een opleiding bij hoort, kies je bij **Gegevens** van de opleiding; klik op Organisatie op haar naam om daar te komen. Een opleiding maak je aan bij **Opleidingen**, in het menu **Onderwijs**. Zie ook [Opleidingen](/help/programmes).
 
+## Wegwijzer naar het loket
+
+Onderaan **Organisatie** vul je de wegwijzer in: per soort vraag (studievertraging en regels, psychische klachten, functiebeperking, ongewenst gedrag, geld) het loket, een korte omschrijving en een link (https:// of mailto:). Laat een soort vraag leeg als je instelling er geen loket voor heeft. Docenten zien de wegwijzer in de help over [SLB](/help/slb) en onder het resultaat van *Een gesprek voorbereiden*. Noem liever een loket of functie dan de naam van een persoon.
+
 ## Mededelingen
 
 Zet een mededeling als balk boven elke pagina, voor iedereen, één team of één persoon. Kies *Mededeling* of *Waarschuwing* (bijvoorbeeld bij een storing). Iedereen kan de balk voor zichzelf wegklikken. Wil je dat hij terugkomt, vul dan in na hoeveel dagen (1 tot 30). Met een laatste dag verdwijnt hij vanzelf; zonder blijft hij staan tot je hem weghaalt.
