@@ -776,4 +776,13 @@ describe("Course page — blueprint and marking model", () => {
         .map((s) => s.closest("details")?.getAttribute("data-export-url")),
     ).toEqual(["/courses/c1/assessments/test-1/dossier/export"]);
   });
+
+  it("links to the teacher's own note on the analysis next to the test dossier (P35.2)", () => {
+    renderRoute(CoursePage, pageData(documentedCourse()), "/?tab=plan");
+    expect(
+      screen
+        .getAllByRole("link", { name: /^Toelichting schrijven/ })
+        .map((l) => l.getAttribute("href")),
+    ).toEqual(["/courses/c1/assessments/test-1/note"]);
+  });
 });

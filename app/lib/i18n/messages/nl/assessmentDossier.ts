@@ -5,6 +5,7 @@ export const assessmentDossier = {
   analysis: "Toetsanalyse",
   analysisExplanation: "Uitleg",
   analysisLinked: "Gekoppeld op {date}.",
+  analysisNote: "Toelichting van de docent",
   analysisNumbers: "Cijfers",
   blueprint: "Toetsmatrijs",
   details: "Gegevens",
@@ -19,8 +20,11 @@ export const assessmentDossier = {
     noAnalysis:
       "Nog geen toetsanalyse gekoppeld: maak er een met *Toetsanalyse uitleggen* bij deze toets en koppel hem aan de toets.",
     noMarkingModel: "Nog geen beoordelingsmodel: voeg onderdelen toe aan de toets.",
+    noNote:
+      "Nog geen eigen toelichting bij de toetsanalyse: schrijf hem met *Toelichting schrijven* bij deze toets.",
     noOutcome: "Deze toets toetst nog geen leeruitkomst.",
     noPassMark: "Nog geen cesuur.",
     noQuestion: "{outcome} heeft nog geen vraag.",
   },
+  writeNote: "Toelichting schrijven",
 };

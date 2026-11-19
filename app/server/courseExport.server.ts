@@ -55,9 +55,12 @@ export async function linkedTestAnalysis(
   );
   const g = work ? await getGeneration(userId, work.generationId) : null;
   if (!g) return undefined;
-  const numbers = (JSON.parse(g.inputJson) as { analysis?: unknown }).analysis;
+  const input = JSON.parse(g.inputJson) as { analysis?: unknown; testInfo?: unknown };
   return {
-    numbers: typeof numbers === "string" ? numbers : "",
+    numbers: typeof input.analysis === "string" ? input.analysis : "",
+    ...(typeof input.testInfo === "string" && input.testInfo.trim()
+      ? { testInfo: input.testInfo }
+      : {}),
     explanation: g.outputMarkdown,
     createdAt: g.createdAt,
   };

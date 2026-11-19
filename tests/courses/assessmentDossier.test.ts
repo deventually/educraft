@@ -12,6 +12,13 @@ const analysis: DossierAnalysis = {
 const md = (data?: CourseData, locale: "nl" | "en" = "nl", a?: DossierAnalysis) =>
   assessmentDossierDoc(course(data), TEST1, locale, a)!.sections[0]!.markdown;
 
+/** The documented course whose final test has the teacher's own note on the analysis (P35.2). */
+function withNote(note = "Vraag 3 herschrijf ik: de afleiders waren te zwak."): CourseData {
+  const d = documentedCourse();
+  d.assessments[1]!.analysisNote = note;
+  return d;
+}
+
 /** A summative test with nothing filled in: no details, no outcomes, no parts. */
 function bareCourse(): CourseData {
   const d = documentedCourse();
@@ -46,7 +53,7 @@ describe("assessmentDossierDoc: the test dossier in one document", () => {
   });
 
   it("opens with what is still to do, or says that nothing is", () => {
-    const full = md(undefined, "nl", analysis);
+    const full = md(withNote(), "nl", analysis);
     expect(full.indexOf("## Nog te doen")).toBe(0);
     expect(full).toContain("Alles staat erin.");
     const noAnalysis = md();
@@ -88,6 +95,24 @@ describe("assessmentDossierDoc: the test dossier in one document", () => {
     expect(assessmentDossierDoc(course(), TEST1, "en")!.title).toBe(
       "Databases: test dossier Eindopdracht",
     );
+  });
+
+  it("puts the teacher's own note under the analysis (P35.2)", () => {
+    const m = md(withNote(), "nl", analysis);
+    expect(m).toContain("### Toelichting van de docent");
+    expect(m).toContain("Vraag 3 herschrijf ik: de afleiders waren te zwak.");
+    expect(m.indexOf("### Toelichting van de docent")).toBeGreaterThan(m.indexOf("### Uitleg"));
+    expect(md(withNote(), "en", analysis)).toContain("### The teacher's notes");
+  });
+
+  it("asks for the teacher's own note once an analysis is linked", () => {
+    const m = md(undefined, "nl", analysis);
+    expect(m).toContain(
+      "- Nog geen eigen toelichting bij de toetsanalyse: schrijf hem met *Toelichting schrijven* bij deze toets.",
+    );
+    expect(m).not.toContain("### Toelichting van de docent");
+    // Without an analysis, the analysis itself is what is still to do.
+    expect(md()).not.toContain("Nog geen eigen toelichting");
   });
 
   it("is null for a test that is not in the course", () => {

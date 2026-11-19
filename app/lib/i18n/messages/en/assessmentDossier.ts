@@ -5,6 +5,7 @@ export const assessmentDossier = {
   analysis: "Test analysis",
   analysisExplanation: "Explanation",
   analysisLinked: "Linked on {date}.",
+  analysisNote: "The teacher's notes",
   analysisNumbers: "Numbers",
   blueprint: "Test blueprint",
   details: "Details",
@@ -19,8 +20,11 @@ export const assessmentDossier = {
     noAnalysis:
       "No test analysis linked yet: make one with *Explain a test analysis* at this test and link it to the test.",
     noMarkingModel: "No marking model yet: add parts to the test.",
+    noNote:
+      "No notes of your own on the test analysis yet: write them with *Write notes* at this test.",
     noOutcome: "This test assesses no learning outcome yet.",
     noPassMark: "No pass mark yet.",
     noQuestion: "{outcome} has no question yet.",
   },
+  writeNote: "Write notes",
 };

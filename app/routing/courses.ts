@@ -9,6 +9,11 @@ export const courses: RouteArea = {
       // A colleague's course, shared with your team (P28.4): read only.
       route("shared/:id", "routes/courses.shared.$id.tsx"),
       route(":id", "routes/courses.$id.tsx"),
+      // The teacher's own notes on a test analysis, for the test dossier (P35.2).
+      route(
+        ":id/assessments/:assessmentId/note",
+        "routes/courses.$id.assessments.$assessmentId.note.tsx",
+      ),
     ]),
   ],
   standalone: [

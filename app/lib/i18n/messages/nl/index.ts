@@ -26,6 +26,7 @@ import { courseMembers } from "./courseMembers";
 import { courseTools } from "./courseTools";
 import { courses } from "./courses";
 import { documents } from "./documents";
+import { dossierNote } from "./dossierNote";
 import { error } from "./error";
 import { exportResult } from "./exportResult";
 import { features } from "./features";
@@ -120,6 +121,7 @@ export const nl = {
   courses,
   courseTools,
   documents,
+  dossierNote,
   error,
   exportResult,
   features,
