@@ -48,6 +48,10 @@ Elke derde tool alfabetisch, vanaf de derde, is holdout (vaste regel, getest in
 guided-reflection, rubric-builder en visit-prep. Op hun uitkomsten wordt niets aan de vragen
 bijgesteld. Het rapport toont de holdout apart.
 
+Een tool met een eval van na dit experiment (#337), zoals `reflection-feedback` (P39.3), doet niet
+mee: de vragen blijven zoals ze geschreven zijn, en zo verschuift de holdout niet. Zo'n tool wordt
+alleen door de LLM-judge beoordeeld (`AFTER_EXPERIMENT` in `tests/evals/judge-jev.test.ts`).
+
 ## Wie heeft gelijk
 
 Waar de twee het eens zijn, telt dat als overeenstemming, niet als bewijs dat ze gelijk hebben.

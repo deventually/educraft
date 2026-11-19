@@ -1,5 +1,5 @@
 import type { FormValues } from "~/lib/forms/values";
-import type { InputField } from "~/lib/registry/types";
+import type { InputField, Tool } from "~/lib/registry/types";
 
 /** A model as the tool page offers it: the teacher's own or a starter, in one language. */
 export interface ModelChoice {
@@ -24,6 +24,22 @@ export function ownModelFor(models: ModelChoice[], documentType: string): ModelC
     (parts.length > 1
       ? own.find((m) => parts.every((p) => m.documentTypes.includes(p)))
       : undefined)
+  );
+}
+
+/**
+ * The models a tool offers: those for one of its document types (the options of
+ * `assessmentModels.byField`), or for none in particular. So a reflection model never shows up
+ * when assessing a thesis, nor a thesis rubric under feedback on a reflection (P39.3).
+ */
+export function modelsForTool(
+  models: ModelChoice[],
+  tool: Pick<Tool, "inputs" | "assessmentModels">,
+): ModelChoice[] {
+  const by = tool.assessmentModels?.byField;
+  const types = new Set(tool.inputs.find((f) => f.name === by)?.options?.map((o) => o.value));
+  return models.filter(
+    (m) => m.documentTypes.length === 0 || m.documentTypes.some((t) => types.has(t)),
   );
 }
 

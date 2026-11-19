@@ -20,8 +20,15 @@ import {
 const EVALS = join(__dirname, "../../evals");
 const specs = loadJudgeSpecs(1);
 
+/**
+ * Tools whose eval came after this experiment (#337). The experiment's questions stay as they
+ * were written (version 1 is frozen, `judge-jev-v2.test.ts`), so a later tool is judged by the
+ * LLM judge only, and adding one never moves a tool in or out of the holdout.
+ */
+const AFTER_EXPERIMENT = ["reflection-feedback"];
+
 /** The tools `npm run eval` judges that have judged hard checks, with those checks. */
-const judged = ALL_TOOLS.flatMap((t) => {
+const judged = ALL_TOOLS.filter((t) => !AFTER_EXPERIMENT.includes(t.slug)).flatMap((t) => {
   let rubric = "";
   try {
     rubric = readFileSync(join(EVALS, t.slug, "rubric.md"), "utf8");

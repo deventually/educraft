@@ -4,7 +4,9 @@
  * id at boot. The stream applies it before saving, the result view before showing, so both
  * agree. No per-tool branch.
  */
-export const GUARD_IDS = ["input-numbers"] as const;
+import { JUDGEMENT } from "~/lib/tracks/feedforward";
+
+export const GUARD_IDS = ["input-numbers", "no-judgement"] as const;
 export type GuardId = (typeof GUARD_IDS)[number];
 
 // A number in digits, with an optional decimal part, not part of a word or a longer number.
@@ -46,8 +48,20 @@ function onlyInputNumbers(output: string, values: Record<string, unknown>): stri
     .join("\n");
 }
 
+/**
+ * "no-judgement": feedforward gives no grade or level (brief P39, 39.3). A line with one is
+ * dropped, by the rule the track's feedforward uses; a heading always stays.
+ */
+function noJudgement(output: string): string {
+  return output
+    .split("\n")
+    .filter((line) => /^\s*#/.test(line) || !JUDGEMENT.test(line.replace(/^\s*[-*]\s+/, "")))
+    .join("\n");
+}
+
 const GUARDS: Record<GuardId, (output: string, values: Record<string, unknown>) => string> = {
   "input-numbers": onlyInputNumbers,
+  "no-judgement": noJudgement,
 };
 
 /** The output as the teacher may see and keep it; unchanged for a stage without a guard. */

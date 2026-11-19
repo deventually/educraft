@@ -6,6 +6,8 @@ import reportNl from "./starters/onderzoeksverslag.nl.md?raw";
 import reportEn from "./starters/onderzoeksverslag.en.md?raw";
 import essayNl from "./starters/essay.nl.md?raw";
 import essayEn from "./starters/essay.en.md?raw";
+import alactNl from "./starters/alact-reflectie.nl.md?raw";
+import alactEn from "./starters/alact-reflectie.en.md?raw";
 
 type Text = Record<Locale, string>;
 
@@ -65,5 +67,16 @@ export const STARTER_MODELS: StarterModel[] = [
     documentTypes: ["essay"],
     framework: { nl: essayNl, en: essayEn },
     scale: OVG,
+  },
+  {
+    // P39.3: feedforward only, so no scale. The source is in the framework text itself.
+    id: "alact-reflection",
+    name: {
+      nl: "Reflectiecirkel van Korthagen (ALACT)",
+      en: "Korthagen's reflection cycle (ALACT)",
+    },
+    documentTypes: ["reflection"],
+    framework: { nl: alactNl, en: alactEn },
+    scale: { nl: "", en: "" },
   },
 ];

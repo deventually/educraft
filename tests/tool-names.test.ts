@@ -61,6 +61,7 @@ describe("task-first tool names (P19.1)", () => {
         "math-grading",
         "mentorai",
         "peer-tutoring",
+        "reflection-feedback",
         "rubric-builder",
         "scaffolding-feedback",
         "socratic-partner",

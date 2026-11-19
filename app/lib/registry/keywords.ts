@@ -63,6 +63,18 @@ export const TOOL_KEYWORDS: Record<string, string[]> = {
     "rosenshine",
   ],
   "visit-prep": ["stagebezoek", "bezoek voorbereiden", "internship visit", "prepare a visit"],
+  "reflection-feedback": [
+    "reflectie",
+    "reflectieverslag",
+    "pop",
+    "persoonlijk ontwikkelplan",
+    "slb",
+    "studieloopbaanbegeleiding",
+    "feedforward",
+    "korthagen",
+    "reflection",
+    "development plan",
+  ],
   "visit-report": ["bezoekverslag", "visit report", "steekwoorden", "stagebezoek", "onstage"],
   "conversation-prep": [
     "gesprek voorbereiden",
