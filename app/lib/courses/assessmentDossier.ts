@@ -1,7 +1,7 @@
 /**
  * One test's dossier (toetsdossier, brief P35.1) as a document to export: what is still to do,
  * the details, the blueprint, the marking model, pass mark and resit, the alignment findings of
- * this test and the linked test analysis. Built from the course and the caller's own linked
+ * this test and the linked test analysis with the teacher's own notes on it (P35.2). Built from the course and the caller's own linked
  * analysis alone, without AI; what is missing is named under "Nog te doen", never made up.
  * Pure and deterministic.
  */
@@ -18,6 +18,8 @@ import type { Assessment, CourseData } from "./types";
 /** The newest test analysis the caller linked to this test: its numbers and its explanation. */
 export interface DossierAnalysis {
   numbers: string;
+  /** What the teacher said about the test in the analysis tool (P35.2 sends it along). */
+  testInfo?: string;
   explanation: string;
   createdAt: Date;
 }
@@ -50,6 +52,8 @@ function todoLines(
     ),
     a.parts?.length ? "" : t.noMarkingModel,
     analysis ? "" : t.noAnalysis,
+    // The BKE asks for the teacher's own analysis: once the numbers are there, their notes (P35.2).
+    analysis && !a.analysisNote ? t.noNote : "",
   ].filter(Boolean);
 }
 
@@ -74,6 +78,7 @@ export function assessmentDossierDoc(
   const todo = todoLines(data, a, locale, analysis);
   const assessed = assessedOutcomes(a).size > 0;
   const findings = checkAlignment(data).filter((f) => f.itemId === a.id);
+  const note = a.analysisNote ? [`### ${d.analysisNote}`, a.analysisNote] : [];
   const blocks = [
     `## ${d.todo.heading}`,
     todo.length ? todo.map((l) => `- ${l}`).join("\n") : d.todo.done,
@@ -117,8 +122,9 @@ export function assessmentDossierDoc(
             analysis.numbers,
             `### ${d.analysisExplanation}`,
             analysis.explanation,
+            ...note,
           ]
-        : [],
+        : note,
     ),
   ];
   return toExportDoc({

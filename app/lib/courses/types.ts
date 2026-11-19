@@ -129,6 +129,8 @@ export interface Assessment {
   /** How the test is taken (afname): place, aids, AI. */
   conduct?: string;
   parts?: AssessmentPart[];
+  /** The teacher's own notes on the test analysis, for the test dossier (P35.2). */
+  analysisNote?: string;
 }
 
 /** How a course meets; option values are stable slugs, never shown. */

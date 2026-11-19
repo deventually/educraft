@@ -561,6 +561,16 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   counts at the respondents and puts unknown places on the whole course. The `evaluate-course`
   intent (`app/server/courseEvaluation.server.ts`) calls the teacher's chosen model with the quota
   gate and one retry, and saves nothing. Eval: `npm run eval:evaluation`.
+- **Notes on the test analysis (P35.2).** `Assessment.analysisNote` is the teacher's own text on
+  the linked test analysis; the test dossier shows it under *Toelichting van de docent*, and
+  *Nog te doen* asks for it once an analysis is linked. Its page
+  (`/courses/:id/assessments/:assessmentId/note`, `app/server/dossierNote.server.ts`) saves it as
+  course content (members too). On request `assessment-dossier-notes@v1` writes a concept from the
+  caller's own linked analysis only (`buildDossierNoteMessage`, `app/lib/courses/dossierNote.ts`),
+  with one or two reflection questions; `parseDossierNote` drops every sentence with a number that
+  is not in the numbers, the pass mark or the test info (the earlier AI explanation does not
+  count) or about a question that is not in the analysis table. The concept is never saved: the
+  teacher takes it over and rewrites it. Eval: `npm run eval:dossier-note`.
 - **Course progress.** `courseProgress(data, findings)` (`app/lib/courses/progress.ts`) is pure
   and advisory like the checks: six backwards-design steps (details, outcomes, assessments,
   lessons, weeks, check), each with its tab, what is done of it and the next open step. The

@@ -1,0 +1,83 @@
+{
+  "cases": [
+    {
+      "id": "hbo-negative-rir-nl",
+      "locale": "nl",
+      "about": "hbo, 96 kandidaten, tien vragen. V7 heeft een negatieve Rir en de alfa stijgt zonder hem: die moet opvallen (sleutel controleren).",
+      "input": {
+        "test": "Tentamen Bedrijfseconomie",
+        "passMark": 55,
+        "numbers": "**Toetsanalyse**\n\n- Kandidaten: 96\n- Vragen: 10\n- Cronbachs alfa: 0,73\n\n| Vraag | Max | p | Rit | Rir | Alfa zonder deze vraag |\n| --- | --- | --- | --- | --- | --- |\n| V1 | 1 | 0,78 | 0,45 | 0,36 | 0,71 |\n| V2 | 1 | 0,66 | 0,51 | 0,42 | 0,70 |\n| V3 | 1 | 0,83 | 0,38 | 0,30 | 0,72 |\n| V4 | 2 | 0,59 | 0,55 | 0,44 | 0,69 |\n| V5 | 1 | 0,71 | 0,40 | 0,31 | 0,72 |\n| V6 | 1 | 0,62 | 0,47 | 0,37 | 0,71 |\n| V7 | 1 | 0,41 | -0,02 | -0,12 | 0,77 |\n| V8 | 2 | 0,55 | 0,58 | 0,46 | 0,68 |\n| V9 | 1 | 0,74 | 0,42 | 0,33 | 0,71 |\n| V10 | 1 | 0,69 | 0,36 | 0,27 | 0,72 |",
+        "testInfo": "Kennistoets bedrijfseconomie, tien meerkeuzevragen met 4 opties, eindtoets blok 1."
+      },
+      "expectQuestions": [
+        "7"
+      ]
+    },
+    {
+      "id": "mbo-small-easy-nl",
+      "locale": "nl",
+      "about": "mbo, maar 18 kandidaten en veel heel makkelijke vragen; V7 is moeilijk maar onderscheidt goed. Voorzichtig met conclusies bij een kleine groep.",
+      "input": {
+        "test": "Praktijktoets Hygiëne",
+        "passMark": 60,
+        "numbers": "**Toetsanalyse**\n\n- Kandidaten: 18\n- Vragen: 8\n- Cronbachs alfa: 0,61\n\n| Vraag | Max | p | Rit | Rir | Alfa zonder deze vraag |\n| --- | --- | --- | --- | --- | --- |\n| V1 | 1 | 0,97 | 0,12 | 0,08 | 0,62 |\n| V2 | 1 | 0,94 | 0,20 | 0,14 | 0,61 |\n| V3 | 1 | 0,89 | 0,33 | 0,25 | 0,58 |\n| V4 | 1 | 0,92 | 0,15 | 0,09 | 0,62 |\n| V5 | 2 | 0,81 | 0,48 | 0,36 | 0,55 |\n| V6 | 1 | 0,95 | 0,18 | 0,12 | 0,61 |\n| V7 | 2 | 0,38 | 0,52 | 0,39 | 0,54 |\n| V8 | 1 | 0,90 | 0,26 | 0,19 | 0,60 |",
+        "testInfo": "Schriftelijk deel van de praktijktoets, acht vragen, deels open."
+      },
+      "expectQuestions": [
+        "7"
+      ]
+    },
+    {
+      "id": "wo-low-alpha-en",
+      "locale": "en",
+      "about": "wo, English, six questions, low alpha. Q4 has a p below the guessing level (four options) and no discrimination.",
+      "input": {
+        "test": "Midterm Research Methods",
+        "passMark": 55,
+        "numbers": "**Test analysis**\n\n- Candidates: 140\n- Questions: 6\n- Cronbach's alpha: 0.56\n\n| Question | Max | p | Rit | Rir | Alpha without this question |\n| --- | --- | --- | --- | --- | --- |\n| Q1 | 1 | 0.72 | 0.41 | 0.30 | 0.52 |\n| Q2 | 1 | 0.65 | 0.35 | 0.24 | 0.54 |\n| Q3 | 1 | 0.58 | 0.44 | 0.33 | 0.51 |\n| Q4 | 1 | 0.19 | 0.05 | -0.03 | 0.60 |\n| Q5 | 1 | 0.70 | 0.30 | 0.19 | 0.55 |\n| Q6 | 1 | 0.63 | 0.39 | 0.28 | 0.53 |",
+        "testInfo": "Six multiple-choice questions with 4 options, midterm of term 2."
+      },
+      "expectQuestions": [
+        "4"
+      ]
+    },
+    {
+      "id": "fault-made-up-p-nl",
+      "locale": "nl",
+      "about": "Ingebouwde fout: de eerdere uitleg noemt voor V3 een p-waarde van 0,18, maar in de tabel staat 0,64. Die verzonnen p-waarde (en de conclusie dat V3 te moeilijk was) mag niet in het concept komen. V4 is de echte lastige vraag.",
+      "input": {
+        "test": "Tentamen Anatomie",
+        "passMark": 55,
+        "numbers": "**Toetsanalyse**\n\n- Kandidaten: 72\n- Vragen: 8\n- Cronbachs alfa: 0,76\n\n| Vraag | Max | p | Rit | Rir | Alfa zonder deze vraag |\n| --- | --- | --- | --- | --- | --- |\n| V1 | 1 | 0,81 | 0,44 | 0,35 | 0,74 |\n| V2 | 1 | 0,73 | 0,48 | 0,38 | 0,73 |\n| V3 | 1 | 0,64 | 0,50 | 0,40 | 0,73 |\n| V4 | 1 | 0,29 | 0,21 | 0,11 | 0,76 |\n| V5 | 2 | 0,57 | 0,61 | 0,49 | 0,71 |\n| V6 | 1 | 0,77 | 0,39 | 0,30 | 0,75 |\n| V7 | 1 | 0,68 | 0,46 | 0,36 | 0,74 |\n| V8 | 1 | 0,85 | 0,31 | 0,23 | 0,75 |",
+        "testInfo": "Acht vragen, meerkeuze en kort open.",
+        "explanation": "In het kort: de toets is redelijk betrouwbaar. Vraag 3 viel op met een p-waarde van 0,18: die was voor bijna iedereen te moeilijk. Bekijk ook vraag 4, die weinig onderscheidt."
+      },
+      "expectQuestions": [
+        "4"
+      ],
+      "forbid": [
+        "0,18",
+        "0.18"
+      ]
+    },
+    {
+      "id": "fault-missing-question-nl",
+      "locale": "nl",
+      "about": "Ingebouwde fout: de eerdere uitleg en de toetsinfo spreken over vraag 12, maar de toets heeft acht vragen. Een conclusie over vraag 12 mag niet in het concept komen. V3 is de echte zwakke vraag (Rir bijna nul).",
+      "input": {
+        "test": "Tentamen Statistiek",
+        "passMark": 55,
+        "numbers": "**Toetsanalyse**\n\n- Kandidaten: 110\n- Vragen: 8\n- Cronbachs alfa: 0,72\n\n| Vraag | Max | p | Rit | Rir | Alfa zonder deze vraag |\n| --- | --- | --- | --- | --- | --- |\n| V1 | 1 | 0,76 | 0,43 | 0,34 | 0,70 |\n| V2 | 1 | 0,69 | 0,40 | 0,31 | 0,71 |\n| V3 | 1 | 0,58 | 0,12 | 0,01 | 0,75 |\n| V4 | 2 | 0,62 | 0,55 | 0,43 | 0,67 |\n| V5 | 1 | 0,80 | 0,37 | 0,29 | 0,71 |\n| V6 | 1 | 0,66 | 0,49 | 0,39 | 0,69 |\n| V7 | 1 | 0,71 | 0,44 | 0,35 | 0,70 |\n| V8 | 1 | 0,54 | 0,47 | 0,36 | 0,69 |",
+        "testInfo": "Acht vragen; studenten klaagden na afloop vooral over vraag 12.",
+        "explanation": "Vraag 12 was onduidelijk geformuleerd en moet worden herschreven. Vraag 3 onderscheidt nauwelijks."
+      },
+      "expectQuestions": [
+        "3"
+      ],
+      "forbidQuestions": [
+        "12"
+      ]
+    }
+  ]
+}

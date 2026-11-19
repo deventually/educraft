@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Form } from "react-router";
+import { Form, Link } from "react-router";
 import { COURSE_LIMITS } from "~/lib/courses/schema";
 import {
   type Assessment,
@@ -259,8 +259,8 @@ function PartsList({ data, assessment: a }: { data: CourseData; assessment: Asse
 
 /**
  * Under each test: its details and parts, and the documents made from them (the blueprint for
- * every test, the marking model once it has parts, the test dossier for a summative test). The
- * documents are built without AI.
+ * every test, the marking model once it has parts, the test dossier for a summative test, with a
+ * link to the teacher's own notes on its analysis). The documents are built without AI.
  */
 export function TestDocuments({
   courseId,
@@ -290,7 +290,17 @@ export function TestDocuments({
           <ExportPanel url={`${base}/marking-model/export`} label={d.markingModel.export} />
         ) : null}
         {a.kind === "summative" ? (
-          <ExportPanel url={`${base}/dossier/export`} label={t.assessmentDossier.export} />
+          <>
+            <ExportPanel url={`${base}/dossier/export`} label={t.assessmentDossier.export} />
+            {/* The teacher's own notes on the analysis, in the dossier (P35.2). */}
+            <Link
+              to={`${base}/note`}
+              className="inline-block text-sm font-medium text-violet-700 underline underline-offset-2"
+            >
+              {t.assessmentDossier.writeNote}
+              <span className="sr-only">: {a.title}</span>
+            </Link>
+          </>
         ) : null}
       </div>
     </>

@@ -142,6 +142,7 @@ const AssessmentSchema = z.object({
   resit: LongText.optional(),
   conduct: LongText.optional(),
   parts: z.array(PartSchema).max(COURSE_LIMITS.parts).optional(),
+  analysisNote: LongText.optional(),
 });
 
 const ScheduleSchema = z.object({
