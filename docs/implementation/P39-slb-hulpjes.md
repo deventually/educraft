@@ -71,6 +71,12 @@ Bastiaan op het advies: "Ja".
 - Na P38.3: de feedforward-prompt moet er zijn. Kan het niet zonder een tak per documenttype, dan
   wordt "formatief" een eigenschap van het beoordelingsmodel (data), niet van de tool.
 
+- **Open punt (eval 2026-11-19rf1, #390):** in 2 van de 18 runs ging het mis. Eén keer nam
+  `feedforward@v2` een naam over die de namencheck had gemist; één keer stond er een sterk punt
+  zonder citaat. Bastiaan: "we laten het voor nu". Komt er in de pilot een naam terug, dan volgt
+  `feedforward@v3` met een strengere naamregel (afgestemd op nieuwe cases, gemeten op deze), plus
+  een controle in code die een citaat schrapt dat niet letterlijk in de tekst staat.
+
 ### 39.4 — De wegwijzer (zonder AI, geen migratie)
 
 - De beheerder vult op Beheer → *Organisatie* een lijst in: per vraag (studievertraging, psychische
