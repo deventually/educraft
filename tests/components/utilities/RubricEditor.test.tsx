@@ -135,6 +135,13 @@ describe("RubricEditor", () => {
     await waitFor(() => expect(lastData(posts).grade.decimals).toBe(0));
   });
 
+  it("offers the rubric as Excel (P30.3)", async () => {
+    renderEditor();
+    expect(
+      await screen.findByRole("button", { name: "Download als Excel (.xlsx)" }),
+    ).toBeInTheDocument();
+  });
+
   it("shows a preview table with a caption", async () => {
     renderEditor();
     expect(

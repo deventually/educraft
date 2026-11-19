@@ -9,8 +9,8 @@ import type { User } from "./auth.server";
 import { loadCourse } from "./courses.server";
 import { type Course, listLinkedWork } from "./repositories/courses.server";
 import { getGeneration } from "./repositories/generations.server";
-import type { ExportDoc } from "~/lib/export/doc";
-import { type ExportFormat, formatsFor } from "~/lib/export/formats";
+import { type ExportDoc, exportFormats } from "~/lib/export/doc";
+import type { ExportFormat } from "~/lib/export/formats";
 import { assessmentDossierDoc, type DossierAnalysis } from "~/lib/courses/assessmentDossier";
 import { markingModelDoc } from "~/lib/courses/markingModel";
 import { moduleGuideDoc } from "~/lib/courses/moduleGuide";
@@ -126,7 +126,7 @@ export async function loadTestDocumentExport(
   const base = `/courses/${encodeURIComponent(course.id)}/assessments/${encodeURIComponent(a.id)}/${params.document}`;
   return {
     doc,
-    formats: formatsFor(doc.sections.map((s) => s.kind)),
+    formats: exportFormats(doc),
     fileBase: fmt(kind.fileName(locale), { course: course.name, assessment: a.title }),
     hrefs: hrefs(base),
   };
@@ -143,7 +143,7 @@ export async function loadCourseDocumentExport(
   const doc = kind.make(course, locale);
   return {
     doc,
-    formats: formatsFor(doc.sections.map((s) => s.kind)),
+    formats: exportFormats(doc),
     fileBase: fmt(kind.fileName(locale), { course: course.name }),
     hrefs: hrefs(`/courses/${encodeURIComponent(course.id)}/documents/${params.document}`),
   };
@@ -152,6 +152,7 @@ export async function loadCourseDocumentExport(
 const hrefs = (base: string): Record<ExportFormat, string> => ({
   docx: `${base}/export/docx`,
   pdf: `${base}/print`,
+  xlsx: `${base}/export/xlsx`,
   pptx: `${base}/export/pptx`,
   md: `${base}/export/md`,
 });

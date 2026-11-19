@@ -17,6 +17,15 @@ export const utilities: Messages["utilities"] = {
       options: "Enter 2 to 10 answer options.",
       passPercent: "Enter a pass mark between 0 and 100 percent.",
     },
+    excel: {
+      cutPoints: "Pass mark in points",
+      fileName: "Grade table {max} points",
+      guessPoints: "Guessing score in points",
+      setting: "Setting",
+      settingsSheet: "Pass mark",
+      tableSheet: "Grade table",
+      value: "Value",
+    },
     grade: "Grade",
     guessing: "Guessing correction (multiple-choice test)",
     guessingHint:
@@ -54,6 +63,19 @@ export const utilities: Messages["utilities"] = {
       tooFewCandidates: "At least 3 candidates are needed.",
       tooFewItems: "At least 2 questions are needed.",
       tooLarge: "The list is too large: at most 5000 candidates and 200 questions.",
+    },
+    excel: {
+      alpha: "Cronbach's alpha",
+      candidates: "Candidates",
+      fileName: "Item analysis",
+      items: "Questions",
+      itemsSheet: "Per question",
+      maxTotal: "Maximum total score",
+      meanTotal: "Mean total score",
+      measure: "Measure",
+      sdTotal: "Standard deviation of total score",
+      summarySheet: "Summary",
+      value: "Value",
     },
     explain: "Explain this",
     explainHint:
@@ -121,6 +143,7 @@ export const utilities: Messages["utilities"] = {
       knockout: "knock-out",
       level: "Level",
       points: "pt",
+      weight: "Weight",
     },
     exportHint:
       "Paste the Markdown into an assessment tool, such as Assess student work and give feedback, or the table into Word or Excel.",

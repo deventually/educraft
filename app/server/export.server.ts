@@ -12,8 +12,8 @@ import {
   listTemplatesForUser,
   type SlideTemplateInfo,
 } from "./repositories/slideTemplates.server";
-import { type ExportDoc, toExportDoc } from "~/lib/export/doc";
-import { type ExportFormat, formatsFor } from "~/lib/export/formats";
+import { type ExportDoc, exportFormats, toExportDoc } from "~/lib/export/doc";
+import type { ExportFormat } from "~/lib/export/formats";
 import { slideHeadings } from "~/lib/export/slides";
 import { getToolBySlug } from "~/lib/registry";
 import { loc } from "~/lib/i18n/localized";
@@ -74,7 +74,7 @@ export async function loadExport(request: Request, generationId: string): Promis
   const date = first.createdAt.toISOString().slice(0, 10);
   return {
     doc,
-    formats: formatsFor(doc.sections.map((s) => s.kind)),
+    formats: exportFormats(doc),
     fileBase: `${title} ${date}`,
   };
 }
