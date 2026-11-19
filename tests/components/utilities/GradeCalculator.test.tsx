@@ -21,6 +21,13 @@ describe("GradeCalculator", () => {
     expect(await screen.findByText("Cesuur: 16,5 van de 30 punten.")).toBeInTheDocument();
   });
 
+  it("offers the grade table as Excel (P30.3)", async () => {
+    renderCalc();
+    expect(
+      await screen.findByRole("button", { name: "Download als Excel (.xlsx)" }),
+    ).toBeInTheDocument();
+  });
+
   it("takes the maximum from ?max= (the link from a rubric)", async () => {
     renderCalc("nl", "/?max=12");
     expect(await screen.findByText("Cesuur: 6,6 van de 12 punten.")).toBeInTheDocument();

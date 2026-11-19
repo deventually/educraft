@@ -4,7 +4,7 @@
  * and the preview read only this model, so what you see is what you get.
  */
 import type { Locale } from "~/lib/i18n";
-import type { ExportKind } from "./formats";
+import { type ExportFormat, type ExportKind, formatsFor } from "./formats";
 import { type Block, parseMarkdown } from "./markdown";
 import type { SlideHeadings } from "./slides";
 
@@ -52,4 +52,13 @@ export function toExportDoc({ title, locale, sections }: ExportInput): ExportDoc
       }))
       .filter((s) => s.blocks.length > 0),
   };
+}
+
+/**
+ * The formats to offer for this result: those of its kinds (`formatsFor`), and Excel only when
+ * there is a table to put in it (brief P30.3: no table, no Excel button).
+ */
+export function exportFormats(doc: ExportDoc): ExportFormat[] {
+  const hasTable = doc.sections.some((s) => s.blocks.some((b) => b.type === "table"));
+  return formatsFor(doc.sections.map((s) => s.kind)).filter((f) => f !== "xlsx" || hasTable);
 }

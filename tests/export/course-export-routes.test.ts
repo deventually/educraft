@@ -1,3 +1,4 @@
+import ExcelJS from "exceljs";
 import JSZip from "jszip";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { signInAs, signedRequest } from "../helpers/session";
@@ -87,15 +88,28 @@ describe("exporting a test blueprint from the course", () => {
     });
   });
 
-  it("gives the owner a preview with Word, PDF and Markdown", async () => {
+  it("gives the owner a preview with Word, PDF, Excel and Markdown", async () => {
     const data = await loadPreview();
     expect(data.doc.title).toBe("Databases: toetsmatrijs Eindopdracht");
     expect(data.doc.sections[0]!.markdown).toContain("### Leeruitkomsten en onderdelen");
     expect(data.downloads).toEqual([
       { format: "docx", href: `${base()}/export/docx` },
       { format: "pdf", href: `${base()}/print` },
+      { format: "xlsx", href: `${base()}/export/xlsx` },
       { format: "md", href: `${base()}/export/md` },
     ]);
+  });
+
+  it("returns the blueprint as Excel, a sheet per table (P30.3)", async () => {
+    const res = await loadFile("xlsx");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Disposition")).toMatch(
+      /^attachment; filename="Databases toetsmatrijs Eindopdracht\.xlsx"/,
+    );
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(await res.arrayBuffer());
+    expect(wb.worksheets.length).toBeGreaterThan(0);
+    expect(wb.worksheets.map((w) => w.name)).toContain("Leeruitkomsten en onderdelen");
   });
 
   it("returns the blueprint as a Word file named after the course and the test", async () => {
@@ -114,7 +128,7 @@ describe("exporting a test blueprint from the course", () => {
     const md = await (await loadFile("md")).text();
     expect(md).toMatch(/^# Databases: toetsmatrijs Eindopdracht\n/);
     expect(await status(loadFile("pdf"))).toBe(404);
-    expect(await status(loadFile("xlsx"))).toBe(404);
+    expect(await status(loadFile("pptx"))).toBe(404);
     const data = (await printPage.loader({
       request: get(`${base()}/print`),
       params: params(),
@@ -122,13 +136,14 @@ describe("exporting a test blueprint from the course", () => {
     expect(data.doc.title).toBe("Databases: toetsmatrijs Eindopdracht");
   });
 
-  it("gives the marking model of a test with parts, in all three formats", async () => {
+  it("gives the marking model of a test with parts, in all four formats", async () => {
     doc = "marking-model";
     const data = await loadPreview();
     expect(data.doc.title).toBe("Databases: nakijkmodel Eindopdracht");
     expect(data.downloads.map((d) => d.href)).toEqual([
       `${base()}/export/docx`,
       `${base()}/print`,
+      `${base()}/export/xlsx`,
       `${base()}/export/md`,
     ]);
     const res = await loadFile("docx");
@@ -210,7 +225,7 @@ describe("exporting the test dossier", () => {
     expect(md).toContain("Eigen uitleg.");
     expect(md).not.toContain("0,11");
     expect(md).not.toContain("Uitleg van een collega.");
-    expect(data.downloads.map((d) => d.format)).toEqual(["docx", "pdf", "md"]);
+    expect(data.downloads.map((d) => d.format)).toEqual(["docx", "pdf", "xlsx", "md"]);
   });
 
   it("gives the editor their own analysis, and the Word file a dossier name", async () => {

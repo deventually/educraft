@@ -1,3 +1,4 @@
+import type { Sheet } from "~/lib/export/xlsx";
 import type { RubricCriterion, RubricData, RubricLevel } from "./schema";
 
 /** Localized words used in an export; the caller passes them from the message bundle. */
@@ -55,4 +56,34 @@ export function rubricToMarkdown(data: RubricData, labels: RubricExportLabels): 
   return [line(head), line(head.map(() => "---")), ...rows(data, labels, true).map(line)].join(
     "\n",
   );
+}
+
+/**
+ * The rubric as one Excel sheet (brief P30.3): a row per criterion, per level its text and its
+ * points in a column of their own, so the points stay numbers to count with.
+ */
+export function rubricSheet(
+  data: RubricData,
+  name: string,
+  labels: RubricExportLabels & { weight: string },
+): Sheet {
+  const width = levelCount(data);
+  const levels = Array.from({ length: width }, (_, i) => `${labels.level} ${i + 1}`);
+  return {
+    name,
+    header: [
+      labels.criterion,
+      labels.weight,
+      ...levels.flatMap((l) => [l, `${l} (${labels.points})`]),
+    ],
+    rows: data.criteria.map((c) => [
+      criterionTitle(c, labels),
+      c.weight ?? 1,
+      ...Array.from({ length: width }, (_, i) => {
+        const l = c.levels[i];
+        if (!l) return [null, null];
+        return [l.description.trim() ? `${l.label}: ${l.description}` : l.label, l.points];
+      }).flat(),
+    ]),
+  };
 }

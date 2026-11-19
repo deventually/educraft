@@ -2,7 +2,13 @@
 export const exportResult = {
   button: "Export",
   download: "Download as {format}",
-  formats: { docx: "Word (.docx)", md: "Markdown (.md)", pptx: "PowerPoint (.pptx)" },
+  excelFailed: "The Excel file could not be made. Please try again.",
+  formats: {
+    docx: "Word (.docx)",
+    md: "Markdown (.md)",
+    pptx: "PowerPoint (.pptx)",
+    xlsx: "Excel (.xlsx)",
+  },
   intro: "This is what the file looks like.",
   loading: "Loading preview…",
   newTab: "(opens in a new tab)",

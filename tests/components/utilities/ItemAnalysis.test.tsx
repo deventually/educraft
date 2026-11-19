@@ -62,6 +62,14 @@ describe("ItemAnalysis", () => {
     expect(result).not.toHaveTextContent("Anna");
   });
 
+  it("offers the analysis as Excel only once there is a result (P30.3)", async () => {
+    renderAnalysis();
+    await screen.findByLabelText("Scorelijst");
+    expect(screen.queryByRole("button", { name: "Download als Excel (.xlsx)" })).toBeNull();
+    await paste(LIST);
+    expect(screen.getByRole("button", { name: "Download als Excel (.xlsx)" })).toBeInTheDocument();
+  });
+
   it("names the error when a score is above the maximum", async () => {
     const user = userEvent.setup();
     renderAnalysis();

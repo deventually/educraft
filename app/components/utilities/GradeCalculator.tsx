@@ -12,6 +12,8 @@ import {
   parseGradeScale,
   type GradeScaleError,
 } from "~/lib/utilities/grade";
+import { gradeSheets } from "~/lib/utilities/grade/sheet";
+import { ExcelDownload } from "~/components/export/ExcelDownload";
 import { copyText, formatGrade, formatNumber, parseNumber } from "./format";
 
 interface Draft {
@@ -215,6 +217,13 @@ export function GradeCalculator() {
                 <Printer className="size-4" aria-hidden />
                 {g.print}
               </Button>
+              <ExcelDownload
+                fileName={fmt(g.excel.fileName, {
+                  max: formatNumber(result.scale.maxPoints, locale),
+                })}
+                title={g.tableCaption}
+                sheets={() => gradeSheets(result.scale, g)}
+              />
             </div>
             <div className="mt-4 max-w-sm overflow-x-auto rounded-xl border border-slate-200 bg-white">
               <table className="w-full text-left text-sm">

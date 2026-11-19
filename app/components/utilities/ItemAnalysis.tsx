@@ -6,7 +6,9 @@ import { useLocale, useT } from "~/lib/i18n/useT";
 import { fmt } from "~/lib/i18n/format";
 import { analyse, parseScores } from "~/lib/utilities/item-analysis";
 import { analysisMarkdown } from "~/lib/utilities/item-analysis/report";
+import { analysisSheets } from "~/lib/utilities/item-analysis/sheet";
 import { writeHandoff } from "~/lib/forms/handoff";
+import { ExcelDownload } from "~/components/export/ExcelDownload";
 import { copyText, formatNumber } from "./format";
 
 const TAG = { nl: "nl-NL", en: "en-GB" } as const;
@@ -154,6 +156,11 @@ export function ItemAnalysis({ explainWith }: { explainWith?: string }) {
                 <Copy className="size-4" aria-hidden />
                 {copied ? a.copied : a.copy}
               </Button>
+              <ExcelDownload
+                fileName={a.excel.fileName}
+                title={a.report.title}
+                sheets={() => analysisSheets(stats, a)}
+              />
             </div>
             {explainWith && <HelpText id={`${id}-explain-hint`}>{a.explainHint}</HelpText>}
             <h3 id={`${id}-table`} className="mt-6 text-sm font-medium text-slate-700">

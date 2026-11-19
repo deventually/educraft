@@ -12,9 +12,11 @@ import {
   RUBRIC_LIMITS,
   rubricToMarkdown,
   rubricGradeSettings,
+  rubricSheet,
   rubricToTsv,
   type RubricData,
 } from "~/lib/utilities/rubric";
+import { ExcelDownload } from "~/components/export/ExcelDownload";
 import { copyText, formatNumber } from "./format";
 import { CriterionEditor } from "./RubricCriterionEditor";
 import { GradeSettings } from "./RubricGradeSettings";
@@ -188,6 +190,11 @@ export function RubricEditor({ rubric }: { rubric: EditableRubric }) {
             <Copy className="size-4" aria-hidden />
             {copied === "md" ? r.copied : r.copyMarkdown}
           </Button>
+          <ExcelDownload
+            fileName={draft.name}
+            title={draft.name}
+            sheets={() => [rubricSheet(data, draft.name, r.export)]}
+          />
         </div>
         <p className="text-sm text-slate-600">{r.exportHint}</p>
         <RubricTable data={data} caption={r.previewCaption} />

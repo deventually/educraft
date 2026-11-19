@@ -2,7 +2,13 @@
 export const exportResult = {
   button: "Exporteer",
   download: "Download als {format}",
-  formats: { docx: "Word (.docx)", md: "Markdown (.md)", pptx: "PowerPoint (.pptx)" },
+  excelFailed: "Het Excel-bestand kon niet worden gemaakt. Probeer het opnieuw.",
+  formats: {
+    docx: "Word (.docx)",
+    md: "Markdown (.md)",
+    pptx: "PowerPoint (.pptx)",
+    xlsx: "Excel (.xlsx)",
+  },
   intro: "Zo ziet het bestand eruit.",
   loading: "Voorbeeld laden…",
   newTab: "(opent in een nieuw tabblad)",

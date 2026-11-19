@@ -15,6 +15,15 @@ export const utilities = {
       options: "Vul 2 tot en met 10 antwoordmogelijkheden in.",
       passPercent: "Vul een cesuur in tussen 0 en 100 procent.",
     },
+    excel: {
+      cutPoints: "Cesuur in punten",
+      fileName: "Cijfertabel {max} punten",
+      guessPoints: "Raadscore in punten",
+      setting: "Instelling",
+      settingsSheet: "Cesuur",
+      tableSheet: "Cijfertabel",
+      value: "Waarde",
+    },
     grade: "Cijfer",
     guessing: "Raadkanscorrectie (meerkeuzetoets)",
     guessingHint:
@@ -53,6 +62,19 @@ export const utilities = {
       tooFewCandidates: "Er zijn minstens 3 kandidaten nodig.",
       tooFewItems: "Er zijn minstens 2 vragen nodig.",
       tooLarge: "De lijst is te groot: hooguit 5000 kandidaten en 200 vragen.",
+    },
+    excel: {
+      alpha: "Cronbachs alfa",
+      candidates: "Kandidaten",
+      fileName: "Toetsanalyse",
+      items: "Vragen",
+      itemsSheet: "Per vraag",
+      maxTotal: "Maximale totaalscore",
+      meanTotal: "Gemiddelde totaalscore",
+      measure: "Maat",
+      sdTotal: "Standaarddeviatie totaalscore",
+      summarySheet: "Samenvatting",
+      value: "Waarde",
     },
     explain: "Laat uitleggen",
     explainHint:
@@ -121,6 +143,7 @@ export const utilities = {
       knockout: "knock-out",
       level: "Niveau",
       points: "pt",
+      weight: "Gewicht",
     },
     exportHint:
       "Plak de Markdown in een beoordelingstool, zoals Studentwerk beoordelen en feedback geven, of de tabel in Word of Excel.",

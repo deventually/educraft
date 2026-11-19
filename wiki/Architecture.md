@@ -725,6 +725,13 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   for anyone who may not use it); `fillPptxTemplate` (`pptxTemplate.ts`, JSZip, no extra library)
   removes the template's own slides and writes each slide in its "Title and Content" layout, so the
   master's logo, colours and fonts come along; the notes come from the `pptxgenjs` file.
+  **Excel (30.3)** is offered for `table` and `rubric`, and only when the result holds a table
+  (`exportFormats`). `xlsx.ts` (`exceljs`, loaded only when used) makes a sheet per table, named
+  after the heading above it (31 characters, unique), the header bold and frozen; `cellValue`
+  makes a plain number a number (a Dutch `3,5` too) and leaves anything ambiguous (`1.250`) as
+  text. A text cell is never a formula. The tools without AI hand their own `Sheet`s to
+  `writeXlsx` in the browser (`ExcelDownload`): `gradeSheets`, `analysisSheets` (statistics
+  only, never the score list) and `rubricSheet` (points in their own columns).
 - **Pilot feedback.** Pure rules in `app/lib/pilot/` (answer options, `checkinDue`,
   `summarizeByTool`); storage in `feedback.server.ts` and `pilot.server.ts`. Under every saved
   result `ResultActions` shows the `FeedbackWidget`: a thumb, then optionally time saved

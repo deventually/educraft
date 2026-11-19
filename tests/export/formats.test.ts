@@ -18,8 +18,15 @@ describe("formatsFor (P30.1)", () => {
       expect(formatsFor([kind])).not.toContain("pptx");
   });
 
+  it("adds Excel for tables and rubrics, after PDF (P30.3)", () => {
+    expect(formatsFor(["table"])).toEqual(["docx", "pdf", "xlsx", "md"]);
+    expect(formatsFor(["rubric"])).toEqual(["docx", "pdf", "xlsx", "md"]);
+    for (const kind of ["document", "slides", "test-items"] as const)
+      expect(formatsFor([kind])).not.toContain("xlsx");
+  });
+
   it("offers each format once for a result with several kinds", () => {
-    expect(formatsFor(["table", "test-items"])).toEqual(formatsFor(["document"]));
+    expect(formatsFor(["table", "rubric", "test-items"])).toEqual(formatsFor(["table"]));
   });
 
   it("falls back to a document when nothing is known", () => {

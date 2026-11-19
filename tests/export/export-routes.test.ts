@@ -1,3 +1,4 @@
+import ExcelJS from "exceljs";
 import { readFileSync } from "node:fs";
 import JSZip from "jszip";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -116,6 +117,36 @@ describe("export routes (P30.1)", () => {
     const zip = await JSZip.loadAsync(new Uint8Array(await res.arrayBuffer()));
     expect(zip.file("ppt/slides/slide2.xml")).toBeTruthy();
     expect(await zip.file("ppt/slides/slide2.xml")?.async("string")).toContain("Exitvraag");
+  });
+
+  it("returns a result with a table as Excel, a sheet per table (P30.3)", async () => {
+    const g = await save(
+      "test-analysis",
+      "explain",
+      "## Per vraag\n\n| Vraag | p | Rit |\n|---|---|---|\n| V1 | 0,45 | 0,31 |\n| V2 | 3,5 | 0,12 |",
+    );
+    expect((await loadPreview(g.id)).downloads.map((d) => d.format)).toContain("xlsx");
+    const res = await loadFile(g.id, "xlsx");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Type")).toBe(
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+    expect(res.headers.get("Content-Disposition")).toMatch(/\.xlsx"/);
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(await res.arrayBuffer());
+    expect(wb.worksheets.map((w) => w.name)).toEqual(["Per vraag"]);
+    expect(wb.worksheets[0]!.getCell("B3").value).toBe(3.5);
+  });
+
+  it("offers no Excel for a table result without a table", async () => {
+    const g = await save("test-analysis", "explain", "## Uitleg\n\nGeen tabel.");
+    expect((await loadPreview(g.id)).downloads.map((d) => d.format)).not.toContain("xlsx");
+    expect(await status(loadFile(g.id, "xlsx"))).toBe(404);
+  });
+
+  it("offers no Excel to a colleague without read access", async () => {
+    const g = await save("test-analysis", "explain", "| A |\n|---|\n| 1 |", "exp-c");
+    expect(await status(loadFile(g.id, "xlsx"))).toBe(404);
   });
 
   it("offers no PowerPoint for a result that is not slides", async () => {
