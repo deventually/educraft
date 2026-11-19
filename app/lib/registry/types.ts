@@ -332,9 +332,8 @@ export interface Tool {
   defaultModel: string;
   defaultTemperature?: number;
   /**
-   * Default output-token cap for this tool's generations (bounds cost/latency).
-   * A stage may override it via `ToolStage.maxTokens`. Absent → the provider's
-   * built-in fallback (8192) applies.
+   * Default output-token cap (cost/latency); a stage may override it via `ToolStage.maxTokens`.
+   * Absent → the provider's built-in fallback (8192) applies.
    */
   defaultMaxTokens?: number;
 
@@ -360,9 +359,8 @@ export interface Tool {
   storesConversation?: false;
 
   /**
-   * True for learning-outcome evaluation tools (grading/assessment). Drives the
-   * stronger "teacher decides" AI-transparency notice (EU AI Act Annex III
-   * framing) purely from data — no per-tool branching in the UI.
+   * True for learning-outcome evaluation tools (grading/assessment). Drives the stronger
+   * "teacher decides" AI-transparency notice (EU AI Act Annex III), purely from data.
    */
   assistiveGrading?: boolean;
 
@@ -377,6 +375,8 @@ export interface Tool {
    * AI, as the book intends (P31.1). Data only: the chat shows "Kopieer voor je studenten".
    */
   copyableStudentPrompt?: true;
+  /** Under the result: the institution's referral guide, admin data without AI (P39.4). */
+  showsReferralGuide?: true;
 
   /** Default output language; overridable per generation. */
   defaultOutputLanguage: OutputLanguage;

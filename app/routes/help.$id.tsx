@@ -8,7 +8,9 @@ import {
   getTopicTitle,
   HELP_TOPIC_SLUGS,
 } from "~/lib/help/registry";
-import { topicVisible } from "~/lib/help/sections";
+import { TOPICS_WITH_REFERRAL_GUIDE, topicVisible } from "~/lib/help/sections";
+import { getReferralGuide } from "~/server/repositories/referralGuide.server";
+import { ReferralGuideList } from "~/components/referrals/ReferralGuideList";
 import { portfolioAccess } from "~/server/portfolioAccess.server";
 import { requireUser } from "~/server/auth.server";
 import { getLocale } from "~/lib/i18n/locale.server";
@@ -31,6 +33,9 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       kind: "topic" as const,
       title: getTopicTitle(params.id, lang),
       body: getTopic(params.id, lang) ?? "",
+      referralGuide: TOPICS_WITH_REFERRAL_GUIDE.includes(params.id)
+        ? await getReferralGuide()
+        : null,
     };
   }
   throw new Response("Not Found", { status: 404 });
@@ -74,6 +79,11 @@ export default function HelpPage({ loaderData }: Route.ComponentProps) {
       ) : (
         <article>
           <Markdown anchors>{loaderData.body}</Markdown>
+          {loaderData.referralGuide && (
+            <div className="mt-4">
+              <ReferralGuideList guide={loaderData.referralGuide} headingLevel={3} />
+            </div>
+          )}
         </article>
       )}
     </div>

@@ -23,11 +23,15 @@ import { useLocale, useT } from "~/lib/i18n/useT";
 import { useFormToast } from "~/components/Toast";
 import { Button, HelpText, Input, Label, Select } from "~/components/ui";
 import { DivisionSection } from "~/components/organisation/DivisionSection";
+import { ReferralGuideEditor } from "~/components/referrals/ReferralGuideEditor";
+import { getReferralGuide, setReferralGuide } from "~/server/repositories/referralGuide.server";
+import { REFERRAL_KINDS, referralGuideFromForm } from "~/lib/referrals/guide";
 
 /**
  * Beheer → Organisatie (BESLUIT-2026-11-12-2): what the institution calls the layer between
  * itself and its programmes, its divisions, and which programme sits under which. The
  * programmes themselves are made by their team on /programmes; here an admin only places them.
+ * Also the referral guide (P39.4): which counter helps with which kind of question.
  */
 export async function loader({ request }: Route.LoaderArgs) {
   const admin = await requireRole(request, "admin");
@@ -46,6 +50,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       teamName: p.teamName,
       divisionId: p.divisionId,
     })),
+    referralGuide: await getReferralGuide(),
   };
 }
 
@@ -71,6 +76,12 @@ export async function action({ request }: Route.ActionArgs) {
       if (result === "deleted") return { ok: "delete" as const };
       return { error: result === "notEmpty" ? ("notEmpty" as const) : ("invalid" as const) };
     }
+    case "referrals": {
+      const parsed = referralGuideFromForm(fd);
+      if (!parsed.ok) return { error: "referral" as const, kind: parsed.kind };
+      await setReferralGuide(parsed.guide);
+      return { ok: "referrals" as const };
+    }
     default:
       return { error: "invalid" as const };
   }
@@ -88,13 +99,18 @@ export default function AdminOrganisation({ loaderData }: Route.ComponentProps) 
   const teams = "teams" in loaderData ? loaderData.teams : [];
   const word = loc(divisionWord(kind), locale);
   const errors = { invalid: o.errorInvalid, name: o.errorName, notEmpty: o.errorNotEmpty };
+  const errorMessage = (d: { error: keyof typeof errors | "referral"; kind?: string }) => {
+    if (d.error !== "referral") return errors[d.error];
+    const kind = REFERRAL_KINDS.find((k) => k.id === d.kind);
+    return fmt(t.referrals.error, { kind: kind ? loc(kind.label, locale) : "" });
+  };
 
   useFormToast(actionData, {
     result: (d) =>
       !d
         ? null
         : "error" in d && d.error
-          ? { variant: "error", message: errors[d.error] }
+          ? { variant: "error", message: errorMessage(d) }
           : { variant: "success", message: t.admin.console.saved },
   });
 
@@ -188,6 +204,8 @@ export default function AdminOrganisation({ loaderData }: Route.ComponentProps) 
           programmes={unplaced}
         />
       )}
+
+      <ReferralGuideEditor guide={loaderData.referralGuide} />
     </div>
   );
 }

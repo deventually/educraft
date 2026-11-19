@@ -246,6 +246,14 @@ LimeOnIt is not tied to one model vendor.
   from `aiUsageReports.server.ts` (grouped in SQL, capped at 500 rows); the arithmetic
   (months, weeks, forecast, savings) is pure in `app/lib/usage/summary.ts`. Help topic `usage`
   ("Wat we meten"). Beheer → *Feedback en pilot* keeps feedback and the pilot only.
+- **Referral guide (P39.4).** Which counter of the institution helps with which kind of question
+  (study delay, mental health, disability, unwanted behaviour, money): admin data without AI, one
+  JSON value in `instance_settings` (`referralGuide.server.ts`), validated by `app/lib/referrals/guide.ts`
+  (Zod; a link is `https://` or `mailto:` only; `parseReferralGuide` drops a broken entry). The
+  admin fills it in at the bottom of Beheer → *Organisatie*; a teacher reads it in the help topic
+  `slb` (`TOPICS_WITH_REFERRAL_GUIDE`) and under the result of a tool with
+  `Tool.showsReferralGuide` (*Een gesprek voorbereiden*). No prompt sees it: the model never names
+  a counter.
 - **Monthly AI limits (PR D, BESLUIT-2026-11-11-8).** The owner sets a monthly budget for the
   institution, an admin a monthly limit in euros per team and per teacher, stored as one JSON
   value in `instance_settings` (`aiLimits.server.ts` repository; `parseAiLimits` drops a broken
