@@ -34,7 +34,7 @@ import { ToolHeader } from "~/components/tool/ToolHeader";
 import { ToolWorkspace } from "~/components/tool/ToolWorkspace";
 import { useT, useLocale } from "~/lib/i18n/useT";
 import { listAssessmentModels } from "~/server/repositories/assessmentModels.server";
-import { type ModelChoice, STARTER_MODELS } from "~/lib/assessment-models";
+import { type ModelChoice, STARTER_MODELS, modelsForTool } from "~/lib/assessment-models";
 import { loc, type LocalizedText } from "~/lib/i18n/localized";
 import { DEFAULT_LOCALE, type Locale } from "~/lib/i18n";
 import { addGenerationToTrack, forTrack } from "~/server/tracks.server";
@@ -136,7 +136,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
       : "";
   const nextTools = await nextStepsFor(user, tool.next ?? []);
   const assessmentModels = tool.assessmentModels
-    ? await assessmentModelChoices(user.id, getLocale(request))
+    ? modelsForTool(await assessmentModelChoices(user.id, getLocale(request)), tool)
     : [];
   // P31.1: only a copyable tutor sends its student text, with the form fields still open.
   const studentPrompt = tool.copyableStudentPrompt

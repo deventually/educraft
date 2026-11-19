@@ -27,6 +27,7 @@ import { conversationPrep } from "./tools/conversation-prep";
 import { visitPrep } from "./tools/visit-prep";
 import { visitReport } from "./tools/visit-report";
 import { groupFeedback } from "./tools/group-feedback";
+import { reflectionFeedback } from "./tools/reflection-feedback";
 import { engagementCheck } from "./tools/engagement-check";
 import { portfolioRehearsal } from "./tools/portfolio-rehearsal";
 
@@ -58,6 +59,7 @@ export const ALL_TOOLS: Tool[] = [
   visitPrep,
   visitReport,
   groupFeedback,
+  reflectionFeedback,
   defendYourWork,
   defenseReview,
   engagementCheck,

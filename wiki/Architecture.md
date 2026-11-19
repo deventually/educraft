@@ -25,7 +25,8 @@ A *tool* is a declarative description, not a hand-written page. A `Tool`
   never depends on the AI's arithmetic. It can also name a **`guard`**
   (`app/lib/template/guards.ts`): the output cleaned in code, by the stream before it is saved
   and by the result view before it is shown, such as Groepsfeedback's `input-numbers` (a number
-  in digits that is not in the input is dropped, P36.2).
+  in digits that is not in the input is dropped, P36.2) or `no-judgement` (a line with a grade or
+  level is dropped, P39.3).
 
 - **`mode`** — `one-shot` or `chat`. How a tool runs is one **strategy** per kind
   (`modeOf(tool)` in `app/lib/registry/modes.ts`): `chat`, `multiStage` (one-shot with more
@@ -394,7 +395,11 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   chooses) and `InputField.prefillFromAssessmentModel` on the fields it fills. The teacher's own
   model for the chosen type fills in by itself (`useAssessmentModel`), a starter only when picked,
   and text the teacher typed is never overwritten. An empty scale means feedback only
-  (`stage-assessment@v3`). Starters are files in `starters/`; a rubric can be taken over.
+  (`stage-assessment@v3`). Starters are files in `starters/`; a rubric can be taken over. A tool
+  offers only the models for one of its document types, or for none (`modelsForTool`, P39.3), so
+  *Feedback op reflectie of POP* (`reflection-feedback`, document types `reflection` and
+  `development-plan`, Korthagen's ALACT as the one starter, with its source) never offers a thesis
+  rubric. That tool has no scale field and the `no-judgement` guard: feedforward only, not kept.
 - **BDB/BKE workplace (P25)** at `/portfolio`. Pure domain in `app/lib/portfolio/` (`schema` with
   `LIMITS`, immutable `edit`, `progress`, `intents.ts` → `applyIntent`, Zod per intent); routes stay
   thin via `app/server/portfolio.server.ts`; storage is one JSON graph per dossier in
@@ -731,7 +736,8 @@ Bigger features keep the same shape: a pure domain module, a thin route, one ser
   `panel` and `optional` (the second assessor: never counted, never the next step); `TrackDataSchema` with status, deadlines, visit dates and the confirmed OnStage texts,
   not `.strict()`), `progress` (`progress`, `nextStep`), `retention` (`purgeDate`), `history`
   (`feedbackHistory`, `weakPoints`), `feedforward` (`parseFeedforward`; only the `feedforward@v1` prompt
-  and its eval use it since the drafts tab assesses with `stage-assessment`, kept for P39.3), `secondAssessor` (`compareAssessors`) and `onstage` (`criteriaOf`, `draftFor`,
+  and its eval use it since the drafts tab assesses with `stage-assessment`; its `JUDGEMENT` rule is
+  also the `no-judgement` output guard of *Feedback op reflectie of POP*, P39.3), `secondAssessor` (`compareAssessors`) and `onstage` (`criteriaOf`, `draftFor`,
   `trackLine`). Storage in `tracks.server.ts` (`supervision_tracks`, `track_rounds`, owner-scoped);
   `trackRetention.server.ts` wipes what is past `purgeAfter`, per institution. The route
   `tracks.$id.tsx` composes one action per intent (`milestone`, `second-assessor`,

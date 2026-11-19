@@ -70,3 +70,38 @@ describe("output guards: input-numbers", () => {
     expect(validateTools([bad as never]).length).toBeGreaterThan(0);
   });
 });
+
+/**
+ * P39.3 — "no-judgement": feedforward gives no grade or level (brief P39, 39.3). A line with one
+ * is dropped in code, with the same rule as the track's feedforward (`JUDGEMENT`); headings and
+ * ordinary words such as "voldoende interviews" stay.
+ */
+describe("output guards: no-judgement", () => {
+  const guard = (text: string) => guardOutput("no-judgement", text, {});
+
+  it("is a known guard", () => {
+    expect(GUARD_IDS).toContain("no-judgement");
+  });
+
+  it("drops a line with a grade or level, keeps the rest", () => {
+    const text = [
+      "### Terugblikken",
+      "- **Sterk:** je beschrijft wat er gebeurde in week 3.",
+      "- Dit is voldoende voor dit criterium.",
+      "- Ik geef dit een 7.",
+      "- **Volgende stap:** noem wat jij dacht en voelde.",
+    ].join("\n");
+    expect(guard(text)).toBe(
+      [
+        "### Terugblikken",
+        "- **Sterk:** je beschrijft wat er gebeurde in week 3.",
+        "- **Volgende stap:** noem wat jij dacht en voelde.",
+      ].join("\n"),
+    );
+  });
+
+  it("keeps ordinary uses of the words", () => {
+    const text = "- Je noemt voldoende voorbeelden uit de praktijk.";
+    expect(guard(text)).toBe(text);
+  });
+});

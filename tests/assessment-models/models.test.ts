@@ -3,6 +3,7 @@ import {
   AssessmentModelDataSchema,
   STARTER_MODELS,
   applyAssessmentModel,
+  modelsForTool,
   ownModelFor,
   untouchedSince,
   type ModelChoice,
@@ -63,9 +64,12 @@ describe("AssessmentModelDataSchema", () => {
 });
 
 describe("STARTER_MODELS", () => {
-  const types = (getToolBySlug("stage-assessment")?.inputs ?? [])
-    .find((f) => f.name === "documentType")
-    ?.options?.map((o) => o.value);
+  const types = ["stage-assessment", "reflection-feedback"].flatMap(
+    (slug) =>
+      (getToolBySlug(slug)?.inputs ?? [])
+        .find((f) => f.name === "documentType")
+        ?.options?.map((o) => o.value) ?? [],
+  );
 
   it("offers the HBO-i internship model and general starters, each valid and bilingual", () => {
     expect(STARTER_MODELS.map((m) => m.id)).toEqual(
@@ -82,6 +86,28 @@ describe("STARTER_MODELS", () => {
       }
       for (const t of m.documentTypes) expect(types).toContain(t);
     }
+  });
+
+  it("offers Korthagen's reflection cycle for a reflection, from its source, never with a grade", () => {
+    const alact = STARTER_MODELS.find((m) => m.id === "alact-reflection");
+    expect(alact?.documentTypes).toEqual(["reflection"]);
+    // Feedforward only (P39.3): no scale, so no grade or level.
+    expect(alact?.scale).toEqual({ nl: "", en: "" });
+    for (const lang of ["nl", "en"] as const) {
+      // A starter only with a checked source (brief P39, principle 4).
+      expect(alact?.framework[lang]).toContain("Korthagen & Kessels (1999)");
+      expect(alact?.framework[lang]).toContain("10.3102/0013189X028004004");
+    }
+    for (const phase of [
+      "Handelen",
+      "Terugblikken",
+      "Bewustwording",
+      "Alternatieven",
+      "Uitproberen",
+    ])
+      expect(alact?.framework.nl).toContain(phase);
+    for (const phase of ["Action", "Looking back", "Awareness", "Creating alternative", "Trial"])
+      expect(alact?.framework.en).toContain(phase);
   });
 });
 
@@ -141,5 +167,30 @@ describe("untouchedSince", () => {
   it("is false once the teacher typed in a field", () => {
     expect(untouchedSince(fields, { ...applied, assessmentScale: "eigen" }, applied)).toBe(false);
     expect(untouchedSince(fields, { assessmentFramework: "eigen" }, undefined)).toBe(false);
+  });
+});
+
+describe("modelsForTool (P39.3)", () => {
+  it("offers only models for one of the tool's document types, or for none in particular", () => {
+    const reflection = getToolBySlug("reflection-feedback")!;
+    const models = [
+      model("mine-any", []),
+      model("mine-essay", ["essay"]),
+      model("mine-reflection", ["reflection"]),
+      model("start-essay", ["essay"], true),
+      model("start-reflection", ["reflection"], true),
+    ];
+    expect(modelsForTool(models, reflection).map((m) => m.id)).toEqual([
+      "mine-any",
+      "mine-reflection",
+      "start-reflection",
+    ]);
+    // Studentwerk beoordelen no longer offers a reflection model.
+    const assess = getToolBySlug("stage-assessment")!;
+    expect(modelsForTool(models, assess).map((m) => m.id)).toEqual([
+      "mine-any",
+      "mine-essay",
+      "start-essay",
+    ]);
   });
 });

@@ -17,6 +17,11 @@ const load = (tool: string) => {
 describe.each([
   ["visit-prep", ["missedKnownError", "aboutAStudent", "judged", "inventedCriteria"]],
   ["visit-report", ["missedKnownError", "invented", "judged", "realName"]],
+  // P39.3: no grade or level, no names, points to the student's text, no personal advice.
+  [
+    "reflection-feedback",
+    ["missedKnownError", "judged", "realName", "noTextReference", "personalAdvice"],
+  ],
 ])("%s eval", (slug, checks) => {
   const { rubric, cases } = load(slug);
 

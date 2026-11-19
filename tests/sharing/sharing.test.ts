@@ -16,6 +16,7 @@ describe("Tool.handlesStudentWork (P28.4)", () => {
       "forum-autograder",
       "group-feedback",
       "math-grading",
+      "reflection-feedback",
       "stage-assessment",
       "test-analysis",
       "visit-prep",

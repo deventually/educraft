@@ -87,6 +87,7 @@ export const TOOL_GOALS: Record<string, TeachingGoal> = {
   "test-items": "assess",
   "test-analysis": "assess",
   "group-feedback": "assess",
+  "reflection-feedback": "assess",
   "defense-review": "assess",
   "arcs-reactor": "motivate",
   mentorai: "coach",
