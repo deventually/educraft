@@ -1,6 +1,7 @@
 # Fase 39 — Studieloopbaanbegeleiding (SLB): hulp in de groep, niet per student
 
-> **Status:** ⚪ brief. 39.1 en 39.2 mogen nu; 39.3 na P38.3; 39.4 en 39.5 los
+> **Status:** ✅ uitgevoerd (stand 2026-11-21): 39.1, 39.2 (#321), 39.3 (#387, eval #390), 39.4 en 39.5 (#386) zijn gemerged. Oorspronkelijke
+> planning: 39.1 en 39.2 mogen nu; 39.3 na P38.3; 39.4 en 39.5 los
 > (BESLUIT-2026-11-12-10, -12). Zo voer je deze brief uit: één deelstap per sessie, elke deelstap één
 > PR vanaf `main`, test-first volgens `AGENTS.md` / de `/tdd`-skill, poort
 > `npm test && npm run typecheck && npm run check`. Merge nooit zelf; alleen Bastiaan merget.

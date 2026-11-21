@@ -1,6 +1,7 @@
 # Fase 31 — Verdedig je werk en de leercheck (bijlagen F en G van het boek)
 
-> **Status:** ⚪ brief. **31.1 en 31.3 mogen nu**, vóór de pilot: een uitzondering op "tot de
+> **Status:** ✅ uitgevoerd (stand 2026-11-21): 31.1 (#148, #152), 31.2, 31.3 (#147) en 31.4 zijn
+> gemerged. Oorspronkelijke planning: **31.1 en 31.3 mogen nu**, vóór de pilot: een uitzondering op "tot de
 > pilot geen nieuwe AI-tools" (BESLUIT-2026-11-05-4, BESLUIT-2026-11-07-1). 31.2 na 31.1, met
 > verplicht anonimiseren (BESLUIT-2026-11-07-2). Zo voer je deze brief uit: één deelstap per sessie, elke deelstap één PR vanaf `main`,
 > test-first volgens `AGENTS.md` / de `/tdd`-skill, poort

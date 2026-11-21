@@ -1,6 +1,7 @@
 # Fase 36 — Groepsfeedback na het nakijken
 
-> **Status:** ⚪ brief. Mag na P34.1 (BESLUIT-2026-11-12-10). Zo voer je deze brief uit: één
+> **Status:** ✅ uitgevoerd (stand 2026-11-21): 36.1 en 36.2 zijn gemerged. Oorspronkelijke
+> planning: Mag na P34.1 (BESLUIT-2026-11-12-10). Zo voer je deze brief uit: één
 > deelstap per sessie, elke deelstap één PR vanaf `main`, test-first volgens `AGENTS.md` / de
 > `/tdd`-skill, poort `npm test && npm run typecheck && npm run check`. Merge nooit zelf; alleen
 > Bastiaan merget. Volgorde en gedeelde bestanden: `README.md`, *Docenthulpjes*.

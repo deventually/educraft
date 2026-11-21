@@ -1,6 +1,8 @@
 # Fase 30 — Exporteren: Word, PDF, Excel, PowerPoint en Brightspace
 
-> **Status:** ⚪ brief. **30.1 en 30.2 (Word en PDF) mogen nu**, en sinds 2026-11-12 ook **30.4
+> **Status:** 🟡 deels af (stand 2026-11-21): 30.1 (#144), 30.2 (#146), 30.3 (#388), 30.4 (#306) en
+> 30.7b voor PowerPoint (#311) zijn gemerged. Open, na de pilot: 30.5, 30.6, 30.7a, Word-sjablonen
+> en 30.8. Oorspronkelijke planning: **30.1 en 30.2 (Word en PDF) mogen nu**, en sinds 2026-11-12 ook **30.4
 > (PowerPoint)**: Bastiaan wil de dia's bij een les vóór de pilot (BESLUIT-2026-11-12-13). Op
 > 2026-11-19 haalde Bastiaan ook **30.3 (Excel)** naar vóór de pilot. De rest volgt na de pilot en de
 > feedback daarop (BESLUIT-2026-11-06-5). Zo voer je deze brief uit: één deelstap per

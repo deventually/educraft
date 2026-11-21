@@ -1,6 +1,6 @@
 # Fase 37 — Lesbezoek met kijkwijzer: een collega observeert, het verslag wordt BDB-bewijs
 
-> **Status:** ⚪ brief. **Wacht op meekijken met een account (P32.4)**, dat nu na de pilot staat
+> **Status:** ⚪ brief, nog niet gebouwd (stand 2026-11-21). **Wacht op meekijken met een account (P32.4)**, dat nu na de pilot staat
 > (BESLUIT-2026-11-12-10). Zo voer je deze brief uit: één deelstap per sessie, elke deelstap één PR
 > vanaf `main`, test-first volgens `AGENTS.md` / de `/tdd`-skill, poort
 > `npm test && npm run typecheck && npm run check`. Merge nooit zelf; alleen Bastiaan merget.

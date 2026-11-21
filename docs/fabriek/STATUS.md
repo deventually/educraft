@@ -59,18 +59,20 @@
 
 - Niets.
 
-## Volgende (volgorde gekozen door Bastiaan, 2026-11-04)
+## Volgende
 
-Klaar: V1 (P17), V2 (P18), V3 (P19), P23.1–23.3, P24.0b/0c/1, P25.1–25.6.
+Stand 2026-11-21: alles wat vóór de pilot gepland stond, is gemerged (laatste PR #390); de status
+van de briefs P30–P39 is bijgewerkt. Gekozen door Bastiaan, 2026-11-21:
 
-1. **P24.0 afmaken** (spoor A, achter elkaar): meting d → MentorAI v2 (klaar) → Dialogisch gesprek (klaar) →
-   Begeleide reflectie (klaar) → de andere tools (bronvermelding, klaar), elk een PR met meting ervoor en erna (BESLUIT-2026-11-04-23).
-2. **P24.2–24.8, de nieuwe AI-tools**: na #56, eerst 24.2 (beoordelingsmodel) en 24.3
-   (toetsvragen en toetsmatrijs); hooguit twee tegelijk.
-3. **P20** (cursussen), dan **P26.3** (OER-import), dan **P27.1 + 27.2** (volgende stap,
-   BDB/BKE doet mee), dan **P28.1–28.3** (gebruikersbeheer, teams, aan/uit per team), dan **P27.3** (Start en menu), **P21** (rolagenten) en **P27.4**, dan **P22**
-   (de docentweek, op Start), dan **P28.4–28.5** (delen, meerdere tegelijk), dan de rest van **P26** (BESLUIT-2026-11-05-4, -5).
-   Stand 2026-11-05: alles tot en met P28.3, P22, P26, P27 en P29 is gemerged; P28.4 (#129) en P28.5 (#127) ook. P28 is af.
+1. **De eerste release** met `/release`; de tag zet Bastiaan zelf.
+
+Daarna, pas na de pilot (BESLUIT-2026-11-06-5, -10-1, -12-10), tenzij Bastiaan iets naar voren haalt:
+
+- **P30.5–30.8:** Brightspace (toetsvragen en cijfers), onderzoek naar GradeWork, huisstijl als
+  instellingen en Word-sjablonen, documentatie.
+- **P32:** de reviewer Examencommissie en meekijkers.
+- **P37:** lesbezoek met kijkwijzer, na meekijken met een account (P32.4).
+- **feedforward@v3** (P39.3), alleen als er in de pilot een naam terugkomt.
 
 ## Open vragen
 

@@ -1,6 +1,7 @@
 # Fase 33 — Cursusevaluatie verwerken: van enquête naar verbeterpunten voor de volgende uitvoering
 
-> **Status:** ⚪ brief. Mag nu (BESLUIT-2026-11-12-10). Zo voer je deze brief uit: één deelstap per
+> **Status:** ✅ uitgevoerd (stand 2026-11-21): 33.1–33.3 (#313, #318) zijn gemerged. Oorspronkelijke
+> planning: Mag nu (BESLUIT-2026-11-12-10). Zo voer je deze brief uit: één deelstap per
 > sessie, elke deelstap één PR vanaf `main`, test-first volgens `AGENTS.md` / de `/tdd`-skill, poort
 > `npm test && npm run typecheck && npm run check`. Merge nooit zelf; alleen Bastiaan merget.
 > Volgorde en gedeelde bestanden met de andere docenthulpjes: `README.md`, *Docenthulpjes*.
