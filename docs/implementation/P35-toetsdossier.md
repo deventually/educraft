@@ -1,6 +1,7 @@
 # Fase 35 — Het toetsdossier: matrijs, beoordelingsmodel, cesuur en toetsanalyse in één verantwoording
 
-> **Status:** ⚪ brief. Mag na P33 en P34 (BESLUIT-2026-11-12-10). Zo voer je deze brief uit: één
+> **Status:** ✅ uitgevoerd (stand 2026-11-21): 35.1, 35.2 (#389) en 35.3 zijn gemerged. Oorspronkelijke
+> planning: Mag na P33 en P34 (BESLUIT-2026-11-12-10). Zo voer je deze brief uit: één
 > deelstap per sessie, elke deelstap één PR vanaf `main`, test-first volgens `AGENTS.md` / de
 > `/tdd`-skill, poort `npm test && npm run typecheck && npm run check`. Merge nooit zelf; alleen
 > Bastiaan merget. Volgorde en gedeelde bestanden: `README.md`, *Docenthulpjes*.

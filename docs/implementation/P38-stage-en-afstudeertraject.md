@@ -1,6 +1,7 @@
 # Fase 38 — Het stage- en afstudeertraject naast OnStage
 
-> **Status:** 🟡 in uitvoering. Het onderdeel staat standaard **aan**; een beheerder kan het
+> **Status:** ✅ uitgevoerd (stand 2026-11-21): 38.1 (#319), 38.2 (#323), 38.3, 38.4 (#329) en
+> 38.5–38.8 (#333) zijn gemerged. Nog open: het akkoord van de privacy-officer (zie het bord). Het onderdeel staat standaard **aan**; een beheerder kan het
 > tijdelijk uitzetten tot de privacy-officer akkoord geeft op de bewaartermijn en de
 > DPIA-aanvulling (BESLUIT-2026-11-12-15, vervangt het "uit tot akkoord" van -10 en -11). Zo voer
 > je deze brief uit: één deelstap per sessie, elke deelstap één PR vanaf `main`, test-first volgens `AGENTS.md` / de `/tdd`-skill, poort

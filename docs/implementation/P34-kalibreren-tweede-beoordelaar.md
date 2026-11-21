@@ -1,6 +1,7 @@
 # Fase 34 — Kalibreren met een tweede beoordelaar (zonder AI)
 
-> **Status:** ⚪ brief. Mag nu (BESLUIT-2026-11-12-10). Zo voer je deze brief uit: één deelstap per
+> **Status:** ✅ uitgevoerd (stand 2026-11-21): 34.1 (#309), 34.2 (#312) en 34.3 (#385) zijn gemerged. Oorspronkelijke
+> planning: Mag nu (BESLUIT-2026-11-12-10). Zo voer je deze brief uit: één deelstap per
 > sessie, elke deelstap één PR vanaf `main`, test-first volgens `AGENTS.md` / de `/tdd`-skill, poort
 > `npm test && npm run typecheck && npm run check`. Merge nooit zelf; alleen Bastiaan merget.
 > Volgorde en gedeelde bestanden met de andere docenthulpjes: `README.md`, *Docenthulpjes*.
