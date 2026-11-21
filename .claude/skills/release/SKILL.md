@@ -91,7 +91,7 @@ SemVer, judged from what someone who installs LimeOnIt has to do (rules in `RELE
 - **Minor** — anything new for teachers or admins. An automatic migration is still minor.
 - **Patch** — fixes only.
 
-The first release is `1.0.0`. Propose the number with one sentence of reasoning; Bastiaan may
+Until 1.0.0 (ready for sale, BESLUIT-2026-11-21-1) versions stay 0.x: new is a minor (0.2.0), fixes a patch. Propose the number with one sentence of reasoning; Bastiaan may
 choose another.
 
 ## 4. The RELEASE.md entry

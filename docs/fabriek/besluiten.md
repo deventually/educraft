@@ -894,3 +894,9 @@ in `geschiedenis.md` en de genoemde brief of ADR.
   acties komen in het logboek. Bastiaan, 2026-11-18 ("Ik wil ook modellen kunnen verwijderen en
   editen (bv. de temperatuur instellen en andere dingen die ik kon instellen bij het toevoegen
   van het model)", "Als beheerder").
+- **BESLUIT-2026-11-21-1:** **De pilot draait op 0.x; 1.0.0 komt pas als alles geverifieerd is en
+  LimeOnIt klaar is voor de verkoop.** De eerste release is 0.1.0. Tot 1.0.0 volgen de nummers de
+  regels van BESLUIT-2026-11-11-5 binnen 0.x (iets nieuws: 0.2.0, alleen herstel: 0.1.1). Geen
+  RC-nummers: de releasestraat kent alleen X.Y.Z. Bastiaan, 2026-11-21 ("Kunnen we dan gaan voor
+  0.1.0?", "Ik denk dat we naar 1.0.0 gaan als we echt alles hebben geverifieerd en het klaar is
+  voor de verkoop.").
