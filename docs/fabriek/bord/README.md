@@ -20,8 +20,8 @@ Een nieuw bestand botst nooit met een andere PR; zo geeft het bord geen merge-co
 - Staat het bestand op `main`, dan is het gemerged. Wat nog loopt, staat in de
   [open PR's](https://github.com/deventually/educraft/pulls); daar hoeft niets voor op het bord.
 
-[`2026-11-21-release-1-0-0.md`](2026-11-21-release-1-0-0.md) bevat alles wat tot en met versie
-1.0.0 gemerged is, het nieuwste bovenaan. `tests/hotspots.test.ts` bewaakt de namen en de vorm.
+[`2026-11-21-release-0-1-0.md`](2026-11-21-release-0-1-0.md) bevat alles wat tot en met versie
+0.1.0 gemerged is, het nieuwste bovenaan. `tests/hotspots.test.ts` bewaakt de namen en de vorm.
 
 **Samenvoegen** gebeurt bij elke release: de release-PR zet alle losse bestanden in één bestand
 `<datum>-release-X-Y-Z.md` en haalt de losse weg. Dat botst niet, want open PR's voegen alleen

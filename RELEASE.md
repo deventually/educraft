@@ -19,7 +19,7 @@ krijgt een kop in precies deze vorm, anders weigert de release-workflow de tag:
 ## [1.2.0] - 2026-11-12
 ```
 
-## [1.0.0] - 2026-11-21
+## [0.1.0] - 2026-11-21
 
 De eerste versie van LimeOnIt, de versie waarmee de pilot begint.
 
