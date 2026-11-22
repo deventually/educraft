@@ -1,9 +1,1 @@
-[
-  {
-    "id": "GHSA-fc5q-39xc-vjpf",
-    "package": "picomatch",
-    "reason": "ReDoS in picomatch, every version (<=4.0.7), no fix yet. Only dev tools use it (vite, vitest, knip, @react-router/dev), with glob patterns from our own config, never user input; the production audit is clean. Remove as soon as a fixed picomatch is out (BESLUIT-2026-11-17-7).",
-    "added": "2026-11-17",
-    "until": "2026-12-31"
-  }
-]
+[]
