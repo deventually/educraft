@@ -61,6 +61,10 @@ beoordeelt de modellen. Na het labelen maakt
 `npm run eval:judge-jev -- --rescore evals/reports/<datum><label>-judge-jev-raw.json` het rapport
 opnieuw, zonder API.
 
+De raw-bestanden van versie 1 en 2 en van afstemrun t4 staan sinds de opruiming van 2026-11-23 alleen nog in de git-geschiedenis: `git show ebbc7e5:evals/reports/<bestand> > evals/reports/<bestand>` zet er een terug. Wat blijft staan: de afstemset en toetsset van versie 4 (`2026-11-14b3t-judge-jev3-raw.json`,
+`2026-11-15c3-judge-jev3-raw.json`) en de uitslag van versie 4 (`2026-11-15t5-judge-jev4-raw.json`,
+`2026-11-15h4-judge-jev4-raw.json`).
+
 ## Uitslag (2026-11-13)
 
 Rapport: [`2026-11-13a-judge-jev.md`](../reports/2026-11-13a-judge-jev.md). Uitvoer van 19 tools,

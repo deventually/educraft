@@ -76,7 +76,7 @@ Nooit onderdeel van CI.
 ## Uitslag (2026-11-17)
 
 Rapport: [`2026-11-17a-review-screen.md`](../reports/2026-11-17a-review-screen.md) (Jev 3×,
-gedraaid op de Mac van Bastiaan; elk exact verzoek staat in het raw-bestand).
+gedraaid op de Mac van Bastiaan; elk exact verzoek staat in het raw-bestand). Dat raw-bestand staat sinds de opruiming van 2026-11-23 alleen nog in de git-geschiedenis: `git show ebbc7e5:evals/reports/<bestand> > evals/reports/<bestand>` zet het terug.
 
 | Set | Paren | Overgeslagen | Gemist: waarschuwing | Gemist: verwachte fout | Alleen tips gemist | Terecht overgeslagen |
 | --- | --- | --- | --- | --- | --- | --- |
