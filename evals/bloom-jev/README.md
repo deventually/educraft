@@ -16,6 +16,8 @@ twijfel je, gebruik dan `null`." Drie manieren, op dezelfde leeruitkomsten:
 `…-bloom-jev-raw.json` (elk exact Jev-verzoek met antwoord, elk importantwoord, en alle rijen).
 Met `--rescore <raw-bestand>` komt het rapport opnieuw met de labels zoals ze nu zijn, zonder API.
 
+De raw-bestanden van deze metingen staan sinds de opruiming van 2026-11-23 alleen nog in de git-geschiedenis: `git show ebbc7e5:evals/reports/<bestand> > evals/reports/<bestand>` zet er een terug.
+
 ## Hoe Jev gevraagd wordt
 
 Volgens TypeSafe's skill, helemaal:

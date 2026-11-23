@@ -29,6 +29,7 @@ alleen het niveau van de AI; dat is de vergelijking.
 2. Bastiaan labelt.
 3. `JEV_API_KEY=… npm run eval:bloom-check -- --repeat 3 --label a` schrijft het rapport in
    `evals/reports/`. `--rescore <raw-bestand>` maakt het opnieuw met de labels van nu.
+   Het raw-bestand van de meting van 2026-11-17 staat sinds de opruiming van 2026-11-23 alleen nog in de git-geschiedenis: `git show ebbc7e5:evals/reports/<bestand> > evals/reports/<bestand>` zet het terug.
 
 Nooit onderdeel van CI.
 
